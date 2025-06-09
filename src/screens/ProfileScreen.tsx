@@ -9,34 +9,66 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User } from '../types/Burger';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../App';
+import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import { useFavorites } from '../context/FavoritesContext';
+import { UserStats } from '../types/Burger';
+import Button from '../components/Button';
+
+type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 const ProfileScreen: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [stats, setStats] = useState({
-    burgersViewed: 24,
-    favoriteCategory: 'Gourmet',
-    recipesCooked: 8,
-    totalCookTime: '4h 32m',
+  const { colors, isDarkMode } = useTheme();
+  const { user, logout, updateUser } = useAuth();
+  const { favorites } = useFavorites();
+  const navigation = useNavigation<NavigationProp>();
+  const [stats, setStats] = useState<UserStats>({
+    burgersViewed: 0,
+    recipesCooked: 0,
+    favoriteCategory: 'None yet',
+    totalCookTime: '0m',
   });
 
   useEffect(() => {
-    loadUserData();
-  }, []);
+    loadUserStats();
+  }, [favorites, user]);
 
-  const loadUserData = async (): Promise<void> => {
-    try {
-      const userData = await AsyncStorage.getItem('userData');
-      if (userData) {
-        setUser(JSON.parse(userData));
-      }
-    } catch (error) {
-      console.error('Error loading user data:', error);
+  const loadUserStats = () => {
+    if (user?.stats) {
+      // Calculate favorite category from current favorites
+      const categoryCount: Record<string, number> = {};
+      favorites.forEach(burger => {
+        categoryCount[burger.category] = (categoryCount[burger.category] || 0) + 1;
+      });
+
+      let topCategory = 'None yet';
+      let maxCount = 0;
+      Object.entries(categoryCount).forEach(([category, count]) => {
+        if (count > maxCount) {
+          maxCount = count;
+          topCategory = category;
+        }
+      });
+
+      setStats({
+        ...user.stats,
+        favoriteCategory: favorites.length > 0 ? topCategory : 'None yet',
+      });
+    } else {
+      // Default stats
+      setStats({
+        burgersViewed: Math.floor(Math.random() * 50) + 10,
+        recipesCooked: Math.floor(Math.random() * 20) + 1,
+        favoriteCategory: favorites.length > 0 ? favorites[0].category : 'None yet',
+        totalCookTime: `${Math.floor(Math.random() * 10) + 1}h ${Math.floor(Math.random() * 60)}m`,
+      });
     }
   };
 
-  const handleLogout = (): void => {
+  const handleLogout = () => {
     Alert.alert(
       'Logout',
       'Are you sure you want to logout?',
@@ -46,8 +78,7 @@ const ProfileScreen: React.FC = () => {
           text: 'Logout',
           style: 'destructive',
           onPress: async () => {
-            await AsyncStorage.clear();
-            // Navigation will be handled by App.tsx auth state
+            await logout();
           },
         },
       ]
@@ -55,30 +86,43 @@ const ProfileScreen: React.FC = () => {
   };
 
   const StatCard: React.FC<{ title: string; value: string; icon: string }> = ({ title, value, icon }) => (
-    <View style={styles.statCard}>
+    <View style={[styles.statCard, { backgroundColor: colors.inputBackground }]}>
       <Text style={styles.statIcon}>{icon}</Text>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statTitle}>{title}</Text>
+      <Text style={[styles.statValue, { color: colors.primary }]}>{value}</Text>
+      <Text style={[styles.statTitle, { color: colors.subtext }]}>{title}</Text>
     </View>
   );
 
-  const MenuButton: React.FC<{ title: string; icon: string; onPress: () => void }> = ({ title, icon, onPress }) => (
-    <TouchableOpacity style={styles.menuButton} onPress={onPress}>
+  const MenuButton: React.FC<{ 
+    title: string; 
+    icon: string; 
+    onPress: () => void;
+    subtitle?: string;
+  }> = ({ title, icon, onPress, subtitle }) => (
+    <TouchableOpacity 
+      style={[styles.menuButton, { backgroundColor: colors.card, borderColor: colors.border }]} 
+      onPress={onPress}
+    >
       <View style={styles.menuButtonLeft}>
         <Text style={styles.menuIcon}>{icon}</Text>
-        <Text style={styles.menuTitle}>{title}</Text>
+        <View style={styles.menuTextContainer}>
+          <Text style={[styles.menuTitle, { color: colors.text }]}>{title}</Text>
+          {subtitle && (
+            <Text style={[styles.menuSubtitle, { color: colors.subtext }]}>{subtitle}</Text>
+          )}
+        </View>
       </View>
-      <Text style={styles.menuArrow}>→</Text>
+      <Text style={[styles.menuArrow, { color: colors.primary }]}>→</Text>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#B91C1C" barStyle="light-content" />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar backgroundColor={colors.primary} barStyle="light-content" />
       
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.primary }]}>
           <View style={styles.profileInfo}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>
@@ -95,7 +139,7 @@ const ProfileScreen: React.FC = () => {
 
         {/* Stats */}
         <View style={styles.statsContainer}>
-          <Text style={styles.sectionTitle}>Your Stats</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Stats</Text>
           <View style={styles.statsGrid}>
             <StatCard title="Burgers Viewed" value={stats.burgersViewed.toString()} icon="🍔" />
             <StatCard title="Recipes Cooked" value={stats.recipesCooked.toString()} icon="👨‍🍳" />
@@ -104,43 +148,91 @@ const ProfileScreen: React.FC = () => {
           </View>
         </View>
 
+        {/* Quick Actions */}
+        <View style={styles.quickActionsContainer}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
+          <View style={styles.quickActionsGrid}>
+            <TouchableOpacity 
+              style={[styles.quickActionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+              onPress={() => navigation.navigate('Main')}
+            >
+              <Text style={styles.quickActionIcon}>🍔</Text>
+              <Text style={[styles.quickActionText, { color: colors.text }]}>Browse</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.quickActionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+              onPress={() => navigation.navigate('Main')}
+            >
+              <Text style={styles.quickActionIcon}>❤️</Text>
+              <Text style={[styles.quickActionText, { color: colors.text }]}>Favorites</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.quickActionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+              onPress={() => navigation.navigate('Main')}
+            >
+              <Text style={styles.quickActionIcon}>🤖</Text>
+              <Text style={[styles.quickActionText, { color: colors.text }]}>AI Chef</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.quickActionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+              onPress={() => navigation.navigate('Settings')}
+            >
+              <Text style={styles.quickActionIcon}>⚙️</Text>
+              <Text style={[styles.quickActionText, { color: colors.text }]}>Settings</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Menu */}
         <View style={styles.menuContainer}>
-          <Text style={styles.sectionTitle}>Account</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Account</Text>
           
           <MenuButton
             title="Edit Profile"
+            subtitle="Update your personal information"
             icon="✏️"
-            onPress={() => Alert.alert('Coming Soon', 'Edit profile feature coming soon!')}
+            onPress={() => navigation.navigate('EditProfile')}
           />
           
           <MenuButton
             title="Favorite Burgers"
+            subtitle={`${favorites.length} saved burgers`}
             icon="❤️"
-            onPress={() => Alert.alert('Coming Soon', 'Favorites feature coming soon!')}
+            onPress={() => navigation.navigate('Main')}
           />
           
           <MenuButton
             title="Cooking History"
+            subtitle="View your cooking journey"
             icon="📚"
             onPress={() => Alert.alert('Coming Soon', 'History feature coming soon!')}
           />
           
           <MenuButton
             title="Share App"
+            subtitle="Tell friends about Burgerpedia"
             icon="📤"
             onPress={() => Alert.alert('Share', 'Share Burgerpedia with friends!')}
           />
           
           <MenuButton
             title="Help & Support"
+            subtitle="Get help and contact support"
             icon="❓"
             onPress={() => Alert.alert('Help', 'Contact support at help@burgerpedia.com')}
           />
           
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Text style={styles.logoutText}>Logout</Text>
-          </TouchableOpacity>
+          <Button
+            title="Logout"
+            onPress={handleLogout}
+            variant="danger"
+            fullWidth
+            style={styles.logoutButton}
+            icon="🚪"
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -150,10 +242,8 @@ const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
   },
   header: {
-    backgroundColor: '#B91C1C',
     paddingTop: 20,
     paddingBottom: 30,
     alignItems: 'center',
@@ -196,7 +286,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 15,
   },
   statsGrid: {
@@ -205,7 +294,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   statCard: {
-    backgroundColor: '#F9FAFB',
     borderRadius: 15,
     padding: 15,
     width: '48%',
@@ -219,12 +307,36 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#B91C1C',
     marginBottom: 4,
   },
   statTitle: {
     fontSize: 12,
-    color: '#666',
+    textAlign: 'center',
+  },
+  quickActionsContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  quickActionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  quickActionButton: {
+    width: '23%',
+    aspectRatio: 1,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  quickActionIcon: {
+    fontSize: 24,
+    marginBottom: 5,
+  },
+  quickActionText: {
+    fontSize: 12,
+    fontWeight: '500',
     textAlign: 'center',
   },
   menuContainer: {
@@ -234,44 +346,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    borderWidth: 1,
   },
   menuButtonLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   menuIcon: {
     fontSize: 20,
     marginRight: 12,
   },
+  menuTextContainer: {
+    flex: 1,
+  },
   menuTitle: {
     fontSize: 16,
-    color: '#333',
     fontWeight: '500',
+  },
+  menuSubtitle: {
+    fontSize: 14,
+    marginTop: 2,
   },
   menuArrow: {
     fontSize: 16,
-    color: '#B91C1C',
   },
   logoutButton: {
-    backgroundColor: '#FEE2E2',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
     marginTop: 20,
-  },
-  logoutText: {
-    color: '#B91C1C',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,18 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
-  Alert,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../../App';
+import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import Button from '../components/Button';
+import IconButton from '../components/IconButton';
 
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -21,145 +27,251 @@ interface Props {
 }
 
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {
+  const { colors, isDarkMode } = useTheme();
+  const { register } = useAuth();
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [keyboardVisible, setKeyboardVisible] = useState<boolean>(false);
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
 
-  const handleRegister = async (): Promise<void> => {
-    if (!name || !email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => setKeyboardVisible(true)
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => setKeyboardVisible(false)
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
+  const validateForm = (): boolean => {
+    const newErrors: {
+      name?: string;
+      email?: string;
+      password?: string;
+      confirmPassword?: string;
+    } = {};
+    
+    if (!name.trim()) {
+      newErrors.name = 'Name is required';
     }
-
+    
+    if (!email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Email is invalid';
+    }
+    
+    if (!password) {
+      newErrors.password = 'Password is required';
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+    
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
+      newErrors.confirmPassword = 'Passwords do not match';
     }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+  const handleRegister = async () => {
+    if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Store user data
-      const userData = {
-        id: Date.now().toString(),
-        name,
-        email,
-        joinDate: new Date().toISOString(),
-      };
-      
-      await AsyncStorage.setItem('userToken', 'dummy_token');
-      await AsyncStorage.setItem('userData', JSON.stringify(userData));
-      
-      Alert.alert('Success', 'Account created successfully!', [
-        {
-          text: 'OK',
-          onPress: () => navigation.reset({
-            index: 0,
-            routes: [{ name: 'Main' }],
-          }),
-        },
-      ]);
+      await register(name, email, password);
     } catch (error) {
-      Alert.alert('Error', 'Registration failed. Please try again.');
+      // Error is handled in the auth context
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#B91C1C" barStyle="light-content" />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoidingView}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView 
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
           >
-            <Text style={styles.backButtonText}>←</Text>
-          </TouchableOpacity>
-          <Text style={styles.logo}>🍔</Text>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join the Burgerpedia community</Text>
-        </View>
+            <View style={styles.header}>
+              <IconButton
+                icon="←"
+                onPress={() => navigation.goBack()}
+                style={StyleSheet.flatten([
+                  styles.backButton,
+                  { backgroundColor: colors.inputBackground }
+                ])}
+                iconStyle={{ color: colors.text, fontWeight: 'bold' }}
+              />
+              
+              {!keyboardVisible && (
+                <>
+                  <Text style={styles.logo}>🍔</Text>
+                  <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
+                  <Text style={[styles.subtitle, { color: colors.subtext }]}>
+                    Join the Burgerpedia community
+                  </Text>
+                </>
+              )}
+            </View>
 
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Full Name</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your full name"
-              placeholderTextColor="#999"
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
+            <View style={styles.form}>
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: colors.text }]}>Full Name</Text>
+                <TextInput
+                  style={[
+                    styles.input, 
+                    { 
+                      backgroundColor: colors.inputBackground,
+                      borderColor: errors.name ? '#DC2626' : colors.border,
+                      color: colors.text,
+                    }
+                  ]}
+                  placeholder="Enter your full name"
+                  placeholderTextColor={colors.subtext}
+                  value={name}
+                  onChangeText={(text) => {
+                    setName(text);
+                    if (errors.name) {
+                      setErrors({ ...errors, name: undefined });
+                    }
+                  }}
+                />
+                {errors.name && (
+                  <Text style={styles.errorText}>{errors.name}</Text>
+                )}
+              </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              placeholderTextColor="#999"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: colors.text }]}>Email</Text>
+                <TextInput
+                  style={[
+                    styles.input, 
+                    { 
+                      backgroundColor: colors.inputBackground,
+                      borderColor: errors.email ? '#DC2626' : colors.border,
+                      color: colors.text,
+                    }
+                  ]}
+                  placeholder="Enter your email"
+                  placeholderTextColor={colors.subtext}
+                  value={email}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    if (errors.email) {
+                      setErrors({ ...errors, email: undefined });
+                    }
+                  }}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                {errors.email && (
+                  <Text style={styles.errorText}>{errors.email}</Text>
+                )}
+              </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Create a password"
-              placeholderTextColor="#999"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-          </View>
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: colors.text }]}>Password</Text>
+                <TextInput
+                  style={[
+                    styles.input, 
+                    { 
+                      backgroundColor: colors.inputBackground,
+                      borderColor: errors.password ? '#DC2626' : colors.border,
+                      color: colors.text,
+                    }
+                  ]}
+                  placeholder="Create a password"
+                  placeholderTextColor={colors.subtext}
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (errors.password) {
+                      setErrors({ ...errors, password: undefined });
+                    }
+                  }}
+                  secureTextEntry
+                />
+                {errors.password && (
+                  <Text style={styles.errorText}>{errors.password}</Text>
+                )}
+              </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Confirm Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm your password"
-              placeholderTextColor="#999"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-            />
-          </View>
+              <View style={styles.inputContainer}>
+                <Text style={[styles.label, { color: colors.text }]}>Confirm Password</Text>
+                <TextInput
+                  style={[
+                    styles.input, 
+                    { 
+                      backgroundColor: colors.inputBackground,
+                      borderColor: errors.confirmPassword ? '#DC2626' : colors.border,
+                      color: colors.text,
+                    }
+                  ]}
+                  placeholder="Confirm your password"
+                  placeholderTextColor={colors.subtext}
+                  value={confirmPassword}
+                  onChangeText={(text) => {
+                    setConfirmPassword(text);
+                    if (errors.confirmPassword) {
+                      setErrors({ ...errors, confirmPassword: undefined });
+                    }
+                  }}
+                  secureTextEntry
+                />
+                {errors.confirmPassword && (
+                  <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+                )}
+              </View>
 
-          <TouchableOpacity
-            style={[styles.registerButton, isLoading && styles.disabledButton]}
-            onPress={handleRegister}
-            disabled={isLoading}
-          >
-            <Text style={styles.registerButtonText}>
-              {isLoading ? 'Creating Account...' : 'Create Account'}
-            </Text>
-          </TouchableOpacity>
+              <Button
+                title="Create Account"
+                onPress={handleRegister}
+                loading={isLoading}
+                disabled={isLoading}
+                fullWidth
+                size="large"
+                style={{ marginTop: 10 }}
+              />
 
-          <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.loginLink}>Sign In</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
+              <View style={styles.loginContainer}>
+                <Text style={[styles.loginText, { color: colors.subtext }]}>
+                  Already have an account?{' '}
+                </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                  <Text style={[styles.loginLink, { color: colors.primary }]}>Sign In</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -167,7 +279,12 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   header: {
     alignItems: 'center',
@@ -178,18 +295,12 @@ const styles = StyleSheet.create({
   backButton: {
     position: 'absolute',
     left: 20,
-    top: 50,
+    top: 20,
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F9FAFB',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  backButtonText: {
-    fontSize: 20,
-    color: '#333',
-    fontWeight: 'bold',
   },
   logo: {
     fontSize: 60,
@@ -198,12 +309,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
   },
   form: {
     paddingHorizontal: 30,
@@ -215,46 +324,32 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#E5E7EB',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    backgroundColor: '#F9FAFB',
   },
-  registerButton: {
-    backgroundColor: '#B91C1C',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 30,
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  registerButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+  errorText: {
+    color: '#DC2626',
+    fontSize: 14,
+    marginTop: 5,
+    marginLeft: 5,
   },
   loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 30,
   },
   loginText: {
     fontSize: 16,
-    color: '#666',
   },
   loginLink: {
     fontSize: 16,
-    color: '#B91C1C',
     fontWeight: '600',
   },
 });

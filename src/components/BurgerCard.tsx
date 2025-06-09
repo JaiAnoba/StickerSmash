@@ -7,6 +7,9 @@ import {
   Image,
 } from 'react-native';
 import { Burger } from '../types/Burger';
+import { useTheme } from '../context/ThemeContext';
+import { useFavorites } from '../context/FavoritesContext';
+import IconButton from './IconButton';
 
 interface BurgerCardProps {
   burger: Burger;
@@ -14,6 +17,10 @@ interface BurgerCardProps {
 }
 
 const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
+  const { colors } = useTheme();
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const isLiked = isFavorite(burger.id);
+
   const renderStars = (rating: number): string => {
     const stars: string[] = [];
     const fullStars: number = Math.floor(rating);
@@ -28,25 +35,44 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
     return stars.join('');
   };
 
+  const handleFavoritePress = () => {
+    if (isLiked) {
+      removeFavorite(burger.id);
+    } else {
+      addFavorite(burger);
+    }
+  };
+
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
       onPress={() => onPress(burger)}
       activeOpacity={0.8}
     >
-      <Image source={{ uri: burger.image }} style={styles.image} />
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: burger.image }} style={styles.image} />
+        <IconButton
+          icon={isLiked ? '❤️' : '🤍'}
+          onPress={handleFavoritePress}
+          style={Object.assign({}, styles.favoriteButton, { backgroundColor: 'rgba(255,255,255,0.9)' })}
+          size={16}
+        />
+      </View>
+      
       <View style={styles.content}>
-        <Text style={styles.name} numberOfLines={2}>
+        <Text style={[styles.name, { color: colors.text }]} numberOfLines={2}>
           {burger.name}
         </Text>
-        <Text style={styles.category}>{burger.category}</Text>
+        <Text style={[styles.category, { color: colors.subtext }]}>{burger.category}</Text>
+        
         <View style={styles.footer}>
           <View style={styles.rating}>
-            <Text style={styles.stars}>{renderStars(burger.rating)}</Text>
-            <Text style={styles.ratingText}>{burger.rating}</Text>
+            <Text style={[styles.stars, { color: colors.primary }]}>{renderStars(burger.rating)}</Text>
+            <Text style={[styles.ratingText, { color: colors.subtext }]}>{burger.rating}</Text>
           </View>
-          <Text style={styles.cookTime}>{burger.cookTime}</Text>
+          <Text style={[styles.cookTime, { color: colors.subtext }]}>{burger.cookTime}</Text>
         </View>
+        
         <View style={styles.difficulty}>
           <Text style={[
             styles.difficultyText,
@@ -64,7 +90,6 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: 'white',
     borderRadius: 15,
     margin: 8,
     flex: 1,
@@ -74,11 +99,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 6,
     overflow: 'hidden',
+    borderWidth: 1,
+  },
+  imageContainer: {
+    position: 'relative',
   },
   image: {
     width: '100%',
     height: 140,
     resizeMode: 'cover',
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
     padding: 12,
@@ -86,13 +125,11 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 4,
     lineHeight: 20,
   },
   category: {
     fontSize: 12,
-    color: '#666',
     marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -108,18 +145,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   stars: {
-    color: '#B91C1C',
     fontSize: 14,
     marginRight: 4,
   },
   ratingText: {
     fontSize: 12,
-    color: '#666',
     fontWeight: '500',
   },
   cookTime: {
     fontSize: 12,
-    color: '#666',
     fontWeight: '500',
   },
   difficulty: {

@@ -11,10 +11,10 @@ import {
   ScrollView,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../app/index';
+import { RootStackParamList } from '../../App';
 import { burgersData, categories } from '../data/burgersData';
 import { Burger } from '../types/Burger';
-import BurgerCard from '../components/BurgerCrad';
+import BurgerCard from '../components/BurgerCard';
 import CategoryTab from '../components/CategoryTab';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;

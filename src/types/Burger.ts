@@ -17,13 +17,21 @@ export interface Category {
   isActive: boolean;
 }
 
+export interface UserStats {
+  burgersViewed: number;
+  recipesCooked: number;
+  favoriteCategory: string;
+  totalCookTime: string;
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
   avatar?: string;
-  favoriteCategory?: string;
   joinDate: string;
+  favorites?: string[];
+  stats?: UserStats;
 }
 
 export interface AIMessage {
@@ -38,4 +46,9 @@ export interface Settings {
   darkMode: boolean;
   language: string;
   autoSave: boolean;
+  cookingTimer: boolean;
+  shoppingList: boolean;
+  nutritionInfo: boolean;
 }
+
+export type Language = 'English' | 'Spanish' | 'French' | 'German' | 'Japanese';

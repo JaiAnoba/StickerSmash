@@ -9,34 +9,54 @@ import {
   ScrollView,
   Switch,
   Alert,
+  Modal,
+  FlatList,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Settings } from '../types/Burger';
+import { Settings, Language } from '../types/Burger';
+import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import Button from '../components/Button';
 
 const SettingsScreen: React.FC = () => {
+  const { colors, isDarkMode, toggleTheme } = useTheme();
+  const { logout } = useAuth();
   const [settings, setSettings] = useState<Settings>({
     notifications: true,
-    darkMode: false,
+    darkMode: isDarkMode,
     language: 'English',
     autoSave: true,
+    cookingTimer: true,
+    shoppingList: false,
+    nutritionInfo: true,
   });
+  const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('English');
+
+  const languages: Language[] = ['English', 'Spanish', 'French', 'German', 'Japanese'];
 
   useEffect(() => {
     loadSettings();
-  }, []);
+  }, [isDarkMode]);
 
-  const loadSettings = async (): Promise<void> => {
+  const loadSettings = async () => {
     try {
       const savedSettings = await AsyncStorage.getItem('appSettings');
       if (savedSettings) {
-        setSettings(JSON.parse(savedSettings));
+        const parsedSettings = JSON.parse(savedSettings);
+        // Make sure darkMode is synced with the theme context
+        setSettings({ ...parsedSettings, darkMode: isDarkMode });
+        setSelectedLanguage(parsedSettings.language || 'English');
+      } else {
+        // If no settings found, use defaults but sync darkMode
+        setSettings(prev => ({ ...prev, darkMode: isDarkMode }));
       }
     } catch (error) {
       console.error('Error loading settings:', error);
     }
   };
 
-  const saveSettings = async (newSettings: Settings): Promise<void> => {
+  const saveSettings = async (newSettings: Settings) => {
     try {
       await AsyncStorage.setItem('appSettings', JSON.stringify(newSettings));
       setSettings(newSettings);
@@ -45,9 +65,85 @@ const SettingsScreen: React.FC = () => {
     }
   };
 
-  const toggleSetting = (key: keyof Settings): void => {
+  const toggleSetting = (key: keyof Settings) => {
     const newSettings = { ...settings, [key]: !settings[key] };
+    
+    // Special handling for dark mode
+    if (key === 'darkMode') {
+      toggleTheme();
+    }
+    
     saveSettings(newSettings);
+  };
+
+  const handleLanguageSelect = (language: Language) => {
+    const newSettings = { ...settings, language };
+    saveSettings(newSettings);
+    setSelectedLanguage(language);
+    setIsLanguageModalVisible(false);
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            await logout();
+          },
+        },
+      ]
+    );
+  };
+
+  const handleClearData = () => {
+    Alert.alert(
+      'Clear All Data',
+      'This will delete all your saved data. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Clear Data', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Keep user logged in but clear other data
+              const userToken = await AsyncStorage.getItem('userToken');
+              const userData = await AsyncStorage.getItem('userData');
+              
+              await AsyncStorage.clear();
+              
+              // Restore user session
+              if (userToken) await AsyncStorage.setItem('userToken', userToken);
+              if (userData) await AsyncStorage.setItem('userData', userData);
+              
+              // Reset settings to default but keep dark mode
+              const defaultSettings: Settings = {
+                notifications: true,
+                darkMode: isDarkMode,
+                language: 'English',
+                autoSave: true,
+                cookingTimer: true,
+                shoppingList: false,
+                nutritionInfo: true,
+              };
+              
+              await AsyncStorage.setItem('appSettings', JSON.stringify(defaultSettings));
+              setSettings(defaultSettings);
+              
+              Alert.alert('Success', 'All app data has been cleared.');
+            } catch (error) {
+              console.error('Error clearing data:', error);
+              Alert.alert('Error', 'Failed to clear data. Please try again.');
+            }
+          }
+        }
+      ]
+    );
   };
 
   const SettingRow: React.FC<{
@@ -60,15 +156,15 @@ const SettingsScreen: React.FC = () => {
     showArrow?: boolean;
   }> = ({ title, subtitle, icon, value, onToggle, onPress, showArrow = false }) => (
     <TouchableOpacity 
-      style={styles.settingRow} 
+      style={[styles.settingRow, { backgroundColor: colors.card, borderColor: colors.border }]} 
       onPress={onPress}
       disabled={!onPress && !onToggle}
     >
       <View style={styles.settingLeft}>
         <Text style={styles.settingIcon}>{icon}</Text>
         <View style={styles.settingText}>
-          <Text style={styles.settingTitle}>{title}</Text>
-          {subtitle && <Text style={styles.settingSubtitle}>{subtitle}</Text>}
+          <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
+          {subtitle && <Text style={[styles.settingSubtitle, { color: colors.subtext }]}>{subtitle}</Text>}
         </View>
       </View>
       <View style={styles.settingRight}>
@@ -76,25 +172,50 @@ const SettingsScreen: React.FC = () => {
           <Switch
             value={value}
             onValueChange={onToggle}
-            trackColor={{ false: '#E5E7EB', true: '#B91C1C' }}
+            trackColor={{ false: colors.border, true: colors.primary }}
             thumbColor={value ? 'white' : '#F3F4F6'}
           />
         )}
-        {showArrow && <Text style={styles.arrow}>→</Text>}
+        {showArrow && <Text style={[styles.arrow, { color: colors.primary }]}>→</Text>}
       </View>
     </TouchableOpacity>
   );
 
   const SectionHeader: React.FC<{ title: string }> = ({ title }) => (
-    <Text style={styles.sectionHeader}>{title}</Text>
+    <Text style={[styles.sectionHeader, { color: colors.text }]}>{title}</Text>
+  );
+
+  const LanguageItem: React.FC<{ language: Language }> = ({ language }) => (
+    <TouchableOpacity
+      style={[
+        styles.languageItem,
+        { borderBottomColor: colors.border },
+        selectedLanguage === language && [
+          styles.selectedLanguage,
+          { backgroundColor: isDarkMode ? '#3B0F0F' : '#FECACA' }
+        ]
+      ]}
+      onPress={() => handleLanguageSelect(language)}
+    >
+      <Text style={[
+        styles.languageText,
+        { color: colors.text },
+        selectedLanguage === language && { fontWeight: 'bold', color: colors.primary }
+      ]}>
+        {language}
+      </Text>
+      {selectedLanguage === language && (
+        <Text style={[styles.checkmark, { color: colors.primary }]}>✓</Text>
+      )}
+    </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#B91C1C" barStyle="light-content" />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.primary }]}>
         <Text style={styles.headerTitle}>Settings</Text>
       </View>
 
@@ -132,7 +253,34 @@ const SettingsScreen: React.FC = () => {
           subtitle={settings.language}
           icon="🌐"
           showArrow
-          onPress={() => Alert.alert('Language', 'Language selection coming soon!')}
+          onPress={() => setIsLanguageModalVisible(true)}
+        />
+
+        {/* Features */}
+        <SectionHeader title="Features" />
+        
+        <SettingRow
+          title="Cooking Timer"
+          subtitle="Enable built-in cooking timer"
+          icon="⏱️"
+          value={settings.cookingTimer}
+          onToggle={() => toggleSetting('cookingTimer')}
+        />
+        
+        <SettingRow
+          title="Shopping List"
+          subtitle="Create shopping lists from recipes"
+          icon="🛒"
+          value={settings.shoppingList}
+          onToggle={() => toggleSetting('shoppingList')}
+        />
+        
+        <SettingRow
+          title="Nutrition Information"
+          subtitle="Show calorie and nutrition data"
+          icon="🥗"
+          value={settings.nutritionInfo}
+          onToggle={() => toggleSetting('nutritionInfo')}
         />
 
         {/* Account */}
@@ -205,31 +353,72 @@ const SettingsScreen: React.FC = () => {
         <SectionHeader title="Danger Zone" />
         
         <TouchableOpacity 
-          style={styles.dangerButton}
-          onPress={() => Alert.alert(
-            'Clear All Data',
-            'This will delete all your saved data. This action cannot be undone.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { 
-                text: 'Clear Data', 
-                style: 'destructive',
-                onPress: async () => {
-                  await AsyncStorage.clear();
-                  Alert.alert('Success', 'All data has been cleared.');
-                }
-              }
-            ]
-          )}
+          style={[
+            styles.dangerButton, 
+            { 
+              backgroundColor: isDarkMode ? '#2D1515' : '#FEE2E2',
+              borderColor: isDarkMode ? '#5B1F1F' : '#FECACA'
+            }
+          ]}
+          onPress={handleClearData}
         >
           <Text style={styles.dangerIcon}>🗑️</Text>
-          <Text style={styles.dangerText}>Clear All Data</Text>
+          <Text style={[styles.dangerText, { color: colors.primary }]}>Clear All Data</Text>
         </TouchableOpacity>
+        
+        <Button
+          title="Logout"
+          onPress={handleLogout}
+          variant="danger"
+          fullWidth
+          style={styles.logoutButton}
+          icon="🚪"
+        />
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Made with ❤️ for burger lovers</Text>
+          <Text style={[styles.footerText, { color: colors.subtext }]}>
+            Made with ❤️ for burger lovers
+          </Text>
         </View>
       </ScrollView>
+
+      {/* Language Selection Modal */}
+      <Modal
+        visible={isLanguageModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setIsLanguageModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Select Language</Text>
+              <TouchableOpacity
+                style={[styles.closeButton, { backgroundColor: colors.inputBackground }]}
+                onPress={() => setIsLanguageModalVisible(false)}
+              >
+                <Text style={[styles.closeButtonText, { color: colors.text }]}>×</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <FlatList
+              data={languages}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => <LanguageItem language={item} />}
+              style={styles.languageList}
+            />
+            
+            <View style={styles.modalFooter}>
+              <Button
+                title="Cancel"
+                onPress={() => setIsLanguageModalVisible(false)}
+                variant="secondary"
+                fullWidth
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -237,10 +426,8 @@ const SettingsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   header: {
-    backgroundColor: '#B91C1C',
     paddingVertical: 20,
     paddingHorizontal: 20,
     alignItems: 'center',
@@ -257,13 +444,11 @@ const styles = StyleSheet.create({
   sectionHeader: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 25,
     marginBottom: 15,
     marginLeft: 5,
   },
   settingRow: {
-    backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
     marginBottom: 8,
@@ -275,6 +460,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
+    borderWidth: 1,
   },
   settingLeft: {
     flexDirection: 'row',
@@ -291,29 +477,24 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#333',
     marginBottom: 2,
   },
   settingSubtitle: {
     fontSize: 14,
-    color: '#666',
   },
   settingRight: {
     alignItems: 'center',
   },
   arrow: {
     fontSize: 16,
-    color: '#B91C1C',
   },
   dangerButton: {
-    backgroundColor: '#FEE2E2',
     borderRadius: 12,
     padding: 16,
     marginBottom: 8,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#FECACA',
   },
   dangerIcon: {
     fontSize: 20,
@@ -322,7 +503,10 @@ const styles = StyleSheet.create({
   dangerText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#B91C1C',
+  },
+  logoutButton: {
+    marginTop: 10,
+    marginBottom: 20,
   },
   footer: {
     alignItems: 'center',
@@ -330,8 +514,77 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: '#666',
     fontStyle: 'italic',
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 20,
+    maxHeight: '80%',
+    borderWidth: 1,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    paddingBottom: 10,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  languageList: {
+    maxHeight: 300,
+  },
+  languageItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+  },
+  selectedLanguage: {
+    borderRadius: 8,
+    marginHorizontal: 10,
+    paddingHorizontal: 10,
+  },
+  languageText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  checkmark: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  modalFooter: {
+    padding: 20,
+    paddingTop: 10,
   },
 });
 
