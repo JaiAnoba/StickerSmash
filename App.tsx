@@ -9,7 +9,6 @@ import LoginScreen from "./src/screens/LoginScreen"
 import RegisterScreen from "./src/screens/RegisterScreen"
 import MainScreen from "./src/screens/MainScreen"
 import BurgerDetailScreen from "./src/screens/BurgerDetailScreen"
-import ProfileScreen from "./src/screens/ProfileScreen"
 import EditProfileScreen from "./src/screens/EditProfileScreen"
 import SettingsScreen from "./src/screens/SettingsScreen"
 import CookingHistoryScreen from "./src/screens/CookingHistoryScreen"
@@ -18,14 +17,13 @@ import DataStorageScreen from "./src/screens/DataStorageScreen"
 import ShareAppScreen from "./src/screens/ShareAppScreen"
 import type { Burger } from "./src/types/Burger"
 
-const Stack = createStackNavigator()
+const Stack = createStackNavigator<RootStackParamList>();
 
 export type RootStackParamList = {
   Login: undefined
   Register: undefined
   Main: undefined
   BurgerDetail: { burger: Burger }
-  Profile: undefined
   EditProfile: undefined
   Settings: undefined
   CookingHistory: undefined
@@ -39,7 +37,7 @@ const AppNavigator = () => {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#FFFFFF" }}>
         <ActivityIndicator size="large" color="#8B0000" />
       </View>
     )
@@ -59,7 +57,6 @@ const AppNavigator = () => {
           <>
             <Stack.Screen name="Main" component={MainScreen} />
             <Stack.Screen name="BurgerDetail" component={BurgerDetailScreen} />
-            <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="CookingHistory" component={CookingHistoryScreen} />

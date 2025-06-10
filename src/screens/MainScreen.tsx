@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+import { Text, View } from "react-native"
 import { useTheme } from "../context/ThemeContext"
 import HomeScreen from "./HomeScreen"
 import FavoritesScreen from "./FavoritesScreen"
@@ -11,37 +12,36 @@ import ProfileScreen from "./ProfileScreen"
 const Tab = createBottomTabNavigator()
 
 const MainScreen: React.FC = () => {
-  const { colors, isDarkMode } = useTheme()
-
-  const getTabBarIcon = (routeName: string, focused: boolean) => {
-    let icon = ""
-
-    switch (routeName) {
-      case "Home":
-        icon = focused ? "🍔" : "🍔"
-        break
-      case "Favorites":
-        icon = focused ? "❤️" : "🤍"
-        break
-      case "AI Assistant":
-        icon = focused ? "🤖" : "🤖"
-        break
-      case "Profile":
-        icon = focused ? "👤" : "👤"
-        break
-      default:
-        icon = "📱"
-    }
-
-    return icon
-  }
+  const { colors } = useTheme()
 
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused }) => {
-          const icon = getTabBarIcon(route.name, focused)
-          return <span style={{ fontSize: 24 }}>{icon}</span>
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName = ""
+
+          switch (route.name) {
+            case "Home":
+              iconName = "🍔"
+              break
+            case "Favorites":
+              iconName = focused ? "❤️" : "🤍"
+              break
+            case "AI Assistant":
+              iconName = "🤖"
+              break
+            case "Profile":
+              iconName = "👤"
+              break
+            default:
+              iconName = "📱"
+          }
+
+          return (
+            <View style={{ alignItems: "center", justifyContent: "center" }}>
+              <Text style={{ fontSize: 24 }}>{iconName}</Text>
+            </View>
+          )
         },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.subtext,

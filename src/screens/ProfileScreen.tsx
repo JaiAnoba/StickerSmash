@@ -13,8 +13,9 @@ import {
   Alert,
   Image,
   Modal,
+  Platform 
 } from "react-native"
-import { launchImageLibrary, type ImagePickerResponse, type MediaType } from "react-native-image-picker"
+import * as ImagePicker from 'expo-image-picker'
 import { useNavigation } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
 import type { RootStackParamList } from "../../App"
@@ -66,29 +67,33 @@ const ProfileScreen: React.FC = () => {
     }
   }
 
-  const handleImagePicker = () => {
-    const options = {
-      mediaType: "photo" as MediaType,
-      includeBase64: false,
-      maxHeight: 2000,
-      maxWidth: 2000,
-      quality: 0.8 as 0.8,
-    }
-
-    launchImageLibrary(options, (response: ImagePickerResponse) => {
-      if (response.didCancel || response.errorMessage) {
-        return
-      }
-
-      if (response.assets && response.assets[0]) {
-        const imageUri = response.assets[0].uri
-        if (imageUri) {
-          saveProfileImage(imageUri)
-          setIsImageModalVisible(false)
-        }
-      }
-    })
+  const handleImagePicker = async () => {
+  // Ask for permission if not already granted
+  const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
+  if (!permissionResult.granted) {
+    Alert.alert("Permission required", "Permission to access gallery is required.")
+    return
   }
+
+  try {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+      base64: false,
+    })
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const imageUri = result.assets[0].uri
+      await saveProfileImage(imageUri)
+      setIsImageModalVisible(false)
+    }
+  } catch (error) {
+    console.error("Error picking image:", error)
+  }
+}
+
 
   const removeProfileImage = async () => {
     try {
