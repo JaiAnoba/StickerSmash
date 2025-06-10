@@ -348,12 +348,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 25,
     textAlign: "center",
     marginBottom: 10,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     textAlign: "center",
     lineHeight: 24,
   },
@@ -364,23 +364,23 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     marginBottom: 8,
   },
   input: {
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
+    borderRadius: 999,
+    padding: 14,
+    fontSize: 14,
     borderWidth: 1,
   },
   passwordContainer: {
     position: "relative",
   },
   passwordInput: {
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 999,
+    padding: 14,
     paddingRight: 50,
-    fontSize: 16,
+    fontSize: 14,
     borderWidth: 1,
   },
   eyeButton: {
