@@ -1,10 +1,10 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, StyleProp } from 'react-native';
 
 interface IconButtonProps {
   icon: string;
   onPress: () => void;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>
   iconStyle?: TextStyle;
   size?: number;
   disabled?: boolean;

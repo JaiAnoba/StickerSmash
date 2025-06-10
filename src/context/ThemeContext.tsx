@@ -1,102 +1,91 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { useColorScheme } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+"use client"
 
-type ThemeType = 'light' | 'dark';
+import type React from "react"
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
-interface ThemeContextType {
-  theme: ThemeType;
-  isDarkMode: boolean;
-  toggleTheme: () => void;
-  colors: {
-    background: string;
-    card: string;
-    text: string;
-    subtext: string;
-    primary: string;
-    border: string;
-    inputBackground: string;
-    statusBar: string;
-  };
+interface Colors {
+  primary: string
+  background: string
+  card: string
+  text: string
+  subtext: string
+  border: string
+  inputBackground: string
+  statusBar: string
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+interface ThemeContextType {
+  isDarkMode: boolean
+  colors: Colors
+  toggleTheme: () => void
+}
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const deviceTheme = useColorScheme() as ThemeType;
-  const [theme, setTheme] = useState<ThemeType>('light');
-  const [isLoaded, setIsLoaded] = useState(false);
+const lightColors: Colors = {
+  primary: "#8B0000",
+  background: "#FFFFFF",
+  card: "#FFFFFF",
+  text: "#000000",
+  subtext: "#666666",
+  border: "#E5E5E5",
+  inputBackground: "#F5F5F5",
+  statusBar: "#8B0000",
+}
+
+const darkColors: Colors = {
+  primary: "#DC143C",
+  background: "#121212",
+  card: "#1E1E1E",
+  text: "#FFFFFF",
+  subtext: "#CCCCCC",
+  border: "#333333",
+  inputBackground: "#2A2A2A",
+  statusBar: "#DC143C",
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+
+interface ThemeProviderProps {
+  children: ReactNode
+}
+
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
   useEffect(() => {
-    loadTheme();
-  }, []);
+    loadTheme()
+  }, [])
 
   const loadTheme = async () => {
     try {
-      const savedTheme = await AsyncStorage.getItem('theme');
-      if (savedTheme) {
-        setTheme(savedTheme as ThemeType);
-      } else {
-        setTheme(deviceTheme || 'light');
+      const savedTheme = await AsyncStorage.getItem("isDarkMode")
+      if (savedTheme !== null) {
+        setIsDarkMode(JSON.parse(savedTheme))
       }
     } catch (error) {
-      console.error('Failed to load theme:', error);
-    } finally {
-      setIsLoaded(true);
+      console.error("Error loading theme:", error)
     }
-  };
+  }
 
   const toggleTheme = async () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
     try {
-      await AsyncStorage.setItem('theme', newTheme);
+      const newTheme = !isDarkMode
+      setIsDarkMode(newTheme)
+      await AsyncStorage.setItem("isDarkMode", JSON.stringify(newTheme))
     } catch (error) {
-      console.error('Failed to save theme:', error);
+      console.error("Error saving theme:", error)
     }
-  };
-
-  const isDarkMode = theme === 'dark';
-
-  const lightColors = {
-    background: '#FFFFFF',
-    card: '#FFFFFF',
-    text: '#333333',
-    subtext: '#666666',
-    primary: '#B91C1C',
-    border: '#E5E7EB',
-    inputBackground: '#F9FAFB',
-    statusBar: '#B91C1C',
-  };
-
-  const darkColors = {
-    background: '#121212',
-    card: '#1E1E1E',
-    text: '#F3F4F6',
-    subtext: '#A1A1AA',
-    primary: '#EF4444',
-    border: '#2D2D2D',
-    inputBackground: '#2D2D2D',
-    statusBar: '#000000',
-  };
-
-  const colors = isDarkMode ? darkColors : lightColors;
-
-  if (!isLoaded) {
-    return null;
   }
 
-  return (
-    <ThemeContext.Provider value={{ theme, isDarkMode, toggleTheme, colors }}>
-      {children}
-    </ThemeContext.Provider>
-  );
-};
+  const colors = isDarkMode ? darkColors : lightColors
 
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
+  return <ThemeContext.Provider value={{ isDarkMode, colors, toggleTheme }}>{children}</ThemeContext.Provider>
+}
+
+export const useTheme = (): ThemeContextType => {
+  const context = useContext(ThemeContext)
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error("useTheme must be used within a ThemeProvider")
   }
-  return context;
-};
+  return context
+}

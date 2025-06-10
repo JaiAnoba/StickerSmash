@@ -1,190 +1,151 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User } from '../types/Burger';
-import { Alert } from 'react-native';
+"use client"
 
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  updateUser: (userData: Partial<User>) => Promise<void>;
+import type React from "react"
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+
+interface User {
+  id: string
+  name: string
+  email: string
+  joinDate: string
+  stats?: {
+    burgersViewed: number
+    recipesCooked: number
+    favoriteCategory: string
+    totalCookTime: string
+  }
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface AuthContextType {
+  user: User | null
+  isLoading: boolean
+  login: (email: string, password: string) => Promise<boolean>
+  register: (name: string, email: string, password: string) => Promise<boolean>
+  logout: () => Promise<void>
+  updateUser: (userData: Partial<User>) => Promise<void>
+}
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+interface AuthProviderProps {
+  children: ReactNode
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    loadUser();
-  }, []);
+    checkAuthState()
+  }, [])
 
-  const loadUser = async () => {
+  const checkAuthState = async () => {
     try {
-      const userToken = await AsyncStorage.getItem('userToken');
-      const userData = await AsyncStorage.getItem('userData');
-      
+      const userToken = await AsyncStorage.getItem("userToken")
+      const userData = await AsyncStorage.getItem("userData")
+
       if (userToken && userData) {
-        setUser(JSON.parse(userData));
-        setIsAuthenticated(true);
+        setUser(JSON.parse(userData))
       }
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error("Error checking auth state:", error)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes, we'll accept any email/password
-      // In a real app, you would validate against a backend
-      
-      // Check if user exists in AsyncStorage (for demo)
-      const existingUsers = await AsyncStorage.getItem('users');
-      const users = existingUsers ? JSON.parse(existingUsers) : [];
-      
-      const foundUser = users.find((u: any) => u.email === email);
-      
-      if (!foundUser) {
-        throw new Error('User not found. Please register first.');
-      }
-      
-      if (foundUser.password !== password) {
-        throw new Error('Invalid password.');
-      }
-      
-      // Create user object without password
-      const { password: _, ...userWithoutPassword } = foundUser;
-      const userData: User = userWithoutPassword;
-      
-      await AsyncStorage.setItem('userToken', 'token-' + Date.now());
-      await AsyncStorage.setItem('userData', JSON.stringify(userData));
-      
-      setUser(userData);
-      setIsAuthenticated(true);
-    } catch (error: any) {
-      Alert.alert('Login Failed', error.message || 'Something went wrong');
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
-  const register = async (name: string, email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Check if user already exists
-      const existingUsers = await AsyncStorage.getItem('users');
-      const users = existingUsers ? JSON.parse(existingUsers) : [];
-      
-      if (users.some((u: any) => u.email === email)) {
-        throw new Error('Email already registered. Please login instead.');
-      }
-      
-      // Create new user
-      const newUser = {
-        id: Date.now().toString(),
-        name,
-        email,
-        password, // In a real app, this would be hashed
+      // Mock successful login
+      const userData: User = {
+        id: "1",
+        name: "John Doe",
+        email: email,
         joinDate: new Date().toISOString(),
-        favorites: [],
+        stats: {
+          burgersViewed: 25,
+          recipesCooked: 8,
+          favoriteCategory: "Classic",
+          totalCookTime: "3h 45m",
+        },
+      }
+
+      await AsyncStorage.setItem("userToken", "mock-token")
+      await AsyncStorage.setItem("userData", JSON.stringify(userData))
+      setUser(userData)
+      return true
+    } catch (error) {
+      console.error("Login error:", error)
+      return false
+    }
+  }
+
+  const register = async (name: string, email: string, password: string): Promise<boolean> => {
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // Mock successful registration
+      const userData: User = {
+        id: "1",
+        name: name,
+        email: email,
+        joinDate: new Date().toISOString(),
         stats: {
           burgersViewed: 0,
           recipesCooked: 0,
-          favoriteCategory: 'None yet',
-          totalCookTime: '0m',
-        }
-      };
-      
-      // Save to "database"
-      users.push(newUser);
-      await AsyncStorage.setItem('users', JSON.stringify(users));
-      
-      // Create user object without password
-      const { password: _, ...userWithoutPassword } = newUser;
-      const userData: User = userWithoutPassword;
-      
-      // Log user in
-      await AsyncStorage.setItem('userToken', 'token-' + Date.now());
-      await AsyncStorage.setItem('userData', JSON.stringify(userData));
-      
-      setUser(userData);
-      setIsAuthenticated(true);
-    } catch (error: any) {
-      Alert.alert('Registration Failed', error.message || 'Something went wrong');
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const logout = async () => {
-    try {
-      await AsyncStorage.removeItem('userToken');
-      setUser(null);
-      setIsAuthenticated(false);
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
-  };
-
-  const updateUser = async (userData: Partial<User>) => {
-    try {
-      if (!user) return;
-      
-      const updatedUser = { ...user, ...userData };
-      await AsyncStorage.setItem('userData', JSON.stringify(updatedUser));
-      
-      // Also update in users array
-      const existingUsers = await AsyncStorage.getItem('users');
-      if (existingUsers) {
-        const users = JSON.parse(existingUsers);
-        const updatedUsers = users.map((u: any) => 
-          u.id === user.id ? { ...u, ...userData } : u
-        );
-        await AsyncStorage.setItem('users', JSON.stringify(updatedUsers));
+          favoriteCategory: "None yet",
+          totalCookTime: "0m",
+        },
       }
-      
-      setUser(updatedUser);
+
+      await AsyncStorage.setItem("userToken", "mock-token")
+      await AsyncStorage.setItem("userData", JSON.stringify(userData))
+      setUser(userData)
+      return true
     } catch (error) {
-      console.error('Error updating user:', error);
-      Alert.alert('Update Failed', 'Failed to update user information');
+      console.error("Registration error:", error)
+      return false
     }
-  };
+  }
+
+  const logout = async (): Promise<void> => {
+    try {
+      await AsyncStorage.removeItem("userToken")
+      await AsyncStorage.removeItem("userData")
+      setUser(null)
+    } catch (error) {
+      console.error("Logout error:", error)
+    }
+  }
+
+  const updateUser = async (userData: Partial<User>): Promise<void> => {
+    try {
+      if (user) {
+        const updatedUser = { ...user, ...userData }
+        await AsyncStorage.setItem("userData", JSON.stringify(updatedUser))
+        setUser(updatedUser)
+      }
+    } catch (error) {
+      console.error("Update user error:", error)
+    }
+  }
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated, 
-      isLoading, 
-      login, 
-      register, 
-      logout,
-      updateUser
-    }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
-  );
-};
+  )
+}
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext)
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider")
   }
-  return context;
-};
+  return context
+}
