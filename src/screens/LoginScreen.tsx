@@ -218,9 +218,31 @@ const LoginScreen: React.FC = () => {
       </View>
 
       {/* Forgot Password Modal */}
-      <Modal visible={forgotPasswordModalVisible} transparent animationType="slide" onRequestClose={closeResetModal}>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <Modal
+        visible={forgotPasswordModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={closeResetModal}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.modalOverlay}
+        >
+          <View
+            style={[
+              styles.modalContent,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
+            {/* X Close Button */}
+            <TouchableOpacity
+              onPress={closeResetModal}
+              style={styles.closeIconContainer}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.closeIcon, { color: colors.text }]}>×</Text>
+            </TouchableOpacity>
+
             {!resetSent ? (
               <>
                 <Text weight="bold" style={styles.modalTitle}>
@@ -262,18 +284,14 @@ const LoginScreen: React.FC = () => {
                     fullWidth
                     style={styles.resetButton}
                   />
-
-                  <Button
-                    title="Cancel"
-                    onPress={closeResetModal}
-                    variant="secondary"
-                    fullWidth
-                    style={styles.cancelButton}
-                  />
                 </View>
 
                 {resetLoading && (
-                  <ActivityIndicator size="small" color={colors.primary} style={styles.loadingIndicator} />
+                  <ActivityIndicator
+                    size="small"
+                    color={colors.primary}
+                    style={styles.loadingIndicator}
+                  />
                 )}
               </>
             ) : (
@@ -284,19 +302,30 @@ const LoginScreen: React.FC = () => {
                 <Text style={[styles.modalSubtitle, { textAlign: "center" }]}>
                   We've sent password reset instructions to:
                 </Text>
-                <Text weight="semiBold" style={[styles.emailSent, { color: colors.primary }]}>
+                <Text
+                  weight="semiBold"
+                  style={[styles.emailSent, { color: colors.primary }]}
+                >
                   {resetEmail}
                 </Text>
-                <Text style={[styles.modalSubtitle, { textAlign: "center", marginTop: 10 }]}>
+                <Text
+                  style={[styles.modalSubtitle, { textAlign: "center", marginTop: 10 }]}
+                >
                   Please check your inbox and follow the instructions to reset your password.
                 </Text>
 
-                <Button title="Back to Login" onPress={closeResetModal} fullWidth style={styles.backButton} />
+                <Button
+                  title="Back to Login"
+                  onPress={closeResetModal}
+                  fullWidth
+                  style={styles.backButton}
+                />
               </View>
             )}
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
     </SafeAreaView>
   )
 }
@@ -444,6 +473,16 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginTop: 24,
+  },
+  closeIconContainer: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    zIndex: 1,
+  },
+  closeIcon: {
+    fontSize: 28,
+    fontWeight: "bold",
   },
 })
 
