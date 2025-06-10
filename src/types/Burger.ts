@@ -38,4 +38,11 @@ export interface Settings {
   nutritionInfo: boolean
 }
 
+export interface AIMessage {
+  id: string;
+  text: string;
+  isUser: boolean;
+  timestamp: Date;
+}
+
 export type Language = "English" | "Spanish" | "French" | "German" | "Japanese"

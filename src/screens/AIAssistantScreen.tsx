@@ -8,7 +8,7 @@ import {
   SafeAreaView,
   StatusBar,
   ScrollView,
-  KeyboardAvoidingView,
+  KeyboardAvoidingView, 
   Platform,
 } from 'react-native';
 import { AIMessage } from '../types/Burger';

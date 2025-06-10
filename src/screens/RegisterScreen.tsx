@@ -4,7 +4,6 @@ import type React from "react"
 import { useState } from "react"
 import {
   View,
-  Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -21,6 +20,7 @@ import type { RootStackParamList } from "../../App"
 import { useTheme } from "../context/ThemeContext"
 import { useAuth } from "../context/AuthContext"
 import Button from "../components/Button"
+import Text from "../components/CustomText"
 
 type NavigationProp = StackNavigationProp<RootStackParamList>
 
@@ -117,16 +117,18 @@ const RegisterScreen: React.FC = () => {
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.logo}>🍔</Text>
-            <Text style={[styles.title, { color: colors.text }]}>Join Burgerpedia</Text>
-            <Text style={[styles.subtitle, { color: colors.subtext }]}>
-              Create your account and start your burger journey
+            <Text weight="bold" style={styles.title}>
+              Join Burgerpedia
             </Text>
+            <Text style={styles.subtitle}>Create your account and start your burger journey</Text>
           </View>
 
           {/* Registration Form */}
           <View style={styles.form}>
             <View style={styles.inputContainer}>
-              <Text style={[styles.label, { color: colors.text }]}>Full Name</Text>
+              <Text weight="semiBold" style={styles.label}>
+                Full Name
+              </Text>
               <TextInput
                 style={[
                   styles.input,
@@ -134,6 +136,7 @@ const RegisterScreen: React.FC = () => {
                     backgroundColor: colors.inputBackground,
                     color: colors.text,
                     borderColor: colors.border,
+                    fontFamily: "Poppins-Regular",
                   },
                 ]}
                 placeholder="Enter your full name"
@@ -146,7 +149,9 @@ const RegisterScreen: React.FC = () => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={[styles.label, { color: colors.text }]}>Email</Text>
+              <Text weight="semiBold" style={styles.label}>
+                Email
+              </Text>
               <TextInput
                 style={[
                   styles.input,
@@ -154,6 +159,7 @@ const RegisterScreen: React.FC = () => {
                     backgroundColor: colors.inputBackground,
                     color: colors.text,
                     borderColor: colors.border,
+                    fontFamily: "Poppins-Regular",
                   },
                 ]}
                 placeholder="Enter your email"
@@ -167,7 +173,9 @@ const RegisterScreen: React.FC = () => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={[styles.label, { color: colors.text }]}>Password</Text>
+              <Text weight="semiBold" style={styles.label}>
+                Password
+              </Text>
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={[
@@ -176,6 +184,7 @@ const RegisterScreen: React.FC = () => {
                       backgroundColor: colors.inputBackground,
                       color: colors.text,
                       borderColor: colors.border,
+                      fontFamily: "Poppins-Regular",
                     },
                   ]}
                   placeholder="Enter your password"
@@ -200,7 +209,9 @@ const RegisterScreen: React.FC = () => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={[styles.label, { color: colors.text }]}>Confirm Password</Text>
+              <Text weight="semiBold" style={styles.label}>
+                Confirm Password
+              </Text>
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={[
@@ -209,6 +220,7 @@ const RegisterScreen: React.FC = () => {
                       backgroundColor: colors.inputBackground,
                       color: colors.text,
                       borderColor: colors.border,
+                      fontFamily: "Poppins-Regular",
                     },
                   ]}
                   placeholder="Confirm your password"
@@ -242,6 +254,7 @@ const RegisterScreen: React.FC = () => {
               disabled={isLoading}
               fullWidth
               style={styles.registerButton}
+              icon="✨"
             />
 
             {isLoading && <ActivityIndicator size="small" color={colors.primary} style={styles.loadingIndicator} />}
@@ -249,9 +262,11 @@ const RegisterScreen: React.FC = () => {
 
           {/* Footer */}
           <View style={styles.footer}>
-            <Text style={[styles.footerText, { color: colors.subtext }]}>Already have an account?</Text>
+            <Text style={styles.footerText}>Already have an account?</Text>
             <TouchableOpacity onPress={navigateToLogin}>
-              <Text style={[styles.linkText, { color: colors.primary }]}>Sign in here</Text>
+              <Text weight="semiBold" style={[styles.linkText, { color: colors.primary }]}>
+                Sign in here
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -282,7 +297,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
     textAlign: "center",
     marginBottom: 10,
   },
@@ -299,7 +313,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: "600",
     marginBottom: 8,
   },
   input: {
@@ -345,7 +358,6 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 16,
-    fontWeight: "600",
   },
 })
 

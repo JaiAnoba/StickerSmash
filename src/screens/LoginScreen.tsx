@@ -4,7 +4,6 @@ import type React from "react"
 import { useState } from "react"
 import {
   View,
-  Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -23,6 +22,7 @@ import type { RootStackParamList } from "../../App"
 import { useTheme } from "../context/ThemeContext"
 import { useAuth } from "../context/AuthContext"
 import Button from "../components/Button"
+import Text from "../components/CustomText"
 
 type NavigationProp = StackNavigationProp<RootStackParamList>
 
@@ -120,16 +120,18 @@ const LoginScreen: React.FC = () => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.logo}>🍔</Text>
-          <Text style={[styles.title, { color: colors.text }]}>Welcome to Burgerpedia</Text>
-          <Text style={[styles.subtitle, { color: colors.subtext }]}>
-            Discover amazing burger recipes and cooking tips
+          <Text weight="bold" style={styles.title}>
+            Welcome to Burgerpedia
           </Text>
+          <Text style={styles.subtitle}>Discover amazing burger recipes and cooking tips</Text>
         </View>
 
         {/* Login Form */}
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: colors.text }]}>Email</Text>
+            <Text weight="semiBold" style={styles.label}>
+              Email
+            </Text>
             <TextInput
               style={[
                 styles.input,
@@ -137,6 +139,7 @@ const LoginScreen: React.FC = () => {
                   backgroundColor: colors.inputBackground,
                   color: colors.text,
                   borderColor: colors.border,
+                  fontFamily: "Poppins-Regular",
                 },
               ]}
               placeholder="Enter your email"
@@ -150,7 +153,9 @@ const LoginScreen: React.FC = () => {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: colors.text }]}>Password</Text>
+            <Text weight="semiBold" style={styles.label}>
+              Password
+            </Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={[
@@ -159,6 +164,7 @@ const LoginScreen: React.FC = () => {
                     backgroundColor: colors.inputBackground,
                     color: colors.text,
                     borderColor: colors.border,
+                    fontFamily: "Poppins-Regular",
                   },
                 ]}
                 placeholder="Enter your password"
@@ -184,7 +190,9 @@ const LoginScreen: React.FC = () => {
 
           {/* Forgot Password Link */}
           <TouchableOpacity style={styles.forgotPasswordContainer} onPress={handleForgotPassword} activeOpacity={0.7}>
-            <Text style={[styles.forgotPasswordText, { color: colors.primary }]}>Forgot password?</Text>
+            <Text weight="medium" style={[styles.forgotPasswordText, { color: colors.primary }]}>
+              Forgot password?
+            </Text>
           </TouchableOpacity>
 
           <Button
@@ -200,9 +208,11 @@ const LoginScreen: React.FC = () => {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: colors.subtext }]}>Don't have an account?</Text>
+          <Text style={styles.footerText}>Don't have an account?</Text>
           <TouchableOpacity onPress={navigateToRegister}>
-            <Text style={[styles.linkText, { color: colors.primary }]}>Sign up here</Text>
+            <Text weight="semiBold" style={[styles.linkText, { color: colors.primary }]}>
+              Sign up here
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -213,13 +223,17 @@ const LoginScreen: React.FC = () => {
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
             {!resetSent ? (
               <>
-                <Text style={[styles.modalTitle, { color: colors.text }]}>Reset Password</Text>
-                <Text style={[styles.modalSubtitle, { color: colors.subtext }]}>
+                <Text weight="bold" style={styles.modalTitle}>
+                  Reset Password
+                </Text>
+                <Text style={styles.modalSubtitle}>
                   Enter your email address and we'll send you instructions to reset your password.
                 </Text>
 
                 <View style={styles.modalInputContainer}>
-                  <Text style={[styles.label, { color: colors.text }]}>Email</Text>
+                  <Text weight="semiBold" style={styles.label}>
+                    Email
+                  </Text>
                   <TextInput
                     style={[
                       styles.input,
@@ -227,6 +241,7 @@ const LoginScreen: React.FC = () => {
                         backgroundColor: colors.inputBackground,
                         color: colors.text,
                         borderColor: colors.border,
+                        fontFamily: "Poppins-Regular",
                       },
                     ]}
                     placeholder="Enter your email"
@@ -263,12 +278,16 @@ const LoginScreen: React.FC = () => {
               </>
             ) : (
               <View style={styles.successContainer}>
-                <Text style={[styles.modalTitle, { color: colors.text }]}>Email Sent!</Text>
-                <Text style={[styles.modalSubtitle, { color: colors.subtext, textAlign: "center" }]}>
+                <Text weight="bold" style={styles.modalTitle}>
+                  Email Sent!
+                </Text>
+                <Text style={[styles.modalSubtitle, { textAlign: "center" }]}>
                   We've sent password reset instructions to:
                 </Text>
-                <Text style={[styles.emailSent, { color: colors.primary }]}>{resetEmail}</Text>
-                <Text style={[styles.modalSubtitle, { color: colors.subtext, textAlign: "center", marginTop: 10 }]}>
+                <Text weight="semiBold" style={[styles.emailSent, { color: colors.primary }]}>
+                  {resetEmail}
+                </Text>
+                <Text style={[styles.modalSubtitle, { textAlign: "center", marginTop: 10 }]}>
                   Please check your inbox and follow the instructions to reset your password.
                 </Text>
 
@@ -301,7 +320,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
     textAlign: "center",
     marginBottom: 10,
   },
@@ -318,7 +336,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: "600",
     marginBottom: 8,
   },
   input: {
@@ -353,7 +370,6 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     fontSize: 14,
-    fontWeight: "500",
   },
   loginButton: {
     marginTop: 10,
@@ -373,7 +389,6 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 16,
-    fontWeight: "600",
   },
   // Modal styles
   modalOverlay: {
@@ -396,7 +411,6 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 22,
-    fontWeight: "bold",
     marginBottom: 12,
   },
   modalSubtitle: {
@@ -426,7 +440,6 @@ const styles = StyleSheet.create({
   },
   emailSent: {
     fontSize: 16,
-    fontWeight: "600",
     marginVertical: 8,
   },
   backButton: {

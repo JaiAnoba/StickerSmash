@@ -1,46 +1,63 @@
-"use client"
-import { NavigationContainer } from "@react-navigation/native"
-import { createStackNavigator } from "@react-navigation/stack"
-import { View, ActivityIndicator } from "react-native"
-import { ThemeProvider } from "./src/context/ThemeContext"
-import { AuthProvider, useAuth } from "./src/context/AuthContext"
-import { FavoritesProvider } from "./src/context/FavoritesContext"
-import LoginScreen from "./src/screens/LoginScreen"
-import RegisterScreen from "./src/screens/RegisterScreen"
-import MainScreen from "./src/screens/MainScreen"
-import BurgerDetailScreen from "./src/screens/BurgerDetailScreen"
-import EditProfileScreen from "./src/screens/EditProfileScreen"
-import SettingsScreen from "./src/screens/SettingsScreen"
-import CookingHistoryScreen from "./src/screens/CookingHistoryScreen"
-import ShoppingListScreen from "./src/screens/ShoppingListScreen"
-import DataStorageScreen from "./src/screens/DataStorageScreen"
-import ShareAppScreen from "./src/screens/ShareAppScreen"
-import type { Burger } from "./src/types/Burger"
+"use client";
+
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { View, ActivityIndicator } from "react-native";
+import { useEffect, useCallback, useState } from "react";
+import * as Font from "expo-font";
+import * as SplashScreen from "expo-splash-screen"; // ✅ New
+
+import { ThemeProvider } from "./src/context/ThemeContext";
+import { AuthProvider, useAuth } from "./src/context/AuthContext";
+import { FavoritesProvider } from "./src/context/FavoritesContext";
+
+import LoginScreen from "./src/screens/LoginScreen";
+import RegisterScreen from "./src/screens/RegisterScreen";
+import MainScreen from "./src/screens/MainScreen";
+import BurgerDetailScreen from "./src/screens/BurgerDetailScreen";
+import EditProfileScreen from "./src/screens/EditProfileScreen";
+import SettingsScreen from "./src/screens/SettingsScreen";
+import CookingHistoryScreen from "./src/screens/CookingHistoryScreen";
+import ShoppingListScreen from "./src/screens/ShoppingListScreen";
+import DataStorageScreen from "./src/screens/DataStorageScreen";
+import ShareAppScreen from "./src/screens/ShareAppScreen";
+import type { Burger } from "./src/types/Burger";
+
+SplashScreen.preventAutoHideAsync(); // 👈 Keeps splash screen showing until fonts are loaded
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 export type RootStackParamList = {
-  Login: undefined
-  Register: undefined
-  Main: undefined
-  BurgerDetail: { burger: Burger }
-  EditProfile: undefined
-  Settings: undefined
-  CookingHistory: undefined
-  ShoppingList: undefined
-  DataStorage: undefined
-  ShareApp: undefined
-}
+  Login: undefined;
+  Register: undefined;
+  Main: undefined;
+  BurgerDetail: { burger: Burger };
+  EditProfile: undefined;
+  Settings: undefined;
+  CookingHistory: undefined;
+  ShoppingList: undefined;
+  DataStorage: undefined;
+  ShareApp: undefined;
+};
+
+const loadFonts = () =>
+  Font.loadAsync({
+    "Poppins-Regular": require("./assets/fonts/Poppins-Regular.ttf"),
+    "Poppins-Medium": require("./assets/fonts/Poppins-Medium.ttf"),
+    "Poppins-SemiBold": require("./assets/fonts/Poppins-SemiBold.ttf"),
+    "Poppins-Bold": require("./assets/fonts/Poppins-Bold.ttf"),
+    "Poppins-Italic": require("./assets/fonts/Poppins-Italic.ttf"),
+  });
 
 const AppNavigator = () => {
-  const { user, isLoading } = useAuth()
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#FFFFFF" }}>
         <ActivityIndicator size="large" color="#8B0000" />
       </View>
-    )
+    );
   }
 
   return (
@@ -53,7 +70,6 @@ const AppNavigator = () => {
         }}
       >
         {user ? (
-          // Authenticated screens
           <>
             <Stack.Screen name="Main" component={MainScreen} />
             <Stack.Screen name="BurgerDetail" component={BurgerDetailScreen} />
@@ -65,7 +81,6 @@ const AppNavigator = () => {
             <Stack.Screen name="ShareApp" component={ShareAppScreen} />
           </>
         ) : (
-          // Authentication screens
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
@@ -73,19 +88,47 @@ const AppNavigator = () => {
         )}
       </Stack.Navigator>
     </NavigationContainer>
-  )
-}
+  );
+};
 
 const App = () => {
-  return (
-    <ThemeProvider>
-      <AuthProvider>
-        <FavoritesProvider>
-          <AppNavigator />
-        </FavoritesProvider>
-      </AuthProvider>
-    </ThemeProvider>
-  )
-}
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
-export default App
+  useEffect(() => {
+    async function prepare() {
+      try {
+        await loadFonts();
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setFontsLoaded(true);
+      }
+    }
+
+    prepare();
+  }, []);
+
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync(); // 👈 Hide splash once fonts are ready
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null; // show nothing while loading fonts
+  }
+
+  return (
+    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+      <ThemeProvider>
+        <AuthProvider>
+          <FavoritesProvider>
+            <AppNavigator />
+          </FavoritesProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </View>
+  );
+};
+
+export default App;

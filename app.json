@@ -2,6 +2,7 @@
   "expo": {
     "name": "Burgerpedia",
     "slug": "burgerpedia",
+    "jsEngine": "jsc",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
@@ -9,14 +10,17 @@
       "backgroundColor": "#8B0000",
       "resizeMode": "contain"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#8B0000"
-      }
+      },
+      "package": "com.anonymous.burgerpedia"
     },
     "web": {
       "bundler": "metro"
