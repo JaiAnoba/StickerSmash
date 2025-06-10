@@ -13,6 +13,7 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
+  Image,
 } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
@@ -33,6 +34,8 @@ const RegisterScreen: React.FC = () => {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const validateForm = () => {
     if (!name.trim()) {
@@ -97,6 +100,14 @@ const RegisterScreen: React.FC = () => {
     navigation.goBack()
   }
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword)
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? "light-content" : "dark-content"} />
@@ -157,44 +168,72 @@ const RegisterScreen: React.FC = () => {
 
             <View style={styles.inputContainer}>
               <Text style={[styles.label, { color: colors.text }]}>Password</Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    color: colors.text,
-                    borderColor: colors.border,
-                  },
-                ]}
-                placeholder="Enter your password"
-                placeholderTextColor={colors.subtext}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={[
+                    styles.passwordInput,
+                    {
+                      backgroundColor: colors.inputBackground,
+                      color: colors.text,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                  placeholder="Enter your password"
+                  placeholderTextColor={colors.subtext}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <TouchableOpacity style={styles.eyeButton} onPress={togglePasswordVisibility} activeOpacity={0.7}>
+                  <Image
+                    source={{
+                      uri: showPassword
+                        ? "https://img.icons8.com/fluency-systems-regular/48/visible--v1.png"
+                        : "https://img.icons8.com/fluency-systems-regular/48/closed-eye.png",
+                    }}
+                    style={[styles.eyeIcon, { tintColor: colors.subtext }]}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={styles.inputContainer}>
               <Text style={[styles.label, { color: colors.text }]}>Confirm Password</Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    color: colors.text,
-                    borderColor: colors.border,
-                  },
-                ]}
-                placeholder="Confirm your password"
-                placeholderTextColor={colors.subtext}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={[
+                    styles.passwordInput,
+                    {
+                      backgroundColor: colors.inputBackground,
+                      color: colors.text,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                  placeholder="Confirm your password"
+                  placeholderTextColor={colors.subtext}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry={!showConfirmPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={toggleConfirmPasswordVisibility}
+                  activeOpacity={0.7}
+                >
+                  <Image
+                    source={{
+                      uri: showConfirmPassword
+                        ? "https://img.icons8.com/fluency-systems-regular/48/visible--v1.png"
+                        : "https://img.icons8.com/fluency-systems-regular/48/closed-eye.png",
+                    }}
+                    style={[styles.eyeIcon, { tintColor: colors.subtext }]}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <Button
@@ -268,6 +307,26 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 16,
     borderWidth: 1,
+  },
+  passwordContainer: {
+    position: "relative",
+  },
+  passwordInput: {
+    borderRadius: 12,
+    padding: 16,
+    paddingRight: 50,
+    fontSize: 16,
+    borderWidth: 1,
+  },
+  eyeButton: {
+    position: "absolute",
+    right: 16,
+    top: 16,
+    padding: 4,
+  },
+  eyeIcon: {
+    width: 20,
+    height: 20,
   },
   registerButton: {
     marginTop: 10,

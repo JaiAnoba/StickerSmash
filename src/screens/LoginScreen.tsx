@@ -15,6 +15,7 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
@@ -33,6 +34,7 @@ const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   // Forgot password states
   const [forgotPasswordModalVisible, setForgotPasswordModalVisible] = useState(false)
@@ -106,6 +108,10 @@ const LoginScreen: React.FC = () => {
     setResetSent(false)
   }
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? "light-content" : "dark-content"} />
@@ -145,23 +151,35 @@ const LoginScreen: React.FC = () => {
 
           <View style={styles.inputContainer}>
             <Text style={[styles.label, { color: colors.text }]}>Password</Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: colors.inputBackground,
-                  color: colors.text,
-                  borderColor: colors.border,
-                },
-              ]}
-              placeholder="Enter your password"
-              placeholderTextColor={colors.subtext}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={[
+                  styles.passwordInput,
+                  {
+                    backgroundColor: colors.inputBackground,
+                    color: colors.text,
+                    borderColor: colors.border,
+                  },
+                ]}
+                placeholder="Enter your password"
+                placeholderTextColor={colors.subtext}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <TouchableOpacity style={styles.eyeButton} onPress={togglePasswordVisibility} activeOpacity={0.7}>
+                <Image
+                  source={{
+                    uri: showPassword
+                      ? "https://img.icons8.com/fluency-systems-regular/48/visible--v1.png"
+                      : "https://img.icons8.com/fluency-systems-regular/48/closed-eye.png",
+                  }}
+                  style={[styles.eyeIcon, { tintColor: colors.subtext }]}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Forgot Password Link */}
@@ -187,13 +205,6 @@ const LoginScreen: React.FC = () => {
             <Text style={[styles.linkText, { color: colors.primary }]}>Sign up here</Text>
           </TouchableOpacity>
         </View>
-
-        {/* Demo Credentials */}
-        {/* <View style={[styles.demoContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Text style={[styles.demoTitle, { color: colors.text }]}>Demo Credentials:</Text>
-          <Text style={[styles.demoText, { color: colors.subtext }]}>Email: demo@burgerpedia.com</Text>
-          <Text style={[styles.demoText, { color: colors.subtext }]}>Password: demo123</Text>
-        </View> */}
       </View>
 
       {/* Forgot Password Modal */}
@@ -316,6 +327,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
   },
+  passwordContainer: {
+    position: "relative",
+  },
+  passwordInput: {
+    borderRadius: 12,
+    padding: 16,
+    paddingRight: 50,
+    fontSize: 16,
+    borderWidth: 1,
+  },
+  eyeButton: {
+    position: "absolute",
+    right: 16,
+    top: 16,
+    padding: 4,
+  },
+  eyeIcon: {
+    width: 20,
+    height: 20,
+  },
   forgotPasswordContainer: {
     alignSelf: "flex-end",
     marginBottom: 20,
@@ -343,21 +374,6 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: 16,
     fontWeight: "600",
-  },
-  demoContainer: {
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    alignItems: "center",
-  },
-  demoTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  demoText: {
-    fontSize: 12,
-    marginBottom: 2,
   },
   // Modal styles
   modalOverlay: {
