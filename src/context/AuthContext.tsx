@@ -24,6 +24,7 @@ interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<boolean>
   logout: () => Promise<void>
   updateUser: (userData: Partial<User>) => Promise<void>
+  resetPassword: (email: string) => Promise<boolean>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -57,27 +58,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      // Mock successful login
-      const userData: User = {
-        id: "1",
-        name: "John Doe",
-        email: email,
-        joinDate: new Date().toISOString(),
-        stats: {
-          burgersViewed: 25,
-          recipesCooked: 8,
-          favoriteCategory: "Classic",
-          totalCookTime: "3h 45m",
-        },
+      // Accept demo credentials or any email/password for demo purposes
+      if (
+        (email === "demo@burgerpedia.com" && password === "demo123") ||
+        (email.includes("@") && password.length >= 3)
+      ) {
+        const userData: User = {
+          id: Date.now().toString(),
+          name: email === "demo@burgerpedia.com" ? "Demo User" : "User",
+          email: email,
+          joinDate: new Date().toISOString(),
+          stats: {
+            burgersViewed: 25,
+            recipesCooked: 8,
+            favoriteCategory: "Classic",
+            totalCookTime: "3h 45m",
+          },
+        }
+
+        await AsyncStorage.setItem("userToken", "mock-token-" + Date.now())
+        await AsyncStorage.setItem("userData", JSON.stringify(userData))
+        setUser(userData)
+        return true
       }
 
-      await AsyncStorage.setItem("userToken", "mock-token")
-      await AsyncStorage.setItem("userData", JSON.stringify(userData))
-      setUser(userData)
-      return true
+      return false
     } catch (error) {
       console.error("Login error:", error)
       return false
@@ -86,27 +94,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      // Mock successful registration
-      const userData: User = {
-        id: "1",
-        name: name,
-        email: email,
-        joinDate: new Date().toISOString(),
-        stats: {
-          burgersViewed: 0,
-          recipesCooked: 0,
-          favoriteCategory: "None yet",
-          totalCookTime: "0m",
-        },
+      // For demo purposes, accept any valid input
+      if (name.trim() && email.includes("@") && password.length >= 6) {
+        const userData: User = {
+          id: Date.now().toString(),
+          name: name,
+          email: email,
+          joinDate: new Date().toISOString(),
+          stats: {
+            burgersViewed: 0,
+            recipesCooked: 0,
+            favoriteCategory: "None yet",
+            totalCookTime: "0m",
+          },
+        }
+
+        await AsyncStorage.setItem("userToken", "mock-token-" + Date.now())
+        await AsyncStorage.setItem("userData", JSON.stringify(userData))
+        setUser(userData)
+        return true
       }
 
-      await AsyncStorage.setItem("userToken", "mock-token")
-      await AsyncStorage.setItem("userData", JSON.stringify(userData))
-      setUser(userData)
-      return true
+      return false
     } catch (error) {
       console.error("Registration error:", error)
       return false
@@ -135,8 +147,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  const resetPassword = async (email: string): Promise<boolean> => {
+    try {
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      // For demo purposes, always return success
+      // In a real app, you would call an API endpoint
+
+      // Store the reset request in AsyncStorage for demo purposes
+      await AsyncStorage.setItem("passwordResetRequested", email)
+
+      return true
+    } catch (error) {
+      console.error("Password reset error:", error)
+      return false
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout, updateUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        login,
+        register,
+        logout,
+        updateUser,
+        resetPassword,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

@@ -203,7 +203,6 @@ const RegisterScreen: React.FC = () => {
               disabled={isLoading}
               fullWidth
               style={styles.registerButton}
-              icon="✨"
             />
 
             {isLoading && <ActivityIndicator size="small" color={colors.primary} style={styles.loadingIndicator} />}

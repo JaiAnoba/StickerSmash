@@ -123,7 +123,7 @@ const HomeScreen: React.FC = () => {
       </View>
 
       {/* Quick Stats */}
-      <View style={styles.statsContainer}>
+      {/* <View style={styles.statsContainer}>
         <View style={[styles.statCard, { backgroundColor: colors.card }]}>
           <Text style={styles.statIcon}>🍔</Text>
           <Text style={[styles.statNumber, { color: colors.primary }]}>{filteredBurgers.length}</Text>
@@ -141,7 +141,7 @@ const HomeScreen: React.FC = () => {
           <Text style={[styles.statNumber, { color: colors.primary }]}>4.8</Text>
           <Text style={[styles.statLabel, { color: colors.subtext }]}>Rating</Text>
         </View>
-      </View>
+      </View> */}
 
       {/* Burgers List */}
       <View style={styles.burgersSection}>
