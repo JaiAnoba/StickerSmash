@@ -54,7 +54,7 @@ const MainScreen: React.FC = () => {
         },
         tabBarStyle: {
           position: "absolute",
-          bottom: 10,
+          bottom: 15,
           left: 20,
           right: 20,
           backgroundColor: "#8B0000",
