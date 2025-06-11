@@ -278,12 +278,12 @@ const HomeScreen: React.FC = () => {
           <View style={styles.emptyState}>
             <Text style={[styles.emptyTitle, { color: colors.text, fontWeight: "bold" }]}>No burgers found</Text>
             <Text style={[styles.emptySubtitle, { color: colors.subtext }]}>Try adjusting your search or filters</Text>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={[styles.clearFiltersButton, { backgroundColor: colors.primary }]}
               onPress={handleResetFilters}
             >
               <Text style={styles.clearFiltersText}>Reset Filters</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         ) : (
           <FlatList
@@ -576,16 +576,16 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     lineHeight: 24,
   },
-  clearFiltersButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  clearFiltersText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
+  // clearFiltersButton: {
+  //   paddingHorizontal: 20,
+  //   paddingVertical: 10,
+  //   borderRadius: 20,
+  // },
+  // clearFiltersText: {
+  //   color: "#FFFFFF",
+  //   fontSize: 16,
+  //   fontWeight: "600",
+  // },
 })
 
 export default HomeScreen
