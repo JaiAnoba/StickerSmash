@@ -33,14 +33,14 @@ const lightColors: Colors = {
 }
 
 const darkColors: Colors = {
-  primary: "#DC143C",
+  primary: "#BB1010",
   background: "#121212",
   card: "#1E1E1E",
   text: "#FFFFFF",
   subtext: "#CCCCCC",
   border: "#333333",
   inputBackground: "#2A2A2A",
-  statusBar: "#DC143C",
+  statusBar: "#8B0000",
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
