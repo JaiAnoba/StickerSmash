@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   View,
   StyleSheet,
@@ -28,7 +28,7 @@ type NavigationProp = StackNavigationProp<RootStackParamList>
 
 const LoginScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme()
-  const { login } = useAuth()
+  const { user, login } = useAuth();
   const navigation = useNavigation<NavigationProp>()
 
   const [email, setEmail] = useState("")
@@ -41,31 +41,36 @@ const LoginScreen: React.FC = () => {
   const [resetEmail, setResetEmail] = useState("")
   const [resetLoading, setResetLoading] = useState(false)
   const [resetSent, setResetSent] = useState(false)
+  
+  useEffect(() => {
+    if (user) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Main" }],
+      });
+    }
+  }, [user]);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert("Error", "Please fill in all fields")
-      return
+      Alert.alert("Error", "Please fill in all fields");
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const success = await login(email, password)
+      const success = await login(email, password); 
       if (success) {
-        // Navigate to Main screen after successful login
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "Main" }],
-        })
+
       } else {
-        Alert.alert("Error", "Invalid email or password")
+        Alert.alert("Error", "Invalid email or password");
       }
     } catch (error) {
-      Alert.alert("Error", "Login failed. Please try again.")
+      Alert.alert("Error", "Login failed. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const navigateToRegister = () => {
     navigation.navigate("Register")

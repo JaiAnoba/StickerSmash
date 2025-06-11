@@ -5,7 +5,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { View, ActivityIndicator } from "react-native";
 import { useEffect, useCallback, useState } from "react";
 import * as Font from "expo-font";
-import * as SplashScreen from "expo-splash-screen"; // ✅ New
+import * as SplashScreen from "expo-splash-screen"; 
 
 import { ThemeProvider } from "./src/context/ThemeContext";
 import { AuthProvider, useAuth } from "./src/context/AuthContext";
@@ -23,7 +23,7 @@ import DataStorageScreen from "./src/screens/DataStorageScreen";
 import ShareAppScreen from "./src/screens/ShareAppScreen";
 import type { Burger } from "./src/types/Burger";
 
-SplashScreen.preventAutoHideAsync(); // 👈 Keeps splash screen showing until fonts are loaded
+SplashScreen.preventAutoHideAsync();
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -63,7 +63,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName={user ? "Main" : "Login"}
+        initialRouteName={user ? "Main" : "Login"} // 👈 This decides which screen to show first based on user
         screenOptions={{
           headerShown: false,
           gestureEnabled: true,
@@ -110,12 +110,12 @@ const App = () => {
 
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded) {
-      await SplashScreen.hideAsync(); // 👈 Hide splash once fonts are ready
+      await SplashScreen.hideAsync(); 
     }
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
-    return null; // show nothing while loading fonts
+    return null; 
   }
 
   return (
