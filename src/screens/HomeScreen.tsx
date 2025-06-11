@@ -199,7 +199,7 @@ const HomeScreen: React.FC = () => {
             ]}
           >
             <Image
-              source={{ uri: "https://img.icons8.com/forma-regular/48/appointment-reminders.png" }}
+              source={{ uri: "https://img.icons8.com/fluency-systems-regular/48/appointment-reminders--v1.png" }}
               style={[styles.notificationImage, { tintColor: isDarkMode ? "white" : "black" }]}
             />
           </TouchableOpacity>
@@ -422,11 +422,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
     marginRight: 12,
-    elevation: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
   },
   categoryText: {
     fontSize: 14,
