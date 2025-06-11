@@ -269,6 +269,7 @@ const LoginScreen: React.FC = () => {
                         color: colors.text,
                         borderColor: colors.border,
                         fontFamily: "Poppins-Regular",
+                        fontSize: 13,
                       },
                     ]}
                     placeholder="Enter your email"
@@ -319,12 +320,12 @@ const LoginScreen: React.FC = () => {
                   Please check your inbox and follow the instructions to reset your password.
                 </Text>
 
-                <Button
+                {/* <Button
                   title="Back to Login"
                   onPress={closeResetModal}
                   fullWidth
                   style={styles.backButton}
-                />
+                /> */}
               </View>
             )}
           </View>
@@ -374,7 +375,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderRadius: 999,
-    padding: 14,
+    padding: 16,
     fontSize: 14,
     borderWidth: 1,
   },
@@ -391,7 +392,7 @@ const styles = StyleSheet.create({
   eyeButton: {
     position: "absolute",
     right: 16,
-    top: 16,
+    top: 11,
     padding: 4,
   },
   eyeIcon: {
@@ -430,7 +431,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.83)",
     padding: 20,
   },
   modalContent: {

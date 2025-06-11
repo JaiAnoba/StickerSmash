@@ -295,12 +295,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 25,
     textAlign: "center",
     marginBottom: 10,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     textAlign: "center",
     lineHeight: 24,
   },
@@ -311,29 +311,29 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     marginBottom: 8,
   },
   input: {
-    borderRadius: 12,
+    borderRadius: 999,
     padding: 16,
-    fontSize: 16,
+    fontSize: 13,
     borderWidth: 1,
   },
   passwordContainer: {
     position: "relative",
   },
   passwordInput: {
-    borderRadius: 12,
+    borderRadius: 999,
     padding: 16,
     paddingRight: 50,
-    fontSize: 16,
+    fontSize: 13,
     borderWidth: 1,
   },
   eyeButton: {
     position: "absolute",
     right: 16,
-    top: 16,
+    top: 12,
     padding: 4,
   },
   eyeIcon: {
@@ -341,6 +341,7 @@ const styles = StyleSheet.create({
     height: 20,
   },
   registerButton: {
+    borderRadius: 999,
     marginTop: 10,
   },
   loadingIndicator: {
@@ -352,11 +353,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   footerText: {
-    fontSize: 16,
+    fontSize: 14,
     marginRight: 5,
   },
   linkText: {
-    fontSize: 16,
+    fontSize: 14,
   },
 })
 
