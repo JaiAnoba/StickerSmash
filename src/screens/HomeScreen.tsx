@@ -2,7 +2,17 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, FlatList, TextInput, TouchableOpacity } from "react-native"
+import {
+  View,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Text,
+} from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
 import type { RootStackParamList } from "../../App"
@@ -10,14 +20,12 @@ import { useTheme } from "../context/ThemeContext"
 import { useFavorites } from "../context/FavoritesContext"
 import { burgersData } from "../data/burgersData"
 import type { Burger } from "../types/Burger"
-import BurgerCard from "../components/BurgerCard"
-import CategoryTab from "../components/CategoryTab"
 
 type NavigationProp = StackNavigationProp<RootStackParamList>
 
 const HomeScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme()
-  const { favorites } = useFavorites()
+  const { favorites, isFavorite, addFavorite, removeFavorite } = useFavorites()
   const navigation = useNavigation<NavigationProp>()
 
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
@@ -33,12 +41,10 @@ const HomeScreen: React.FC = () => {
   const filterBurgers = () => {
     let filtered = burgersData
 
-    // Filter by category
     if (selectedCategory !== "All") {
       filtered = filtered.filter((burger) => burger.category === selectedCategory)
     }
 
-    // Filter by search query
     if (searchQuery.trim()) {
       filtered = filtered.filter(
         (burger) =>
@@ -55,10 +61,95 @@ const HomeScreen: React.FC = () => {
     navigation.navigate("BurgerDetail", { burger })
   }
 
-  const renderBurgerCard = ({ item }: { item: Burger }) => <BurgerCard burger={item} onPress={handleBurgerPress} />
+  const handleFavoritePress = (burger: Burger) => {
+    if (isFavorite(burger.id)) {
+      removeFavorite(burger.id)
+    } else {
+      addFavorite(burger)
+    }
+  }
+
+  const renderStars = (rating: number): string => {
+    const stars: string[] = []
+    const fullStars: number = Math.floor(rating)
+    const hasHalfStar: boolean = rating % 1 !== 0
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push("★")
+    }
+    if (hasHalfStar) {
+      stars.push("☆")
+    }
+    return stars.join("")
+  }
 
   const renderCategoryTab = ({ item }: { item: string }) => (
-    <CategoryTab category={item} isActive={selectedCategory === item} onPress={setSelectedCategory} />
+    <TouchableOpacity
+      style={[
+        styles.categoryTab,
+        selectedCategory === item
+          ? { backgroundColor: colors.primary }
+          : { backgroundColor: isDarkMode ? "#2A2A2A" : "#FFFFFF" },
+      ]}
+      onPress={() => setSelectedCategory(item)}
+    >
+      <Text
+        style={[
+          styles.categoryText,
+          selectedCategory === item
+            ? { color: "#FFFFFF", fontWeight: "600" }
+            : { color: isDarkMode ? colors.text : "#666666", fontWeight: "500" },
+        ]}
+      >
+        {item}
+      </Text>
+    </TouchableOpacity>
+  )
+
+  const renderBurgerCard = ({ item }: { item: Burger }) => (
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
+      onPress={() => handleBurgerPress(item)}
+      activeOpacity={0.8}
+    >
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: item.image }} style={styles.image} />
+        <TouchableOpacity
+          style={[styles.favoriteButton, { backgroundColor: "rgba(255,255,255,0.9)" }]}
+          onPress={() => handleFavoritePress(item)}
+        >
+          <Text style={styles.favoriteIcon}>{isFavorite(item.id) ? "❤️" : "🤍"}</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.content}>
+        <Text style={[styles.name, { color: colors.text, fontWeight: "bold" }]} numberOfLines={2}>
+          {item.name}
+        </Text>
+        <Text style={[styles.category, { color: colors.subtext }]}>{item.category}</Text>
+
+        <View style={styles.footer}>
+          <View style={styles.rating}>
+            <Text style={[styles.stars, { color: colors.primary }]}>{renderStars(item.rating)}</Text>
+            <Text style={[styles.ratingText, { color: colors.subtext }]}>{item.rating}</Text>
+          </View>
+          <Text style={[styles.cookTime, { color: colors.subtext }]}>{item.cookTime}</Text>
+        </View>
+
+        <View style={styles.difficulty}>
+          <Text
+            style={[
+              styles.difficultyText,
+              item.difficulty === "Easy" && styles.easy,
+              item.difficulty === "Medium" && styles.medium,
+              item.difficulty === "Hard" && styles.hard,
+            ]}
+          >
+            {item.difficulty}
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
   )
 
   const getGreeting = () => {
@@ -68,50 +159,92 @@ const HomeScreen: React.FC = () => {
     return "Good Evening"
   }
 
+  // Background color based on theme
+  const backgroundColor = isDarkMode ? colors.background : "white"
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? "light-content" : "dark-content"} />
+    <SafeAreaView style={[styles.container, { backgroundColor }]}>
+      <StatusBar
+        backgroundColor={isDarkMode ? colors.statusBar : "white"}
+        barStyle={isDarkMode ? "light-content" : "dark-content"}
+      />
 
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
+      <View style={[styles.header, { backgroundColor }]}>
+
         <View style={styles.headerContent}>
-          <View>
-            <Text style={styles.greeting}>{getGreeting()}!</Text>
-            <Text style={styles.headerTitle}>What burger are you craving?</Text>
+          <View style={styles.profileAndText}>
+            <Image
+              source={{
+                uri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+              }}
+              style={styles.profileImage}
+            />
+
+            <View style={styles.headerTextContainer}>
+              <Text style={[styles.headerLineOne, { color: colors.text }]}>Choose</Text>
+              <Text style={styles.headerLineTwo}>
+                <Text style={[styles.boldText, { color: colors.text }]}>Your Favorite </Text>
+                <Text style={styles.redText}>Burger</Text>
+              </Text>
+            </View>
           </View>
+
           <TouchableOpacity
-            style={styles.notificationButton}
-            onPress={() => {
-              /* Handle notifications */
-            }}
+            style={[
+              styles.notificationButton,
+              {
+                backgroundColor: isDarkMode ? "rgba(255,255,255,0.1)" : "#F0F0F0",
+              },
+            ]}
           >
-            <Text style={styles.notificationIcon}>🔔</Text>
+            <Image
+              source={{ uri: "https://img.icons8.com/forma-regular/48/appointment-reminders.png" }}
+              style={[styles.notificationImage, { tintColor: isDarkMode ? "white" : "black" }]}
+            />
           </TouchableOpacity>
         </View>
+
       </View>
 
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <View style={[styles.searchBar, { backgroundColor: colors.inputBackground, borderColor: colors.border }]}>
-          <Text style={styles.searchIcon}>🔍</Text>
+      <View style={styles.searchWrapper}>
+        <View
+          style={[
+            styles.searchBar,
+            {
+              backgroundColor: isDarkMode ? colors.inputBackground : "#F5F5F5",
+              borderColor: isDarkMode ? colors.border : "transparent",
+              borderWidth: isDarkMode ? 1 : 0,
+            },
+          ]}
+        >
+          <Image
+            source={{
+              uri: "https://img.icons8.com/fluency-systems-regular/48/search--v1.png",
+            }}
+            style={styles.searchIcon}
+          />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Search burgers, ingredients..."
+            placeholder="Search"
             placeholderTextColor={colors.subtext}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <Text style={styles.clearIcon}>✕</Text>
-            </TouchableOpacity>
-          )}
         </View>
+        <TouchableOpacity style={[styles.filterButton, { backgroundColor: colors.primary }]}>
+          <Image
+            source={{
+              uri: "https://img.icons8.com/sf-regular/48/FFFFFF/sorting-options.png",
+            }}
+            style={styles.filterIcon}
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Categories */}
       <View style={styles.categoriesSection}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Categories</Text>
         <FlatList
           data={categories}
           renderItem={renderCategoryTab}
@@ -122,31 +255,10 @@ const HomeScreen: React.FC = () => {
         />
       </View>
 
-      {/* Quick Stats */}
-      {/* <View style={styles.statsContainer}>
-        <View style={[styles.statCard, { backgroundColor: colors.card }]}>
-          <Text style={styles.statIcon}>🍔</Text>
-          <Text style={[styles.statNumber, { color: colors.primary }]}>{filteredBurgers.length}</Text>
-          <Text style={[styles.statLabel, { color: colors.subtext }]}>Recipes</Text>
-        </View>
-
-        <View style={[styles.statCard, { backgroundColor: colors.card }]}>
-          <Text style={styles.statIcon}>❤️</Text>
-          <Text style={[styles.statNumber, { color: colors.primary }]}>{favorites.length}</Text>
-          <Text style={[styles.statLabel, { color: colors.subtext }]}>Favorites</Text>
-        </View>
-
-        <View style={[styles.statCard, { backgroundColor: colors.card }]}>
-          <Text style={styles.statIcon}>⭐</Text>
-          <Text style={[styles.statNumber, { color: colors.primary }]}>4.8</Text>
-          <Text style={[styles.statLabel, { color: colors.subtext }]}>Rating</Text>
-        </View>
-      </View> */}
-
       {/* Burgers List */}
       <View style={styles.burgersSection}>
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text, fontWeight: "bold" }]}>
             {selectedCategory === "All" ? "All Burgers" : `${selectedCategory} Burgers`}
           </Text>
           {searchQuery && (
@@ -157,7 +269,7 @@ const HomeScreen: React.FC = () => {
         {filteredBurgers.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyIcon}>🔍</Text>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>No burgers found</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text, fontWeight: "bold" }]}>No burgers found</Text>
             <Text style={[styles.emptySubtitle, { color: colors.subtext }]}>
               Try adjusting your search or category filter
             </Text>
@@ -168,7 +280,7 @@ const HomeScreen: React.FC = () => {
                 setSelectedCategory("All")
               }}
             >
-              <Text style={styles.clearFiltersText}>Clear Filters</Text>
+              <Text style={[styles.clearFiltersText, { fontWeight: "600" }]}>Clear Filters</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -194,46 +306,77 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: 10,
     paddingBottom: 20,
-    paddingHorizontal: 20,
   },
   headerContent: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    marginBottom: 10,
+  },
+  profileAndText: {
+    flexDirection: "column",
+  },
+  headerTextContainer: {
+    marginTop: 10,
+  },
+  headerLineOne: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  headerLineTwo: {
+    fontSize: 25,
+    fontWeight: "bold",
+  },
+  boldText: {
+    fontWeight: "bold",
+  },
+  redText: {
+    color: "#B91C1C",
+    fontWeight: "bold",
+  },
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 25,
+    marginRight: 20,
   },
   greeting: {
     fontSize: 16,
-    color: "rgba(255,255,255,0.8)",
     marginBottom: 4,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "white",
   },
   notificationButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
   },
   notificationIcon: {
     fontSize: 20,
   },
-  searchContainer: {
+  notificationImage: {
+    width: 20,
+    height: 20, 
+  },
+  searchWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 20,
     marginTop: -10,
     marginBottom: 20,
   },
   searchBar: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    height: 48,
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -241,59 +384,52 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   searchIcon: {
-    fontSize: 18,
-    marginRight: 12,
+    width: 17,
+    height: 17,
+    marginRight: 8,
+    tintColor: "gray",
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
   },
-  clearIcon: {
-    fontSize: 16,
-    color: "#999",
-    marginLeft: 8,
-  },
-  categoriesSection: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
-    paddingHorizontal: 20,
-  },
-  categoriesList: {
-    paddingHorizontal: 15,
-  },
-  statsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  statCard: {
+  filterButton: {
+    marginLeft: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: "center",
     alignItems: "center",
-    padding: 15,
-    borderRadius: 12,
-    minWidth: 80,
-    elevation: 2,
+    elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
-  statIcon: {
-    fontSize: 24,
-    marginBottom: 8,
+  filterIcon: {
+    width: 20,
+    height: 20,
+    tintColor: "#FFFFFF",
   },
-  statNumber: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 4,
+  categoriesSection: {
+    marginBottom: 20,
   },
-  statLabel: {
-    fontSize: 12,
-    textAlign: "center",
+  categoriesList: {
+    paddingHorizontal: 15,
+  },
+  categoryTab: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginRight: 12,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+  },
+  categoryText: {
+    fontSize: 14,
   },
   burgersSection: {
     flex: 1,
@@ -305,6 +441,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 15,
   },
+  sectionTitle: {
+    fontSize: 18,
+  },
   resultsCount: {
     fontSize: 14,
     fontStyle: "italic",
@@ -314,6 +453,99 @@ const styles = StyleSheet.create({
   },
   burgerRow: {
     justifyContent: "space-between",
+  },
+  card: {
+    borderRadius: 15,
+    marginBottom: 16,
+    width: "48%",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    overflow: "hidden",
+    borderWidth: 1,
+  },
+  imageContainer: {
+    position: "relative",
+  },
+  image: {
+    width: "100%",
+    height: 140,
+    resizeMode: "cover",
+  },
+  favoriteButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  favoriteIcon: {
+    fontSize: 16,
+  },
+  content: {
+    padding: 12,
+  },
+  name: {
+    fontSize: 16,
+    marginBottom: 4,
+    lineHeight: 20,
+  },
+  category: {
+    fontSize: 12,
+    marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  rating: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  stars: {
+    fontSize: 14,
+    marginRight: 4,
+  },
+  ratingText: {
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  cookTime: {
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  difficulty: {
+    alignSelf: "flex-start",
+  },
+  difficultyText: {
+    fontSize: 11,
+    fontWeight: "bold",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  easy: {
+    backgroundColor: "#DCFCE7",
+    color: "#166534",
+  },
+  medium: {
+    backgroundColor: "#FEF3C7",
+    color: "#92400E",
+  },
+  hard: {
+    backgroundColor: "#FEE2E2",
+    color: "#B91C1C",
   },
   emptyState: {
     flex: 1,
@@ -327,7 +559,6 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 24,
-    fontWeight: "bold",
     marginBottom: 10,
     textAlign: "center",
   },
@@ -343,9 +574,8 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   clearFiltersText: {
-    color: "white",
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "600",
   },
 })
 

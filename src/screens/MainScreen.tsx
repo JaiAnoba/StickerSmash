@@ -1,9 +1,8 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-import { Text, View } from "react-native"
-import { useTheme } from "../context/ThemeContext"
+import { Image } from "react-native"
 import HomeScreen from "./HomeScreen"
 import FavoritesScreen from "./FavoritesScreen"
 import AIAssistantScreen from "./AIAssistantScreen"
@@ -12,83 +11,72 @@ import ProfileScreen from "./ProfileScreen"
 const Tab = createBottomTabNavigator()
 
 const MainScreen: React.FC = () => {
-  const { colors } = useTheme()
-
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName = ""
+        tabBarIcon: ({ focused }) => {
+          let iconSource = ""
 
           switch (route.name) {
             case "Home":
-              iconName = "🍔"
+              iconSource = focused
+                ? "https://img.icons8.com/fluency-systems-filled/48/home.png"
+                : "https://img.icons8.com/fluency-systems-regular/48/home--v1.png"
               break
             case "Favorites":
-              iconName = focused ? "❤️" : "🤍"
+              iconSource = focused
+                ? "https://img.icons8.com/puffy-filled/32/like.png"
+                : "https://img.icons8.com/puffy/32/like.png"
               break
             case "AI Assistant":
-              iconName = "🤖"
+              iconSource = focused
+                ? "https://img.icons8.com/material-rounded/24/bot.png"
+                : "https://img.icons8.com/material-outlined/24/bot.png"
               break
             case "Profile":
-              iconName = "👤"
+              iconSource = focused
+                ? "https://img.icons8.com/fluency-systems-filled/48/user.png"
+                : "https://img.icons8.com/fluency-systems-regular/48/user--v1.png"
               break
-            default:
-              iconName = "📱"
           }
 
           return (
-            <View style={{ alignItems: "center", justifyContent: "center" }}>
-              <Text style={{ fontSize: 24 }}>{iconName}</Text>
-            </View>
+            <Image
+              source={{ uri: iconSource }}
+              style={{
+                width: 20,
+                height: 20,
+                tintColor: "#fff", 
+              }}
+              resizeMode="contain"
+            />
           )
         },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.subtext,
         tabBarStyle: {
-          backgroundColor: colors.card,
-          borderTopColor: colors.border,
-          borderTopWidth: 1,
-          paddingTop: 8,
+          position: "absolute",
+          bottom: 10,
+          left: 20,
+          right: 20,
+          backgroundColor: "#8B0000",
+          borderRadius: 35,
+          height: 66,
           paddingBottom: 8,
-          height: 70,
+          paddingTop: 8,
+          borderTopWidth: 0,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.2,
+          shadowRadius: 8,
+          elevation: 10,
         },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "500",
-          marginTop: 4,
-        },
+        tabBarShowLabel: false,
         headerShown: false,
       })}
     >
-      <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          tabBarLabel: "Home",
-        }}
-      />
-      <Tab.Screen
-        name="Favorites"
-        component={FavoritesScreen}
-        options={{
-          tabBarLabel: "Favorites",
-        }}
-      />
-      <Tab.Screen
-        name="AI Assistant"
-        component={AIAssistantScreen}
-        options={{
-          tabBarLabel: "AI Chef",
-        }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          tabBarLabel: "Profile",
-        }}
-      />
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Favorites" component={FavoritesScreen} />
+      <Tab.Screen name="AI Assistant" component={AIAssistantScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   )
 }
