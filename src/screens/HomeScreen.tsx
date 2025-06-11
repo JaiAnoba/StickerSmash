@@ -266,11 +266,6 @@ const HomeScreen: React.FC = () => {
             {selectedCategory === "All" ? "All Burgers" : `${selectedCategory} Burgers`}
           </Text>
           <View style={styles.resultsContainer}>
-            {hasActiveFilters && (
-              <TouchableOpacity style={styles.filterBadge} onPress={() => setFilterModalVisible(true)}>
-                <Text style={styles.filterBadgeText}>Filters</Text>
-              </TouchableOpacity>
-            )}
             <Text style={[styles.resultsCount, { color: colors.subtext }]}>
               {filteredBurgers.length} {filteredBurgers.length === 1 ? "result" : "results"}
             </Text>
@@ -281,12 +276,6 @@ const HomeScreen: React.FC = () => {
           <View style={styles.emptyState}>
             <Text style={[styles.emptyTitle, { color: colors.text, fontWeight: "bold" }]}>No burgers found</Text>
             <Text style={[styles.emptySubtitle, { color: colors.subtext }]}>Try adjusting your search or filters</Text>
-            <TouchableOpacity
-              style={[styles.clearFiltersButton, { backgroundColor: colors.primary }]}
-              onPress={handleResetFilters}
-            >
-              <Text style={styles.clearFiltersText}>Reset Filters</Text>
-            </TouchableOpacity>
           </View>
         ) : (
           <FlatList
@@ -443,18 +432,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  filterBadge: {
-    backgroundColor: "#B91C1C",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-    marginRight: 8,
-  },
-  filterBadgeText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "500",
-  },
   resultsCount: {
     fontSize: 14,
     fontStyle: "italic",
@@ -574,16 +551,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 30,
     lineHeight: 24,
-  },
-  clearFiltersButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  clearFiltersText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
   },
 })
 
