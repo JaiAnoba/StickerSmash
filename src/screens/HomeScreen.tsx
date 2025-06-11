@@ -268,20 +268,10 @@ const HomeScreen: React.FC = () => {
 
         {filteredBurgers.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>🔍</Text>
             <Text style={[styles.emptyTitle, { color: colors.text, fontWeight: "bold" }]}>No burgers found</Text>
             <Text style={[styles.emptySubtitle, { color: colors.subtext }]}>
               Try adjusting your search or category filter
             </Text>
-            <TouchableOpacity
-              style={[styles.clearFiltersButton, { backgroundColor: colors.primary }]}
-              onPress={() => {
-                setSearchQuery("")
-                setSelectedCategory("All")
-              }}
-            >
-              <Text style={[styles.clearFiltersText, { fontWeight: "600" }]}>Clear Filters</Text>
-            </TouchableOpacity>
           </View>
         ) : (
           <FlatList
@@ -546,31 +536,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 60,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 20,
+    paddingVertical: 40,
   },
   emptyTitle: {
-    fontSize: 24,
+    fontSize: 20,
     marginBottom: 10,
     textAlign: "center",
   },
   emptySubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     textAlign: "center",
     marginBottom: 30,
     lineHeight: 24,
-  },
-  clearFiltersButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 25,
-  },
-  clearFiltersText: {
-    color: "#FFFFFF",
-    fontSize: 16,
   },
 })
 
