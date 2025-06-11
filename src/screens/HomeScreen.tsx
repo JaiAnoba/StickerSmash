@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   View,
   StyleSheet,
@@ -20,42 +20,39 @@ import { useTheme } from "../context/ThemeContext"
 import { useFavorites } from "../context/FavoritesContext"
 import { burgersData } from "../data/burgersData"
 import type { Burger } from "../types/Burger"
+import { CATEGORIES } from "../types/Filter"
+import { useFilters } from "../hooks/useFilters"
+import FilterModal from "../components/FilterModal"
 
 type NavigationProp = StackNavigationProp<RootStackParamList>
 
 const HomeScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme()
-  const { favorites, isFavorite, addFavorite, removeFavorite } = useFavorites()
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites()
   const navigation = useNavigation<NavigationProp>()
 
+  // State
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
   const [searchQuery, setSearchQuery] = useState<string>("")
-  const [filteredBurgers, setFilteredBurgers] = useState<Burger[]>(burgersData)
+  const [filterModalVisible, setFilterModalVisible] = useState(false)
 
-  const categories = ["All", "Classic", "Gourmet", "Vegetarian", "Spicy", "BBQ", "Healthy"]
-
-  useEffect(() => {
-    filterBurgers()
-  }, [selectedCategory, searchQuery])
-
-  const filterBurgers = () => {
-    let filtered = burgersData
-
-    if (selectedCategory !== "All") {
-      filtered = filtered.filter((burger) => burger.category === selectedCategory)
-    }
-
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(
-        (burger) =>
-          burger.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          burger.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          burger.ingredients.some((ingredient) => ingredient.toLowerCase().includes(searchQuery.toLowerCase())),
-      )
-    }
-
-    setFilteredBurgers(filtered)
-  }
+  // Use the custom hook for filtering
+  const {
+    filterOptions,
+    setFilterOptions,
+    sortOption,
+    setSortOption,
+    filteredBurgers,
+    resetFilters,
+    updateCategoryFilter,
+    hasActiveFilters,
+    activeFilterCount,
+  } = useFilters({
+    burgers: burgersData,
+    searchQuery,
+    selectedCategory,
+    isFavorite,
+  })
 
   const handleBurgerPress = (burger: Burger) => {
     navigation.navigate("BurgerDetail", { burger })
@@ -67,6 +64,16 @@ const HomeScreen: React.FC = () => {
     } else {
       addFavorite(burger)
     }
+  }
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category)
+    updateCategoryFilter(category)
+  }
+
+  const handleResetFilters = () => {
+    resetFilters()
+    setSelectedCategory("All")
   }
 
   const renderStars = (rating: number): string => {
@@ -91,7 +98,7 @@ const HomeScreen: React.FC = () => {
           ? { backgroundColor: colors.primary }
           : { backgroundColor: isDarkMode ? "#2A2A2A" : "#FFFFFF" },
       ]}
-      onPress={() => setSelectedCategory(item)}
+      onPress={() => handleCategorySelect(item)}
     >
       <Text
         style={[
@@ -152,13 +159,6 @@ const HomeScreen: React.FC = () => {
     </TouchableOpacity>
   )
 
-  const getGreeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) return "Good Morning"
-    if (hour < 17) return "Good Afternoon"
-    return "Good Evening"
-  }
-
   // Background color based on theme
   const backgroundColor = isDarkMode ? colors.background : "white"
 
@@ -171,7 +171,6 @@ const HomeScreen: React.FC = () => {
 
       {/* Header */}
       <View style={[styles.header, { backgroundColor }]}>
-
         <View style={styles.headerContent}>
           <View style={styles.profileAndText}>
             <Image
@@ -204,7 +203,6 @@ const HomeScreen: React.FC = () => {
             />
           </TouchableOpacity>
         </View>
-
       </View>
 
       {/* Search Bar */}
@@ -223,7 +221,7 @@ const HomeScreen: React.FC = () => {
             source={{
               uri: "https://img.icons8.com/fluency-systems-regular/48/search--v1.png",
             }}
-            style={styles.searchIcon}
+            style={[styles.searchIcon, { tintColor: colors.subtext }]}
           />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
@@ -233,7 +231,10 @@ const HomeScreen: React.FC = () => {
             onChangeText={setSearchQuery}
           />
         </View>
-        <TouchableOpacity style={[styles.filterButton, { backgroundColor: colors.primary }]}>
+        <TouchableOpacity
+          style={[styles.filterButton, { backgroundColor: colors.primary }]}
+          onPress={() => setFilterModalVisible(true)}
+        >
           <Image
             source={{
               uri: "https://img.icons8.com/sf-regular/48/FFFFFF/sorting-options.png",
@@ -246,7 +247,7 @@ const HomeScreen: React.FC = () => {
       {/* Categories */}
       <View style={styles.categoriesSection}>
         <FlatList
-          data={categories}
+          data={CATEGORIES}
           renderItem={renderCategoryTab}
           keyExtractor={(item) => item}
           horizontal
@@ -261,17 +262,28 @@ const HomeScreen: React.FC = () => {
           <Text style={[styles.sectionTitle, { color: colors.text, fontWeight: "bold" }]}>
             {selectedCategory === "All" ? "All Burgers" : `${selectedCategory} Burgers`}
           </Text>
-          {searchQuery && (
-            <Text style={[styles.resultsCount, { color: colors.subtext }]}>{filteredBurgers.length} results</Text>
-          )}
+          <View style={styles.resultsContainer}>
+            {hasActiveFilters && (
+              <TouchableOpacity style={styles.filterBadge} onPress={() => setFilterModalVisible(true)}>
+                <Text style={styles.filterBadgeText}>Filters</Text>
+              </TouchableOpacity>
+            )}
+            <Text style={[styles.resultsCount, { color: colors.subtext }]}>
+              {filteredBurgers.length} {filteredBurgers.length === 1 ? "result" : "results"}
+            </Text>
+          </View>
         </View>
 
         {filteredBurgers.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={[styles.emptyTitle, { color: colors.text, fontWeight: "bold" }]}>No burgers found</Text>
-            <Text style={[styles.emptySubtitle, { color: colors.subtext }]}>
-              Try adjusting your search or category filter
-            </Text>
+            <Text style={[styles.emptySubtitle, { color: colors.subtext }]}>Try adjusting your search or filters</Text>
+            <TouchableOpacity
+              style={[styles.clearFiltersButton, { backgroundColor: colors.primary }]}
+              onPress={handleResetFilters}
+            >
+              <Text style={styles.clearFiltersText}>Reset Filters</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           <FlatList
@@ -285,6 +297,17 @@ const HomeScreen: React.FC = () => {
           />
         )}
       </View>
+
+      {/* Filter Modal */}
+      <FilterModal
+        visible={filterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+        filterOptions={filterOptions}
+        setFilterOptions={setFilterOptions}
+        sortOption={sortOption}
+        setSortOption={setSortOption}
+        onReset={handleResetFilters}
+      />
     </SafeAreaView>
   )
 }
@@ -331,14 +354,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 20,
   },
-  greeting: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
   notificationButton: {
     width: 40,
     height: 40,
@@ -346,12 +361,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  notificationIcon: {
-    fontSize: 20,
-  },
   notificationImage: {
     width: 20,
-    height: 20, 
+    height: 20,
   },
   searchWrapper: {
     flexDirection: "row",
@@ -377,7 +389,6 @@ const styles = StyleSheet.create({
     width: 17,
     height: 17,
     marginRight: 8,
-    tintColor: "gray",
   },
   searchInput: {
     flex: 1,
@@ -428,6 +439,22 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
+  },
+  resultsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  filterBadge: {
+    backgroundColor: "#B91C1C",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  filterBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "500",
   },
   resultsCount: {
     fontSize: 14,
@@ -548,6 +575,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 30,
     lineHeight: 24,
+  },
+  clearFiltersButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  clearFiltersText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
   },
 })
 
