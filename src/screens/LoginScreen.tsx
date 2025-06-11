@@ -119,7 +119,7 @@ const LoginScreen: React.FC = () => {
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.logo}>🍔</Text>
+          {/* <Text style={styles.logo}>🍔</Text> */}
           <Text weight="bold" style={styles.title}>
             Welcome to Burgerpedia
           </Text>
@@ -402,6 +402,7 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     marginTop: 10,
+    borderRadius: 999,
   },
   loadingIndicator: {
     marginTop: 10,
@@ -413,11 +414,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   footerText: {
-    fontSize: 16,
+    fontSize: 14,
     marginRight: 5,
   },
   linkText: {
-    fontSize: 16,
+    fontSize: 14,
   },
   // Modal styles
   modalOverlay: {
@@ -439,11 +440,11 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 18,
     marginBottom: 12,
   },
   modalSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
     lineHeight: 20,
     marginBottom: 20,
   },

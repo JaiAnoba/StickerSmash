@@ -116,7 +116,7 @@ const RegisterScreen: React.FC = () => {
         <View style={styles.content}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.logo}>🍔</Text>
+            {/* <Text style={styles.logo}>🍔</Text> */}
             <Text weight="bold" style={styles.title}>
               Join Burgerpedia
             </Text>
@@ -254,7 +254,6 @@ const RegisterScreen: React.FC = () => {
               disabled={isLoading}
               fullWidth
               style={styles.registerButton}
-              icon="✨"
             />
 
             {isLoading && <ActivityIndicator size="small" color={colors.primary} style={styles.loadingIndicator} />}
