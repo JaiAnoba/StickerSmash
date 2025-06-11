@@ -20,9 +20,12 @@ import { useTheme } from "../context/ThemeContext"
 import { useFavorites } from "../context/FavoritesContext"
 import { burgersData } from "../data/burgersData"
 import type { Burger } from "../types/Burger"
+import type { Notification } from "../types/Notification"
 import { CATEGORIES } from "../types/Filter"
 import { useFilters } from "../hooks/useFilters"
 import FilterModal from "../components/FilterModal"
+import NotificationModal from "../components/NotificationModal"
+import NotificationButton from "../components/NotificationButton"
 
 type NavigationProp = StackNavigationProp<RootStackParamList>
 
@@ -35,6 +38,7 @@ const HomeScreen: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
   const [searchQuery, setSearchQuery] = useState<string>("")
   const [filterModalVisible, setFilterModalVisible] = useState(false)
+  const [notificationModalVisible, setNotificationModalVisible] = useState(false)
 
   // Use the custom hook for filtering
   const {
@@ -46,7 +50,6 @@ const HomeScreen: React.FC = () => {
     resetFilters,
     updateCategoryFilter,
     hasActiveFilters,
-    activeFilterCount,
   } = useFilters({
     burgers: burgersData,
     searchQuery,
@@ -74,6 +77,18 @@ const HomeScreen: React.FC = () => {
   const handleResetFilters = () => {
     resetFilters()
     setSelectedCategory("All")
+  }
+
+  const handleNotificationPress = (notification: Notification) => {
+    // Handle notification actions
+    if (notification.actionUrl && notification.data) {
+      if (notification.actionUrl === "BurgerDetail") {
+        const burger = burgersData.find((b) => b.id === notification.data.burgerId)
+        if (burger) {
+          navigation.navigate("BurgerDetail", { burger })
+        }
+      }
+    }
   }
 
   const renderStars = (rating: number): string => {
@@ -189,19 +204,7 @@ const HomeScreen: React.FC = () => {
             </View>
           </View>
 
-          <TouchableOpacity
-            style={[
-              styles.notificationButton,
-              {
-                backgroundColor: isDarkMode ? "rgba(255,255,255,0.1)" : "#F0F0F0",
-              },
-            ]}
-          >
-            <Image
-              source={{ uri: "https://img.icons8.com/fluency-systems-regular/48/appointment-reminders--v1.png" }}
-              style={[styles.notificationImage, { tintColor: isDarkMode ? "white" : "black" }]}
-            />
-          </TouchableOpacity>
+          <NotificationButton onPress={() => setNotificationModalVisible(true)} />
         </View>
       </View>
 
@@ -278,12 +281,12 @@ const HomeScreen: React.FC = () => {
           <View style={styles.emptyState}>
             <Text style={[styles.emptyTitle, { color: colors.text, fontWeight: "bold" }]}>No burgers found</Text>
             <Text style={[styles.emptySubtitle, { color: colors.subtext }]}>Try adjusting your search or filters</Text>
-            {/* <TouchableOpacity
+            <TouchableOpacity
               style={[styles.clearFiltersButton, { backgroundColor: colors.primary }]}
               onPress={handleResetFilters}
             >
               <Text style={styles.clearFiltersText}>Reset Filters</Text>
-            </TouchableOpacity> */}
+            </TouchableOpacity>
           </View>
         ) : (
           <FlatList
@@ -308,6 +311,13 @@ const HomeScreen: React.FC = () => {
         setSortOption={setSortOption}
         onReset={handleResetFilters}
       />
+
+      {/* Notification Modal */}
+      <NotificationModal
+        visible={notificationModalVisible}
+        onClose={() => setNotificationModalVisible(false)}
+        onNotificationPress={handleNotificationPress}
+      />
     </SafeAreaView>
   )
 }
@@ -317,7 +327,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: 5,
+    paddingTop: 10,
     paddingBottom: 20,
   },
   headerContent: {
@@ -353,17 +363,6 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 25,
     marginRight: 20,
-  },
-  notificationButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  notificationImage: {
-    width: 20,
-    height: 20,
   },
   searchWrapper: {
     flexDirection: "row",
@@ -576,16 +575,16 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     lineHeight: 24,
   },
-  // clearFiltersButton: {
-  //   paddingHorizontal: 20,
-  //   paddingVertical: 10,
-  //   borderRadius: 20,
-  // },
-  // clearFiltersText: {
-  //   color: "#FFFFFF",
-  //   fontSize: 16,
-  //   fontWeight: "600",
-  // },
+  clearFiltersButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  clearFiltersText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
 })
 
 export default HomeScreen
