@@ -133,7 +133,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({ visible, onClose,
         <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
         {/* Header */}
-        <View style={[styles.header, { backgroundColor: colors.primary }]}>
+        <View style={[styles.header, { backgroundColor: 'white' }]}>
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Notifications</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -163,7 +163,6 @@ const NotificationModal: React.FC<NotificationModalProps> = ({ visible, onClose,
         {/* Notifications List */}
         {notifications.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>🔔</Text>
             <Text style={[styles.emptyTitle, { color: colors.text }]}>No Notifications</Text>
             <Text style={[styles.emptySubtitle, { color: colors.subtext }]}>
               You're all caught up! New notifications will appear here.
@@ -197,16 +196,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
-    color: "white",
+    color: "black",
   },
   closeButton: {
     padding: 4,
   },
   closeButtonText: {
-    fontSize: 24,
-    color: "white",
+    fontSize: 18,
+    color: "black",
     fontWeight: "bold",
   },
   actionButtons: {
@@ -312,18 +311,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 40,
   },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 20,
-  },
   emptyTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
     textAlign: "center",
   },
   emptySubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     textAlign: "center",
     lineHeight: 24,
   },
