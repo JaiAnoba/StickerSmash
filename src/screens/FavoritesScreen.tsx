@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   FlatList,
   SafeAreaView,
@@ -17,6 +16,7 @@ import { useFavorites } from '../context/FavoritesContext';
 import { Burger } from '../types/Burger';
 import BurgerCard from '../components/BurgerCard';
 import Button from '../components/Button';
+import Text from "../components/CustomText";
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -83,15 +83,15 @@ const FavoritesScreen: React.FC = () => {
 
   const EmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={[styles.emptyTitle, { color: colors.text }]}>No Favorites Yet</Text>
+      <Text  weight='semiBold' style={[styles.emptyTitle, { color: colors.text }]}>No Favorites Yet</Text>
       <Text style={[styles.emptyText, { color: colors.subtext }]}>
         Start exploring burgers and tap the heart icon to add them to your favorites!
       </Text>
-      <Button
+      {/* <Button
         title="Explore Burgers"
         onPress={() => navigation.navigate('Main')}
         style={styles.exploreButton}
-      />
+      /> */}
     </View>
   );
 
@@ -101,7 +101,7 @@ const FavoritesScreen: React.FC = () => {
       
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text style={styles.headerTitle}>My Favorites</Text>
+        <Text weight='semiBold' style={styles.headerTitle}>My Favorites</Text>
         <Text style={styles.headerSubtitle}>
           {favorites.length} {favorites.length === 1 ? 'burger' : 'burgers'}
         </Text>
@@ -159,15 +159,16 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20,
     alignItems: 'center',
+    borderBottomStartRadius: 60,
+    borderBottomEndRadius: 60,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 20,
     color: 'white',
     marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: 'rgba(255,255,255,0.8)',
   },
   categoriesContainer: {
@@ -181,40 +182,24 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 10,
-    borderWidth: 1,
   },
   categoryText: {
     fontSize: 14,
-    fontWeight: '600',
+    color: 'rgba(255,255,255,0.8)',
   },
   content: {
-    flex: 1,
-    paddingHorizontal: 20,
+    marginBottom: 230,
+    paddingInline: 10,
   },
   favoritesList: {
-    paddingBottom: 20,
+    paddingTop: 15,
+    paddingLeft: 9,
   },
   cardContainer: {
     position: 'relative',
     marginBottom: 25,
     marginTop: 15,
     flex: 1,
-  },
-  removeButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
-  removeButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   emptyState: {
     flex: 1,
@@ -227,24 +212,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   emptyTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 12,
+    fontSize: 20,
+    marginBottom: 10,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 13,
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 30,
-  },
-  exploreButton: {
-    paddingHorizontal: 30,
   },
   emptyCategory: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 60,
+    paddingVertical: 50,
   },
   emptyCategoryText: {
     fontSize: 16,
