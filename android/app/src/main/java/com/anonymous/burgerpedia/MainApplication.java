@@ -1,4 +1,4 @@
-package com.anonymous.burgerpedia;
+package com.anonymous.burgify;
 
 import android.app.Application;
 import android.content.res.Configuration;
