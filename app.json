@@ -1,29 +1,30 @@
 {
   "expo": {
-    "name": "Burgerpedia",
-    "slug": "burgerpedia",
+    "name": "Burgify",
+    "slug": "burgify",
     "jsEngine": "jsc",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "backgroundColor": "#8B0000",
-      "resizeMode": "contain"
+      "image": "./assets/images/2.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#8B0000"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/images/2.png",
         "backgroundColor": "#8B0000"
       },
-      "package": "com.anonymous.burgerpedia"
+      "package": "com.anonymous.burgify"
     },
     "web": {
       "bundler": "metro"
     }
   }
 }
+

@@ -98,7 +98,7 @@ const RegisterScreen: React.FC = () => {
         <View style={styles.content}>
           <View style={styles.header}>
             <Text weight="bold" style={styles.title}>
-              Join Burgerpedia
+              Join Burgify
             </Text>
             <Text style={styles.subtitle}>Create your account and start your burger journey</Text>
           </View>

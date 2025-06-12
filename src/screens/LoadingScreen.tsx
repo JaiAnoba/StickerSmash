@@ -11,7 +11,7 @@ const LoadingScreen: React.FC = () => {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={styles.logo}>🍔</Text>
       <ActivityIndicator size="large" color={colors.primary} style={styles.spinner} />
-      <Text style={[styles.text, { color: colors.text }]}>Loading Burgerpedia...</Text>
+      <Text style={[styles.text, { color: colors.text }]}>Loading Burgify...</Text>
     </View>
   )
 }

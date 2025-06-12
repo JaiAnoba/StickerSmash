@@ -126,7 +126,7 @@ const LoginScreen: React.FC = () => {
         <View style={styles.header}>
           {/* <Text style={styles.logo}>🍔</Text> */}
           <Text weight="bold" style={styles.title}>
-            Welcome to Burgerpedia
+            Welcome to Burgify
           </Text>
           <Text style={styles.subtitle}>Discover amazing burger recipes and cooking tips</Text>
         </View>
