@@ -20,7 +20,7 @@ import { useFavorites } from "../context/FavoritesContext"
 import { burgersData } from "../data/burgersData"
 import type { Burger } from "../types/Burger"
 import type { Notification } from "../types/Notification"
-import { CATEGORIES } from "../types/Filter"
+import { TOP_LEVEL_CATEGORIES } from "../types/Filter"
 import { useFilters } from "../hooks/useFilters"
 import FilterModal from "../components/FilterModal"
 import NotificationModal from "../components/NotificationModal"
@@ -250,7 +250,7 @@ const HomeScreen: React.FC = () => {
       {/* Categories */}
       <View style={styles.categoriesSection}>
         <FlatList
-          data={CATEGORIES}
+          data={TOP_LEVEL_CATEGORIES}
           renderItem={renderCategoryTab}
           keyExtractor={(item) => item}
           horizontal

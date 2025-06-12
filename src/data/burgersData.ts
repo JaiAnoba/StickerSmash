@@ -38,6 +38,7 @@ export const burgersData: Burger[] = [
     servings: 4,
     calories: 650,
     rating: 4.8,
+    isRecommended: false,
     difficulty: "Easy",
     nutrition: {
       calories: 650,
@@ -86,6 +87,7 @@ export const burgersData: Burger[] = [
     servings: 4,
     calories: 720,
     rating: 4.6,
+    isRecommended: true,
     difficulty: "Medium",
     nutrition: {
       calories: 720,
@@ -139,6 +141,7 @@ export const burgersData: Burger[] = [
     servings: 4,
     calories: 420,
     rating: 4.5,
+    isRecommended: false,
     difficulty: "Medium",
     nutrition: {
       calories: 420,
@@ -187,6 +190,7 @@ export const burgersData: Burger[] = [
     servings: 4,
     calories: 680,
     rating: 4.7,
+    isRecommended: true,
     difficulty: "Medium",
     nutrition: {
       calories: 680,
@@ -235,6 +239,7 @@ export const burgersData: Burger[] = [
     servings: 4,
     calories: 780,
     rating: 4.9,
+    isRecommended: false,
     difficulty: "Medium",
     nutrition: {
       calories: 780,
@@ -285,6 +290,7 @@ export const burgersData: Burger[] = [
     servings: 4,
     calories: 580,
     rating: 4.7,
+    isRecommended: true,
     difficulty: "Medium",
     nutrition: {
       calories: 580,
@@ -332,6 +338,7 @@ export const burgersData: Burger[] = [
     servings: 4,
     calories: 380,
     rating: 4.5,
+    isRecommended: false,
     difficulty: "Easy",
     nutrition: {
       calories: 380,
@@ -382,6 +389,7 @@ export const burgersData: Burger[] = [
     servings: 4,
     calories: 650,
     rating: 4.6,
+    isRecommended: true,
     difficulty: "Medium",
     nutrition: {
       calories: 650,
@@ -429,6 +437,7 @@ export const burgersData: Burger[] = [
     servings: 4,
     calories: 950,
     rating: 4.9,
+    isRecommended: false,
     difficulty: "Medium",
     nutrition: {
       calories: 950,
@@ -479,6 +488,7 @@ export const burgersData: Burger[] = [
     servings: 4,
     calories: 420,
     rating: 4.4,
+    isRecommended: true,
     difficulty: "Easy",
     nutrition: {
       calories: 420,
@@ -487,4 +497,159 @@ export const burgersData: Burger[] = [
       fat: 22,
     },
   },
+   {
+    id: "11",
+    name: "Blue Cheese Burger",
+    category: "Gourmet",
+    image: "https://images.unsplash.com/photo-1612197553921-33fc1ed179b5?auto=format&fit=crop&w=1400&q=80",
+    description: "Bold and tangy blue cheese paired with caramelized onions and arugula for a rich, gourmet experience.",
+    ingredients: [
+      "1 lb ground beef",
+      "4 burger buns",
+      "4 oz blue cheese, crumbled",
+      "1 large onion, thinly sliced",
+      "2 tbsp butter",
+      "1 tbsp olive oil",
+      "2 cups arugula",
+      "Salt and pepper to taste"
+    ],
+    instructions: [
+      "Caramelize onions in butter and olive oil until golden brown.",
+      "Form ground beef into 4 patties and season with salt and pepper.",
+      "Grill or pan-sear patties 4-5 minutes per side.",
+      "Top with crumbled blue cheese and cover to melt.",
+      "Toast buns and layer arugula, patty, and caramelized onions.",
+      "Serve immediately."
+    ],
+    cookTime: "20 min",
+    prepTime: "15 min",
+    totalTime: "35 min",
+    servings: 4,
+    calories: 700,
+    rating: 4.7,
+    isRecommended: false,
+    difficulty: "Medium",
+    nutrition: {
+      calories: 700,
+      protein: 36,
+      carbs: 34,
+      fat: 45,
+    }
+  },
+  {
+    id: "12",
+    name: "Breakfast Burger",
+    category: "Specialty",
+    image: "https://images.unsplash.com/photo-1601050690591-ef8f4bdcfb0e?auto=format&fit=crop&w=1400&q=80",
+    description: "A morning twist with fried egg, crispy bacon, cheddar cheese, and a hash brown patty on a toasted bun.",
+    ingredients: [
+      "1 lb ground beef",
+      "4 burger buns",
+      "4 eggs",
+      "4 hash brown patties",
+      "8 slices bacon",
+      "4 slices cheddar cheese",
+      "Salt and pepper to taste"
+    ],
+    instructions: [
+      "Cook bacon until crispy.",
+      "Fry hash browns and set aside.",
+      "Form beef into patties, season, and cook until desired doneness.",
+      "Top patties with cheddar and let melt.",
+      "Fry eggs sunny-side up.",
+      "Assemble burger with bun, hash brown, patty with cheese, bacon, and egg."
+    ],
+    cookTime: "20 min",
+    prepTime: "10 min",
+    totalTime: "30 min",
+    servings: 4,
+    calories: 850,
+    rating: 4.9,
+    isRecommended: true,
+    difficulty: "Medium",
+    nutrition: {
+      calories: 850,
+      protein: 40,
+      carbs: 46,
+      fat: 55
+    }
+  },
+  {
+    id: "13",
+    name: "Kimchi Burger",
+    category: "Fusion",
+    image: "https://images.unsplash.com/photo-1620221642211-bd52aa3d38d7?auto=format&fit=crop&w=1400&q=80",
+    description: "A Korean-inspired burger with spicy kimchi, gochujang mayo, and crispy beef patty.",
+    ingredients: [
+      "1 lb ground beef",
+      "4 buns",
+      "1 cup kimchi, chopped",
+      "1/4 cup gochujang",
+      "1/2 cup mayonnaise",
+      "4 slices mozzarella or cheddar",
+      "Lettuce leaves",
+      "Salt and pepper"
+    ],
+    instructions: [
+      "Mix gochujang with mayonnaise.",
+      "Form and season beef patties, grill or pan-fry until cooked.",
+      "Top with cheese and melt.",
+      "Toast buns, spread gochujang mayo.",
+      "Layer with lettuce, patty, and kimchi."
+    ],
+    cookTime: "15 min",
+    prepTime: "10 min",
+    totalTime: "25 min",
+    servings: 4,
+    calories: 720,
+    rating: 4.8,
+    isRecommended: false,
+    difficulty: "Medium",
+    nutrition: {
+      calories: 720,
+      protein: 35,
+      carbs: 38,
+      fat: 46
+    }
+  },
+  {
+    id: "14",
+    name: "Salmon Burger",
+    category: "Seafood",
+    image: "https://images.unsplash.com/photo-1585238342020-fd1c3f5a646d?auto=format&fit=crop&w=1400&q=80",
+    description: "A light yet flavorful burger made with fresh salmon, dill, and lemon, perfect for seafood lovers.",
+    ingredients: [
+      "1 lb salmon filet, skin removed",
+      "1/4 cup breadcrumbs",
+      "2 tbsp fresh dill, chopped",
+      "1 egg",
+      "1 tbsp Dijon mustard",
+      "1 tbsp lemon juice",
+      "4 buns",
+      "Lettuce and tomato",
+      "Tartar sauce"
+    ],
+    instructions: [
+      "Chop salmon finely or pulse in food processor.",
+      "Mix with dill, breadcrumbs, egg, mustard, and lemon juice.",
+      "Form into 4 patties and chill 15 min.",
+      "Cook 3-4 minutes per side in skillet.",
+      "Toast buns, spread tartar sauce, add lettuce, tomato, and salmon patty."
+    ],
+    cookTime: "10 min",
+    prepTime: "15 min",
+    totalTime: "25 min",
+    servings: 4,
+    calories: 520,
+    rating: 4.4,
+    isRecommended: true,
+    difficulty: "Easy",
+    nutrition: {
+      calories: 520,
+      protein: 34,
+      carbs: 30,
+      fat: 28
+    }
+  },
+
 ]

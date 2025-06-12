@@ -12,6 +12,7 @@ export interface Burger {
   servings: number
   calories: number
   rating: number
+  isRecommended: boolean
   difficulty: "Easy" | "Medium" | "Hard"
   nutrition?: {
     calories: number

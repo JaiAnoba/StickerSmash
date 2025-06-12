@@ -12,7 +12,15 @@ export const filterBurgers = (
 
   // Apply category filter from tabs
   if (selectedCategory !== "All") {
-    filtered = filtered.filter((burger) => burger.category === selectedCategory)
+    if (selectedCategory === "Popular") {
+      // Popular = rating 4.5+
+      filtered = filtered.filter((burger) => burger.rating >= 4.5)
+    } else if (selectedCategory === "Recommended") {
+      // Recommended = isRecommended flag
+      filtered = filtered.filter((burger) => burger.isRecommended === true)
+    } else {
+      filtered = filtered.filter((burger) => burger.category === selectedCategory)
+    }
   }
 
   // Apply search query
@@ -21,7 +29,9 @@ export const filterBurgers = (
       (burger) =>
         burger.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         burger.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        burger.ingredients.some((ingredient) => ingredient.toLowerCase().includes(searchQuery.toLowerCase())),
+        burger.ingredients.some((ingredient) =>
+          ingredient.toLowerCase().includes(searchQuery.toLowerCase()),
+        ),
     )
   }
 

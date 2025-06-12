@@ -102,30 +102,36 @@ const FilterModal: React.FC<FilterModalProps> = ({
               {/* Category Filter */}
               <View style={styles.filterGroup}>
                 <Text style={[styles.filterGroupTitle, { color: colors.text }]}>Category</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterChipsContainer}>
-                  {CATEGORIES.map((category) => (
-                    <TouchableOpacity
-                      key={category}
-                      style={[
-                        styles.filterChip,
-                        filterOptions.category === category
-                          ? { backgroundColor: colors.primary }
-                          : { backgroundColor: isDarkMode ? "#2A2A2A" : "#F5F5F5" },
-                      ]}
-                      onPress={() => setFilterOptions((prev) => ({ ...prev, category }))}
-                    >
-                      <Text
-                        style={[
-                          styles.filterChipText,
-                          filterOptions.category === category ? { color: "#FFFFFF" } : { color: colors.text },
-                        ]}
-                      >
-                        {category}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                {Object.entries(CATEGORIES).map(([group, items]) => (
+                  <View key={group} style={{ marginBottom: 12 }}>
+                    <Text style={[{ marginBottom: 6, fontWeight: "600", color: colors.text }]}>{group}</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterChipsContainer}>
+                      {items.map((category) => (
+                        <TouchableOpacity
+                          key={category}
+                          style={[
+                            styles.filterChip,
+                            filterOptions.category === category
+                              ? { backgroundColor: colors.primary }
+                              : { backgroundColor: isDarkMode ? "#2A2A2A" : "#F5F5F5" },
+                          ]}
+                          onPress={() => setFilterOptions((prev) => ({ ...prev, category }))}
+                        >
+                          <Text
+                            style={[
+                              styles.filterChipText,
+                              filterOptions.category === category ? { color: "#FFFFFF" } : { color: colors.text },
+                            ]}
+                          >
+                            {category}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                ))}
               </View>
+
 
               {/* Ingredients Filter */}
               <View style={styles.filterGroup}>
