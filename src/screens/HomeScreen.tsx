@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   View,
   StyleSheet,
@@ -176,6 +176,10 @@ const HomeScreen: React.FC = () => {
 
   // Background color based on theme
   const backgroundColor = isDarkMode ? colors.background : "white"
+
+  useEffect(() => {
+    updateCategoryFilter("All")
+  }, [])
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>

@@ -121,6 +121,7 @@ export const CATEGORIES = {
 
 // all categories combined for easy access
 export const ALL_CATEGORIES = [
+  "All",
   ...CATEGORIES.protein,
   ...CATEGORIES.style,
   ...CATEGORIES.dietary,

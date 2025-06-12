@@ -10,11 +10,11 @@ export const filterBurgers = (
 ): Burger[] => {
   let filtered = [...burgers]
 
-  // Apply category filter from tabs
   if (selectedCategory !== "All") {
     if (selectedCategory === "Popular") {
-      // Popular = rating 4.5+
-      filtered = filtered.filter((burger) => burger.rating >= 4.5)
+      filtered = filtered.filter((burger) =>
+        typeof burger.rating === "number" && burger.rating >= 4.5,
+      )
     } else if (selectedCategory === "Recommended") {
       // Recommended = isRecommended flag
       filtered = filtered.filter((burger) => burger.isRecommended === true)
@@ -23,7 +23,6 @@ export const filterBurgers = (
     }
   }
 
-  // Apply search query
   if (searchQuery.trim()) {
     filtered = filtered.filter(
       (burger) =>
@@ -35,9 +34,8 @@ export const filterBurgers = (
     )
   }
 
-  // Apply filter options
   // Category filter from modal
-  if (filterOptions.category !== "All") {
+  if (selectedCategory === "All" && filterOptions.category !== "All") {
     filtered = filtered.filter((burger) => burger.category === filterOptions.category)
   }
 
