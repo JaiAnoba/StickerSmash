@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Image,
@@ -9,6 +8,7 @@ import {
 import { Burger } from '../types/Burger';
 import { useTheme } from '../context/ThemeContext';
 import { useFavorites } from '../context/FavoritesContext';
+import Text from "../components/CustomText";
 
 const heartIcon = 'https://img.icons8.com/puffy/32/like.png';
 const filledHeartIcon = 'https://img.icons8.com/puffy-filled/32/like.png';
@@ -45,6 +45,7 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
 
       <View style={styles.infoSection}>
         <Text
+          weight='semiBold'
           style={styles.name}
           numberOfLines={1}
           ellipsizeMode="tail"
@@ -58,7 +59,7 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
             <Text style={styles.timeText}>{burger.totalTime}</Text>
           </View>
           <View style={styles.difficulty}>
-            <Text style={styles.difficultyText}>{burger.difficulty.toUpperCase()}</Text>
+            <Text weight= "semiBold" style={styles.difficultyText}>{burger.difficulty.toUpperCase()}</Text>
           </View>
         </View>
 
@@ -124,17 +125,16 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
   },
   name: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
     textAlign: 'left',
     marginBottom: 4,
     maxWidth: '100%',
     overflow: 'hidden',
   },
   category: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#6B7280',
-    marginBottom: 6,
+    marginBottom: 2,
     alignSelf: 'flex-start',
   },
   row: {
@@ -148,9 +148,8 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     alignSelf: 'flex-start',
   },
-
   timeText: {
-    fontSize: 12,
+    fontSize: 11,
     color: 'black',
   },
   difficulty: {
@@ -163,7 +162,6 @@ const styles = StyleSheet.create({
   difficultyText: {
     fontSize: 11,
     color: '#166534',
-    fontWeight: 'bold',
   },
 });
 
