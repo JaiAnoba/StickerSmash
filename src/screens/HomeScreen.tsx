@@ -384,6 +384,8 @@ const styles = StyleSheet.create({
   burgersSection: {
     flex: 1,
     paddingHorizontal: 20,
+    paddingTop: 5,
+    marginBottom: 60,
   },
   sectionHeader: {
     flexDirection: "row",

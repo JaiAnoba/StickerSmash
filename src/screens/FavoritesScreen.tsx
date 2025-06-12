@@ -55,16 +55,10 @@ const FavoritesScreen: React.FC = () => {
     <View style={styles.cardContainer}>
       <BurgerCard
         burger={item}
-        isFavorite={true} // Because this is the Favorites screen, all burgers are favorites
+        isFavorite={true} 
         onPress={handleBurgerPress}
         onFavoritePress={() => handleRemoveFavorite(item)}
       />
-      <TouchableOpacity
-        style={[styles.removeButton, { backgroundColor: colors.primary }]}
-        onPress={() => handleRemoveFavorite(item)}
-      >
-        <Text style={styles.removeButtonText}>×</Text>
-      </TouchableOpacity>
     </View>
   );
 
@@ -202,6 +196,8 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     position: 'relative',
+    marginBottom: 25,
+    marginTop: 15,
     flex: 1,
   },
   removeButton: {
