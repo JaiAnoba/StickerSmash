@@ -29,9 +29,11 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({ onPress }) => {
         style={[styles.notificationImage, { tintColor: isDarkMode ? "white" : "black" }]}
       />
       {unreadCount > 0 && (
-        <View style={[styles.badge, { backgroundColor: colors.primary }]}>
-          <Text style={styles.badgeText}>{unreadCount > 99 ? "99+" : unreadCount}</Text>
-        </View>
+        // <View style={[styles.badgeWrapper]}>
+          <View style={[styles.badge, { backgroundColor: colors.primary }]}>
+            <Text style={styles.badgeText}>{unreadCount > 99 ? "99+" : unreadCount}</Text>
+          </View>
+        // </View>
       )}
     </TouchableOpacity>
   )
@@ -52,8 +54,8 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: "absolute",
-    top: -2,
-    right: -2,
+    top: 1,
+    right: 0.5,
     borderRadius: 10,
     minWidth: 20,
     height: 20,
