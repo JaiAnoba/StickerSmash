@@ -250,7 +250,7 @@ const HomeScreen: React.FC = () => {
 
         {filteredBurgers.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyTitle, { color: colors.text, fontWeight: "bold" }]}>No burgers found</Text>
+            <Text weight="semiBold" style={[styles.emptyTitle, { color: colors.text }]}>No burgers found</Text>
             <Text style={[styles.emptySubtitle, { color: colors.subtext }]}>Try adjusting your search or filters</Text>
           </View>
         ) : (
