@@ -11,7 +11,6 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Text,
 } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
@@ -26,6 +25,7 @@ import { useFilters } from "../hooks/useFilters"
 import FilterModal from "../components/FilterModal"
 import NotificationModal from "../components/NotificationModal"
 import NotificationButton from "../components/NotificationButton"
+import Text from "../components/CustomText";
 
 type NavigationProp = StackNavigationProp<RootStackParamList>
 
@@ -196,10 +196,10 @@ const HomeScreen: React.FC = () => {
             />
 
             <View style={styles.headerTextContainer}>
-              <Text style={[styles.headerLineOne, { color: colors.text }]}>Choose</Text>
+              <Text weight="semiBold" style={[styles.headerLineOne, { color: colors.text }]}>Choose</Text>
               <Text style={styles.headerLineTwo}>
-                <Text style={[styles.boldText, { color: colors.text }]}>Your Favorite </Text>
-                <Text style={styles.redText}>Burger</Text>
+                <Text weight="semiBold" style={[ { color: colors.text }]}>Your Favorite </Text>
+                <Text weight="semiBold" style={styles.redText}>Burger</Text>
               </Text>
             </View>
           </View>
@@ -262,11 +262,11 @@ const HomeScreen: React.FC = () => {
       {/* Burgers List */}
       <View style={styles.burgersSection}>
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text, fontWeight: "bold" }]}>
+          <Text weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>
             {selectedCategory === "All" ? "All Burgers" : `${selectedCategory} Burgers`}
           </Text>
           <View style={styles.resultsContainer}>
-            <Text style={[styles.resultsCount, { color: colors.subtext }]}>
+            <Text italic style={[{ color: colors.subtext }]}>
               {filteredBurgers.length} {filteredBurgers.length === 1 ? "result" : "results"}
             </Text>
           </View>
@@ -334,18 +334,13 @@ const styles = StyleSheet.create({
   },
   headerLineOne: {
     fontSize: 18,
-    fontWeight: "600",
   },
   headerLineTwo: {
     fontSize: 25,
-    fontWeight: "bold",
-  },
-  boldText: {
-    fontWeight: "bold",
+    marginTop: -5,
   },
   redText: {
     color: "#B91C1C",
-    fontWeight: "bold",
   },
   profileImage: {
     width: 40,
@@ -433,8 +428,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   resultsCount: {
-    fontSize: 14,
-    fontStyle: "italic",
+    fontSize: 12,
   },
   burgersList: {
     paddingBottom: 20,

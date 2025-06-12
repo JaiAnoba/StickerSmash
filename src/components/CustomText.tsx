@@ -6,6 +6,7 @@ import {
   TextStyle,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import type { JSX } from 'react';
 
 interface CustomTextProps extends TextProps {
   weight?: 'regular' | 'medium' | 'semiBold' | 'bold';

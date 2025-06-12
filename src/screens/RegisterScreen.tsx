@@ -1,7 +1,6 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -13,132 +12,102 @@ import {
   ActivityIndicator,
   ScrollView,
   Image,
-} from "react-native"
-import { useNavigation } from "@react-navigation/native"
-import type { StackNavigationProp } from "@react-navigation/stack"
-import type { RootStackParamList } from "../../App"
-import { useTheme } from "../context/ThemeContext"
-import { useAuth } from "../context/AuthContext"
-import Button from "../components/Button"
-import Text from "../components/CustomText"
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { StackNavigationProp } from "@react-navigation/stack";
+import type { RootStackParamList } from "../../App";
+import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import Button from "../components/Button";
+import Text from "../components/CustomText";
 
-type NavigationProp = StackNavigationProp<RootStackParamList>
+type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 const RegisterScreen: React.FC = () => {
-  const { colors, isDarkMode } = useTheme()
-  const { register } = useAuth()
-  const navigation = useNavigation<NavigationProp>()
+  const { colors, isDarkMode } = useTheme();
+  const { register, user } = useAuth();
+  const navigation = useNavigation<NavigationProp>();
 
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateForm = () => {
     if (!name.trim()) {
-      Alert.alert("Error", "Please enter your name")
-      return false
+      Alert.alert("Error", "Please enter your name");
+      return false;
     }
     if (!email.trim()) {
-      Alert.alert("Error", "Please enter your email")
-      return false
+      Alert.alert("Error", "Please enter your email");
+      return false;
     }
     if (!email.includes("@")) {
-      Alert.alert("Error", "Please enter a valid email address")
-      return false
+      Alert.alert("Error", "Please enter a valid email address");
+      return false;
     }
     if (!password.trim()) {
-      Alert.alert("Error", "Please enter a password")
-      return false
+      Alert.alert("Error", "Please enter a password");
+      return false;
     }
     if (password.length < 6) {
-      Alert.alert("Error", "Password must be at least 6 characters long")
-      return false
+      Alert.alert("Error", "Password must be at least 6 characters long");
+      return false;
     }
     if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match")
-      return false
+      Alert.alert("Error", "Passwords do not match");
+      return false;
     }
-    return true
-  }
+    return true;
+  };
 
   const handleRegister = async () => {
-    if (!validateForm()) {
-      return
-    }
+    if (!validateForm()) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const success = await register(name, email, password)
+      const success = await register(name, email, password);
       if (success) {
         Alert.alert("Success", "Account created successfully!", [
           {
             text: "OK",
             onPress: () => {
-              // Navigate to Main screen after successful registration
-              navigation.reset({
-                index: 0,
-                routes: [{ name: "Main" }],
-              })
+              navigation.navigate("Login");
             },
           },
-        ])
+        ]);
       } else {
-        Alert.alert("Error", "Registration failed. Please try again.")
+        Alert.alert("Error", "Registration failed. Please try again.");
       }
     } catch (error) {
-      Alert.alert("Error", "Registration failed. Please try again.")
+      Alert.alert("Error", "Registration failed. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const navigateToLogin = () => {
-    navigation.goBack()
-  }
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword)
-  }
-
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword)
-  }
+  const navigateToLogin = () => navigation.navigate("Login");
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? "light-content" : "dark-content"} />
-
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          {/* Header */}
           <View style={styles.header}>
-            {/* <Text style={styles.logo}>🍔</Text> */}
             <Text weight="bold" style={styles.title}>
               Join Burgerpedia
             </Text>
             <Text style={styles.subtitle}>Create your account and start your burger journey</Text>
           </View>
 
-          {/* Registration Form */}
           <View style={styles.form}>
             <View style={styles.inputContainer}>
-              <Text weight="semiBold" style={styles.label}>
-                Full Name
-              </Text>
+              <Text weight="semiBold" style={styles.label}>Full Name</Text>
               <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    color: colors.text,
-                    borderColor: colors.border,
-                    fontFamily: "Poppins-Regular",
-                  },
-                ]}
+                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text, borderColor: colors.border, fontFamily: "Poppins-Regular" }]}
                 placeholder="Enter your full name"
                 placeholderTextColor={colors.subtext}
                 value={name}
@@ -149,19 +118,9 @@ const RegisterScreen: React.FC = () => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text weight="semiBold" style={styles.label}>
-                Email
-              </Text>
+              <Text weight="semiBold" style={styles.label}>Email</Text>
               <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    color: colors.text,
-                    borderColor: colors.border,
-                    fontFamily: "Poppins-Regular",
-                  },
-                ]}
+                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text, borderColor: colors.border, fontFamily: "Poppins-Regular" }]}
                 placeholder="Enter your email"
                 placeholderTextColor={colors.subtext}
                 value={email}
@@ -173,20 +132,10 @@ const RegisterScreen: React.FC = () => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text weight="semiBold" style={styles.label}>
-                Password
-              </Text>
+              <Text weight="semiBold" style={styles.label}>Password</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
-                  style={[
-                    styles.passwordInput,
-                    {
-                      backgroundColor: colors.inputBackground,
-                      color: colors.text,
-                      borderColor: colors.border,
-                      fontFamily: "Poppins-Regular",
-                    },
-                  ]}
+                  style={[styles.passwordInput, { backgroundColor: colors.inputBackground, color: colors.text, borderColor: colors.border, fontFamily: "Poppins-Regular" }]}
                   placeholder="Enter your password"
                   placeholderTextColor={colors.subtext}
                   value={password}
@@ -195,13 +144,9 @@ const RegisterScreen: React.FC = () => {
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
-                <TouchableOpacity style={styles.eyeButton} onPress={togglePasswordVisibility} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword(!showPassword)} activeOpacity={0.7}>
                   <Image
-                    source={{
-                      uri: showPassword
-                        ? "https://img.icons8.com/fluency-systems-regular/48/visible--v1.png"
-                        : "https://img.icons8.com/fluency-systems-regular/48/closed-eye.png",
-                    }}
+                    source={{ uri: showPassword ? "https://img.icons8.com/fluency-systems-regular/48/visible--v1.png" : "https://img.icons8.com/fluency-systems-regular/48/closed-eye.png" }}
                     style={[styles.eyeIcon, { tintColor: colors.subtext }]}
                   />
                 </TouchableOpacity>
@@ -209,20 +154,10 @@ const RegisterScreen: React.FC = () => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text weight="semiBold" style={styles.label}>
-                Confirm Password
-              </Text>
+              <Text weight="semiBold" style={styles.label}>Confirm Password</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
-                  style={[
-                    styles.passwordInput,
-                    {
-                      backgroundColor: colors.inputBackground,
-                      color: colors.text,
-                      borderColor: colors.border,
-                      fontFamily: "Poppins-Regular",
-                    },
-                  ]}
+                  style={[styles.passwordInput, { backgroundColor: colors.inputBackground, color: colors.text, borderColor: colors.border, fontFamily: "Poppins-Regular" }]}
                   placeholder="Confirm your password"
                   placeholderTextColor={colors.subtext}
                   value={confirmPassword}
@@ -231,17 +166,9 @@ const RegisterScreen: React.FC = () => {
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
-                <TouchableOpacity
-                  style={styles.eyeButton}
-                  onPress={toggleConfirmPasswordVisibility}
-                  activeOpacity={0.7}
-                >
+                <TouchableOpacity style={styles.eyeButton} onPress={() => setShowConfirmPassword(!showConfirmPassword)} activeOpacity={0.7}>
                   <Image
-                    source={{
-                      uri: showConfirmPassword
-                        ? "https://img.icons8.com/fluency-systems-regular/48/visible--v1.png"
-                        : "https://img.icons8.com/fluency-systems-regular/48/closed-eye.png",
-                    }}
+                    source={{ uri: showConfirmPassword ? "https://img.icons8.com/fluency-systems-regular/48/visible--v1.png" : "https://img.icons8.com/fluency-systems-regular/48/closed-eye.png" }}
                     style={[styles.eyeIcon, { tintColor: colors.subtext }]}
                   />
                 </TouchableOpacity>
@@ -255,110 +182,41 @@ const RegisterScreen: React.FC = () => {
               fullWidth
               style={styles.registerButton}
             />
-
             {isLoading && <ActivityIndicator size="small" color={colors.primary} style={styles.loadingIndicator} />}
           </View>
 
-          {/* Footer */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>Already have an account?</Text>
             <TouchableOpacity onPress={navigateToLogin}>
-              <Text weight="semiBold" style={[styles.linkText, { color: colors.primary }]}>
-                Sign in here
-              </Text>
+              <Text weight="semiBold" style={[styles.linkText, { color: colors.primary }]}>Sign in here</Text>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
     </SafeAreaView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 30,
-    paddingVertical: 40,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  logo: {
-    fontSize: 64,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 25,
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 24,
-  },
-  form: {
-    marginBottom: 30,
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  input: {
-    borderRadius: 999,
-    padding: 16,
-    fontSize: 13,
-    borderWidth: 1,
-  },
-  passwordContainer: {
-    position: "relative",
-  },
-  passwordInput: {
-    borderRadius: 999,
-    padding: 16,
-    paddingRight: 50,
-    fontSize: 13,
-    borderWidth: 1,
-  },
-  eyeButton: {
-    position: "absolute",
-    right: 16,
-    top: 12,
-    padding: 4,
-  },
-  eyeIcon: {
-    width: 20,
-    height: 20,
-  },
-  registerButton: {
-    borderRadius: 999,
-    marginTop: 10,
-  },
-  loadingIndicator: {
-    marginTop: 10,
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  footerText: {
-    fontSize: 14,
-    marginRight: 5,
-  },
-  linkText: {
-    fontSize: 14,
-  },
-})
+  container: { flex: 1 },
+  scrollView: { flex: 1 },
+  content: { flex: 1, paddingHorizontal: 30, paddingVertical: 40 },
+  header: { alignItems: "center", marginBottom: 40 },
+  title: { fontSize: 25, textAlign: "center", marginBottom: 10 },
+  subtitle: { fontSize: 14, textAlign: "center", lineHeight: 24 },
+  form: { marginBottom: 30 },
+  inputContainer: { marginBottom: 20 },
+  label: { fontSize: 14, marginBottom: 8 },
+  input: { borderRadius: 999, padding: 16, fontSize: 13, borderWidth: 1 },
+  passwordContainer: { position: "relative" },
+  passwordInput: { borderRadius: 999, padding: 16, paddingRight: 50, fontSize: 13, borderWidth: 1 },
+  eyeButton: { position: "absolute", right: 16, top: 12, padding: 4 },
+  eyeIcon: { width: 20, height: 20 },
+  registerButton: { borderRadius: 999, marginTop: 10 },
+  loadingIndicator: { marginTop: 10 },
+  footer: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
+  footerText: { fontSize: 14, marginRight: 5 },
+  linkText: { fontSize: 14 },
+});
 
-export default RegisterScreen
+export default RegisterScreen;

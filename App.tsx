@@ -64,7 +64,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName={user ? "Main" : "Login"} // 👈 This decides which screen to show first based on user
+        initialRouteName={user ? "Login" : "Main"}
         screenOptions={{
           headerShown: false,
           gestureEnabled: true,
