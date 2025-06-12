@@ -97,6 +97,7 @@ const RegisterScreen: React.FC = () => {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <View style={styles.header}>
+            <Image source={require('../../assets/images/b.png')} style={styles.logo} />
             <Text weight="bold" style={styles.title}>
               Join Burgify
             </Text>
@@ -202,7 +203,8 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1 },
   content: { flex: 1, paddingHorizontal: 30, paddingVertical: 40 },
   header: { alignItems: "center", marginBottom: 40 },
-  title: { fontSize: 25, textAlign: "center", marginBottom: 10 },
+  logo: { width: 50, height: 50, resizeMode: 'contain', marginBottom: 10, },
+  title: { fontSize: 22, textAlign: "center", marginBottom: 10 },
   subtitle: { fontSize: 14, textAlign: "center", lineHeight: 24 },
   form: { marginBottom: 30 },
   inputContainer: { marginBottom: 20 },

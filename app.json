@@ -7,7 +7,7 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/2.png",
+      "image": "./assets/images/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#8B0000"
     },
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/2.png",
+        "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#8B0000"
       },
       "package": "com.anonymous.burgify"

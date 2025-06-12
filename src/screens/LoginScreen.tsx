@@ -124,7 +124,7 @@ const LoginScreen: React.FC = () => {
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
-          {/* <Text style={styles.logo}>🍔</Text> */}
+          <Image source={require('../../assets/images/b.png')} style={styles.logo} />
           <Text weight="bold" style={styles.title}>
             Welcome to Burgify
           </Text>
@@ -349,12 +349,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 40,
   },
-  logo: {
-    fontSize: 64,
-    marginBottom: 20,
+  logo: { 
+    width: 50, 
+    height: 50, 
+    resizeMode: 'contain', 
+    marginBottom: 10, 
   },
   title: {
-    fontSize: 25,
+    fontSize: 23,
     textAlign: "center",
     marginBottom: 10,
   },
