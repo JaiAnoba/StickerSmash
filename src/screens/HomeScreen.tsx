@@ -197,7 +197,13 @@ const HomeScreen: React.FC = () => {
             style={[styles.searchIcon, { tintColor: colors.subtext }]}
           />
           <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
+            style={[
+              styles.searchInput,
+              {
+                color: colors.text,
+                fontFamily: 'Poppins-Regular',
+              },
+            ]}
             placeholder="Search"
             placeholderTextColor={colors.subtext}
             value={searchQuery}
@@ -307,7 +313,8 @@ const styles = StyleSheet.create({
   },
   headerLineTwo: {
     fontSize: 25,
-    marginTop: -5,
+    marginBottom: -5,
+    marginTop: -4,
   },
   redText: {
     color: "#B91C1C",
@@ -345,7 +352,8 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
+    top: 2,
   },
   filterButton: {
     marginLeft: 12,
@@ -366,7 +374,7 @@ const styles = StyleSheet.create({
     tintColor: "#FFFFFF",
   },
   categoriesSection: {
-    marginBottom: 20,
+    marginBottom: 10,
     alignItems: "center",
   },
   categoriesList: {
