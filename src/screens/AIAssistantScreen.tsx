@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -13,6 +12,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import { AIMessage } from '../types/Burger';
+import Text from "../components/CustomText";
 
 const AIAssistantScreen: React.FC = () => {
   const [messages, setMessages] = useState<AIMessage[]>([
@@ -141,7 +141,7 @@ const AIAssistantScreen: React.FC = () => {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🤖 AI Burger Chef</Text>
+        <Text weight='semiBold' style={styles.headerTitle}>🤖 AI Burger Chef</Text>
         <Text style={styles.headerSubtitle}>Your personal cooking assistant</Text>
       </View>
 
@@ -182,7 +182,12 @@ const AIAssistantScreen: React.FC = () => {
         {/* Input */}
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.textInput}
+            style={[
+              styles.textInput,
+              {
+                fontFamily: 'Poppins-Regular',
+              },
+            ]}
             placeholder="Ask me anything about burgers..."
             placeholderTextColor="#999"
             value={inputText}
@@ -213,19 +218,21 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20,
     alignItems: 'center',
+    borderBottomStartRadius: 60,
+    borderBottomEndRadius: 60,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 20,
     color: 'white',
     marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: 'rgba(255,255,255,0.8)',
   },
   content: {
     flex: 1,
+    paddingBottom: 80,
   },
   messagesContainer: {
     flex: 1,
@@ -238,7 +245,7 @@ const styles = StyleSheet.create({
     maxWidth: '80%',
     marginBottom: 15,
     borderRadius: 20,
-    padding: 15,
+    padding: 20,
   },
   userMessage: {
     backgroundColor: '#B91C1C',
@@ -251,7 +258,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 5,
   },
   messageText: {
-    fontSize: 16,
+    fontSize: 13,
     lineHeight: 22,
     marginBottom: 5,
   },
@@ -278,7 +285,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#F3F4F6',
   },
   quickQuestionsTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#333',
     marginBottom: 10,
@@ -291,7 +298,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   quickButtonText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#B91C1C',
     fontWeight: '500',
   },
@@ -310,7 +317,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
-    fontSize: 16,
+    fontSize: 13,
     maxHeight: 100,
     marginRight: 10,
   },
