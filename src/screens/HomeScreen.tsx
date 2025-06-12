@@ -17,6 +17,7 @@ import type { StackNavigationProp } from "@react-navigation/stack"
 import type { RootStackParamList } from "../../App"
 import { useTheme } from "../context/ThemeContext"
 import { useFavorites } from "../context/FavoritesContext"
+import BurgerCard from "../components/BurgerCard";
 import { burgersData } from "../data/burgersData"
 import type { Burger } from "../types/Burger"
 import type { Notification } from "../types/Notification"
@@ -129,49 +130,14 @@ const HomeScreen: React.FC = () => {
   )
 
   const renderBurgerCard = ({ item }: { item: Burger }) => (
-    <TouchableOpacity
-      style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
-      onPress={() => handleBurgerPress(item)}
-      activeOpacity={0.8}
-    >
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: item.image }} style={styles.image} />
-        <TouchableOpacity
-          style={[styles.favoriteButton, { backgroundColor: "rgba(255,255,255,0.9)" }]}
-          onPress={() => handleFavoritePress(item)}
-        >
-          <Text style={styles.favoriteIcon}>{isFavorite(item.id) ? "❤️" : "🤍"}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.content}>
-        <Text style={[styles.name, { color: colors.text, fontWeight: "bold" }]} numberOfLines={2}>
-          {item.name}
-        </Text>
-        <Text style={[styles.category, { color: colors.subtext }]}>{item.category}</Text>
-
-        <View style={styles.footer}>
-          <View style={styles.rating}>
-            <Text style={[styles.stars, { color: colors.primary }]}>{renderStars(item.rating)}</Text>
-            <Text style={[styles.ratingText, { color: colors.subtext }]}>{item.rating}</Text>
-          </View>
-          <Text style={[styles.cookTime, { color: colors.subtext }]}>{item.cookTime}</Text>
-        </View>
-
-        <View style={styles.difficulty}>
-          <Text
-            style={[
-              styles.difficultyText,
-              item.difficulty === "Easy" && styles.easy,
-              item.difficulty === "Medium" && styles.medium,
-              item.difficulty === "Hard" && styles.hard,
-            ]}
-          >
-            {item.difficulty}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
+    <View style={{ width: "48%", marginBlock: 16, paddingTop: 8 }}>
+      <BurgerCard
+        burger={item}
+        isFavorite={isFavorite(item.id)}
+        onPress={() => handleBurgerPress(item)}
+        onFavoritePress={() => handleFavoritePress(item)}
+      />
+    </View>
   )
 
   // Background color based on theme
@@ -401,6 +367,7 @@ const styles = StyleSheet.create({
   },
   categoriesSection: {
     marginBottom: 20,
+    alignItems: "center",
   },
   categoriesList: {
     paddingHorizontal: 15,
@@ -439,6 +406,7 @@ const styles = StyleSheet.create({
   },
   burgerRow: {
     justifyContent: "space-between",
+    gap: 10, 
   },
   card: {
     borderRadius: 15,

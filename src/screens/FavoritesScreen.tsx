@@ -53,7 +53,12 @@ const FavoritesScreen: React.FC = () => {
 
   const renderBurgerCard = ({ item }: { item: Burger }) => (
     <View style={styles.cardContainer}>
-      <BurgerCard burger={item} onPress={handleBurgerPress} />
+      <BurgerCard
+        burger={item}
+        isFavorite={true} // Because this is the Favorites screen, all burgers are favorites
+        onPress={handleBurgerPress}
+        onFavoritePress={() => handleRemoveFavorite(item)}
+      />
       <TouchableOpacity
         style={[styles.removeButton, { backgroundColor: colors.primary }]}
         onPress={() => handleRemoveFavorite(item)}
@@ -84,7 +89,6 @@ const FavoritesScreen: React.FC = () => {
 
   const EmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyIcon}>💔</Text>
       <Text style={[styles.emptyTitle, { color: colors.text }]}>No Favorites Yet</Text>
       <Text style={[styles.emptyText, { color: colors.subtext }]}>
         Start exploring burgers and tap the heart icon to add them to your favorites!

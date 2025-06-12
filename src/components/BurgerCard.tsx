@@ -9,31 +9,21 @@ import {
 import { Burger } from '../types/Burger';
 import { useTheme } from '../context/ThemeContext';
 import { useFavorites } from '../context/FavoritesContext';
-import IconButton from './IconButton';
+
+const heartIcon = 'https://img.icons8.com/puffy/32/like.png';
+const filledHeartIcon = 'https://img.icons8.com/puffy-filled/32/like.png';
 
 interface BurgerCardProps {
   burger: Burger;
+  isFavorite: boolean;
   onPress: (burger: Burger) => void;
+  onFavoritePress: () => void;
 }
 
 const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
   const { colors } = useTheme();
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
   const isLiked = isFavorite(burger.id);
-
-  const renderStars = (rating: number): string => {
-    const stars: string[] = [];
-    const fullStars: number = Math.floor(rating);
-    const hasHalfStar: boolean = rating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push('★');
-    }
-    if (hasHalfStar) {
-      stars.push('☆');
-    }
-    return stars.join('');
-  };
 
   const handleFavoritePress = () => {
     if (isLiked) {
@@ -45,44 +35,42 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
 
   return (
     <TouchableOpacity
-      style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
+      style={[styles.card]}
       onPress={() => onPress(burger)}
-      activeOpacity={0.8}
+      activeOpacity={0.9}
     >
-      <View style={styles.imageContainer}>
+      <View style={styles.imageWrapper}>
         <Image source={{ uri: burger.image }} style={styles.image} />
-        <IconButton
-          icon={isLiked ? '❤️' : '🤍'}
-          onPress={handleFavoritePress}
-          style={Object.assign({}, styles.favoriteButton, { backgroundColor: 'rgba(255,255,255,0.9)' })}
-          size={16}
-        />
       </View>
-      
-      <View style={styles.content}>
-        <Text style={[styles.name, { color: colors.text }]} numberOfLines={2}>
+
+      <View style={styles.infoSection}>
+        <Text
+          style={styles.name}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
           {burger.name}
         </Text>
-        <Text style={[styles.category, { color: colors.subtext }]}>{burger.category}</Text>
-        
-        <View style={styles.footer}>
-          <View style={styles.rating}>
-            <Text style={[styles.stars, { color: colors.primary }]}>{renderStars(burger.rating)}</Text>
-            <Text style={[styles.ratingText, { color: colors.subtext }]}>{burger.rating}</Text>
+        <Text style={styles.category}>{burger.category}</Text>
+
+        <View style={styles.row}>
+          <View style={styles.timeContainer}>
+            <Text style={styles.timeText}>{burger.totalTime}</Text>
           </View>
-          <Text style={[styles.cookTime, { color: colors.subtext }]}>{burger.cookTime}</Text>
+          <View style={styles.difficulty}>
+            <Text style={styles.difficultyText}>{burger.difficulty.toUpperCase()}</Text>
+          </View>
         </View>
-        
-        <View style={styles.difficulty}>
-          <Text style={[
-            styles.difficultyText,
-            burger.difficulty === 'Easy' && styles.easy,
-            burger.difficulty === 'Medium' && styles.medium,
-            burger.difficulty === 'Hard' && styles.hard,
-          ]}>
-            {burger.difficulty}
-          </Text>
-        </View>
+
+        <TouchableOpacity onPress={handleFavoritePress} style={styles.favoriteIcon}>
+          <Image
+            source={{ uri: isLiked ? filledHeartIcon : heartIcon }}
+            style={[
+              styles.heart,
+              isLiked && styles.heartFilled
+            ]}
+          />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -90,95 +78,92 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 15,
-    margin: 8,
-    flex: 1,
-    elevation: 4,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 12,
+    marginLeft: 2,
+    width: 150,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 3 },
     shadowRadius: 6,
-    overflow: 'hidden',
-    borderWidth: 1,
+    elevation: 4,
   },
-  imageContainer: {
+  imageWrapper: {
     position: 'relative',
+    alignItems: 'center',
+    marginTop: -40,
+    zIndex: 10,
   },
   image: {
-    width: '100%',
-    height: 140,
-    resizeMode: 'cover',
+    width: 130,
+    height: 100,
+    resizeMode: 'contain',
   },
-  favoriteButton: {
+  favoriteIcon: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
+    bottom: 0,
+    right: 2,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 5,
+    elevation: 2,
   },
-  content: {
-    padding: 12,
+  heart: {
+    width: 18,
+    height: 18,
+    tintColor: 'black', 
+  },
+
+  heartFilled: {
+    tintColor: '#8B0000', 
+  },
+  infoSection: {
+    alignItems: 'flex-start',
+    marginTop: 12,
+    paddingLeft: 4,
   },
   name: {
     fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'left',
     marginBottom: 4,
-    lineHeight: 20,
+    maxWidth: '100%',
+    overflow: 'hidden',
   },
   category: {
     fontSize: 12,
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    color: '#6B7280',
+    marginBottom: 6,
+    alignSelf: 'flex-start',
   },
-  footer: {
-    flexDirection: 'row',
+  row: {
+    flexDirection: 'column',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+    width: '100%',
+    gap: 4,
   },
-  rating: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  timeContainer: {
+    paddingVertical: 4,
+    borderRadius: 999,
+    alignSelf: 'flex-start',
   },
-  stars: {
-    fontSize: 14,
-    marginRight: 4,
-  },
-  ratingText: {
+
+  timeText: {
     fontSize: 12,
-    fontWeight: '500',
-  },
-  cookTime: {
-    fontSize: 12,
-    fontWeight: '500',
+    color: 'black',
   },
   difficulty: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
     alignSelf: 'flex-start',
   },
   difficultyText: {
     fontSize: 11,
-    fontWeight: 'bold',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  easy: {
-    backgroundColor: '#DCFCE7',
     color: '#166534',
-  },
-  medium: {
-    backgroundColor: '#FEF3C7',
-    color: '#92400E',
-  },
-  hard: {
-    backgroundColor: '#FEE2E2',
-    color: '#B91C1C',
+    fontWeight: 'bold',
   },
 });
 
