@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView, 
   Platform,
 } from 'react-native';
+import axios from 'axios';
 import { AIMessage } from '../types/Burger';
 
 const AIAssistantScreen: React.FC = () => {
@@ -43,46 +44,37 @@ const AIAssistantScreen: React.FC = () => {
     }, 100);
   };
 
-  const generateAIResponse = (userMessage: string): string => {
-    const lowerMessage = userMessage.toLowerCase();
-    
-    if (lowerMessage.includes('patty') || lowerMessage.includes('meat')) {
-      return 'For the perfect patty: Use 80/20 ground beef, don\'t overwork the meat, make a small indent in the center to prevent puffing, and season generously with salt and pepper just before cooking. Cook for 3-4 minutes per side for medium doneness! 🥩';
+  const generateAIResponse = async (userMessage: string): Promise<string> => {
+    const burgerPrompt = `
+      You are an AI Burger Chef Assistant 🍔.
+      You help users with burger recipes, patty tips, ingredient substitutions, and cooking techniques.
+      Answer helpfully, friendly, and like a fun burger expert.
+      User: ${userMessage}
+    `;
+
+    try {
+      const response = await axios.post(
+        'https://api.cohere.ai/v1/chat',
+        {
+          message: burgerPrompt,
+          model: 'command-r',
+          chat_history: [],
+          temperature: 0.7,
+          max_tokens: 300,
+        },
+        {
+          headers: {
+            'Authorization': 'Bearer T0wyDO2Tv2RClj7PxmyTpC4YnNZdVNwgsL9Hemcb',
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      return response.data.text ?? 'Hmm... I couldn’t think of a good answer!';
+    } catch (error: any) {
+      console.error('Cohere API error:', error?.response?.data || error.message || error);
+      return 'Sorry, I’m having trouble responding right now. Please try again later!';
     }
-    
-    if (lowerMessage.includes('cheese')) {
-      return 'Great cheese choices for burgers:\n• American - Classic melting\n• Cheddar - Sharp flavor\n• Swiss - Nutty taste\n• Pepper Jack - Spicy kick\n• Blue cheese - Bold flavor\n\nAdd cheese in the last minute of cooking for perfect melting! 🧀';
-    }
-    
-    if (lowerMessage.includes('vegetarian') || lowerMessage.includes('veggie')) {
-      return 'Delicious vegetarian options:\n• Black bean patties\n• Portobello mushroom caps\n• Quinoa and vegetable patties\n• Beyond/Impossible meat alternatives\n• Grilled halloumi cheese\n\nDon\'t forget to season well and add plenty of fresh toppings! 🥬';
-    }
-    
-    if (lowerMessage.includes('temperature') || lowerMessage.includes('cook')) {
-      return 'Burger cooking temperatures:\n• Rare: 120-125°F\n• Medium-rare: 130-135°F\n• Medium: 135-145°F\n• Medium-well: 145-155°F\n• Well-done: 155°F+\n\nAlways use a meat thermometer for food safety! 🌡️';
-    }
-    
-    if (lowerMessage.includes('bun') || lowerMessage.includes('bread')) {
-      return 'Best burger buns:\n• Brioche - Rich and buttery\n• Sesame seed - Classic choice\n• Pretzel buns - Unique flavor\n• Whole wheat - Healthier option\n• Potato buns - Soft and sweet\n\nAlways toast your buns for better texture! 🍞';
-    }
-    
-    if (lowerMessage.includes('sauce') || lowerMessage.includes('condiment')) {
-      return 'Popular burger sauces:\n• Classic: Ketchup, mustard, mayo\n• Special sauce: Mayo + ketchup + pickle relish\n• Aioli: Garlic mayo\n• BBQ sauce: Sweet and smoky\n• Chipotle mayo: Spicy and creamy\n\nExperiment with different combinations! 🥫';
-    }
-    
-    if (lowerMessage.includes('topping')) {
-      return 'Essential burger toppings:\n• Lettuce (iceberg or butter)\n• Tomato (thick slices)\n• Onion (red or white)\n• Pickles\n• Bacon\n• Avocado\n• Mushrooms\n\nLayer strategically: wet ingredients away from the bun! 🥬🍅';
-    }
-    
-    // Default responses
-    const defaultResponses = [
-      'That\'s a great question! For the best burger experience, focus on quality ingredients and proper cooking techniques. What specific aspect would you like to know more about?',
-      'I\'d love to help you with that! Burger making is an art. Could you be more specific about what you\'re looking for?',
-      'Interesting! There are many ways to approach burger making. What\'s your current skill level, and what would you like to improve?',
-      'Great question! The key to amazing burgers is in the details. What particular challenge are you facing?',
-    ];
-    
-    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
   };
 
   const sendMessage = async (text: string): Promise<void> => {
@@ -99,18 +91,22 @@ const AIAssistantScreen: React.FC = () => {
     setInputText('');
     setIsTyping(true);
 
-    // Simulate AI thinking time
-    setTimeout(() => {
+    try {
+      const aiText = await generateAIResponse(text);
+
       const aiResponse: AIMessage = {
         id: (Date.now() + 1).toString(),
-        text: generateAIResponse(text),
+        text: aiText,
         isUser: false,
         timestamp: new Date(),
       };
 
       setMessages(prev => [...prev, aiResponse]);
+    } catch (error) {
+      console.error(error);
+    } finally {
       setIsTyping(false);
-    }, 1000 + Math.random() * 2000);
+    }
   };
 
   const MessageBubble: React.FC<{ message: AIMessage }> = ({ message }) => (

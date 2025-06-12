@@ -265,16 +265,16 @@ const HomeScreen: React.FC = () => {
 
       {/* Burgers List */}
       <View style={styles.burgersSection}>
-        <View style={styles.sectionHeader}>
+        {/* <View style={styles.sectionHeader}>
           <Text weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>
-            {selectedCategory === "All" ? "All Burgers" : `${selectedCategory} Burgers`}
+            {selectedCategory === "All" ? "All" : `${selectedCategory}`}
           </Text>
           <View style={styles.resultsContainer}>
-            <Text italic style={[{ color: colors.subtext }]}>
+            <Text italic style={[styles.resultsCount, { color: colors.subtext }]}>
               {filteredBurgers.length} {filteredBurgers.length === 1 ? "result" : "results"}
             </Text>
           </View>
-        </View>
+        </View> */}
 
         {filteredBurgers.length === 0 ? (
           <View style={styles.emptyState}>
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 13,
   },
   resultsContainer: {
     flexDirection: "row",
