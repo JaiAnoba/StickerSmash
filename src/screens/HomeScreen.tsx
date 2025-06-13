@@ -158,13 +158,6 @@ const HomeScreen: React.FC = () => {
       <View style={[styles.header, { backgroundColor }]}>
         <View style={styles.headerContent}>
           <View style={styles.profileAndText}>
-            <Image
-              source={{
-                uri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-              }}
-              style={styles.profileImage}
-            />
-
             <View style={styles.headerTextContainer}>
               <Text weight="semiBold" style={[styles.headerLineOne, { color: colors.text }]}>Choose</Text>
               <Text style={styles.headerLineTwo}>
@@ -309,7 +302,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   headerLineOne: {
-    fontSize: 18,
+    fontSize: 20,
   },
   headerLineTwo: {
     fontSize: 25,
@@ -318,12 +311,6 @@ const styles = StyleSheet.create({
   },
   redText: {
     color: "#B91C1C",
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 25,
-    marginRight: 20,
   },
   searchWrapper: {
     flexDirection: "row",
