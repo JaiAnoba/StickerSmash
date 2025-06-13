@@ -1,5 +1,6 @@
 {
   "expo": {
+    "name": "Burgify",
     "slug": "burgify",
     "jsEngine": "jsc",
     "version": "1.0.0",

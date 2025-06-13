@@ -1,0 +1,16 @@
+export const burgerImages: Record<string, any> = {
+  classic: require('../../assets/images/ClassicCheeseburger.png'),
+  mushroomSwiss: require('../../assets/images/MushroomSwissBurger.png'),
+  veggie: require('../../assets/images/VeggieBurgerDeluxe.png'),
+  spicy: require('../../assets/images/SpicyJalapeñoBurger.png'),
+  bbq: require('../../assets/images/BBQBaconBurger.png'),
+  lamb: require('../../assets/images/MediterraneanLambBurger.png'),
+  portobello: require('../../assets/images/PortobelloMushroomBurger.png'),
+  hawaiian: require('../../assets/images/HawaiianTeriyakiBurger.png'),
+  doubleBacon: require('../../assets/images/DoubleBaconSmashBurger.png'),
+  turkey: require('../../assets/images/TurkeyAvocadoBurger.png'),
+  blueCheese: require('../../assets/images/BlueCheeseBurger.png'),
+  breakfast: require('../../assets/images/BreakfastBurger.png'),
+  kimchi: require('../../assets/images/KimchiBurger.png'),
+  salmonBurger: require('../../assets/images/SalmonBurger.png'),
+};

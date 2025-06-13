@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   Image,
@@ -12,6 +11,8 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../App';
+import { burgerImages } from '../data/burgerImages';
+import Text from "../components/CustomText";
 
 type BurgerDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BurgerDetail'>;
 type BurgerDetailScreenRouteProp = RouteProp<RootStackParamList, 'BurgerDetail'>;
@@ -127,7 +128,10 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Image Section */}
         <View style={styles.imageContainer}>
-          <Image source={{ uri: burger.image }} style={styles.burgerImage} />
+          <Image
+            source={burgerImages[burger.image]} 
+            style={styles.burgerImage}
+          />
         </View>
         
         {/* Info Section */}

@@ -9,6 +9,7 @@ import { Burger } from '../types/Burger';
 import { useTheme } from '../context/ThemeContext';
 import { useFavorites } from '../context/FavoritesContext';
 import Text from "../components/CustomText";
+import { burgerImages } from '../data/burgerImages';
 
 const heartIcon = 'https://img.icons8.com/puffy/32/like.png';
 const filledHeartIcon = 'https://img.icons8.com/puffy-filled/32/like.png';
@@ -40,7 +41,10 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
       activeOpacity={0.9}
     >
       <View style={styles.imageWrapper}>
-        <Image source={{ uri: burger.image }} style={styles.image} />
+        <Image
+          source={burgerImages[burger.image]} 
+          style={styles.image}
+        />
       </View>
 
       <View style={styles.infoSection}>

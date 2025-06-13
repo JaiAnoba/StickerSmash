@@ -1,13 +1,13 @@
 import type { Burger } from "../types/Burger"
-import salmonBurgerImg from '../../assets/images/SalmonBurger.png';
+import {burgerImages} from "./burgerImages"
+
 
 export const burgersData: Burger[] = [
   {
     id: "1",
     name: "Classic Cheeseburger",
     category: "Classic",
-    image:
-      "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1400&q=80",
+    image: burgerImages.classic,
     description:
       "The timeless classic burger with juicy beef patty, melted cheese, fresh lettuce, tomato, and our special sauce.",
     ingredients: [
@@ -53,7 +53,7 @@ export const burgersData: Burger[] = [
     name: "Mushroom Swiss Burger",
     category: "Gourmet",
     image:
-      "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1400&q=80",
+      burgerImages.mushroomSwiss,
     description:
       "A savory delight featuring sautéed mushrooms, caramelized onions, and melted Swiss cheese on a juicy beef patty.",
     ingredients: [
@@ -102,7 +102,7 @@ export const burgersData: Burger[] = [
     name: "Veggie Burger Deluxe",
     category: "Vegetarian",
     image:
-      "https://images.unsplash.com/photo-1550317138-10000687a72b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1400&q=80",
+      burgerImages.veggie,
     description:
       "A hearty plant-based burger with black beans, quinoa, and roasted vegetables, topped with avocado and sprouts.",
     ingredients: [
@@ -156,7 +156,7 @@ export const burgersData: Burger[] = [
     name: "Spicy Jalapeño Burger",
     category: "Spicy",
     image:
-      "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1400&q=80",
+      "spicy",
     description:
       "A fiery burger featuring jalapeños, pepper jack cheese, and chipotle mayo that will ignite your taste buds.",
     ingredients: [
@@ -205,7 +205,7 @@ export const burgersData: Burger[] = [
     name: "BBQ Bacon Burger",
     category: "BBQ",
     image:
-      "https://images.unsplash.com/photo-1553979459-d2229ba7433b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1400&q=80",
+      "bbq",
     description:
       "A smoky, sweet burger topped with crispy bacon, cheddar cheese, and tangy BBQ sauce for the ultimate comfort food experience.",
     ingredients: [
@@ -254,7 +254,7 @@ export const burgersData: Burger[] = [
     name: "Mediterranean Lamb Burger",
     category: "Gourmet",
     image:
-      "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1400&q=80",
+      "lamb",
     description:
       "A sophisticated burger featuring ground lamb, feta cheese, tzatziki sauce, and fresh herbs for a Mediterranean twist.",
     ingredients: [
@@ -305,7 +305,7 @@ export const burgersData: Burger[] = [
     name: "Portobello Mushroom Burger",
     category: "Vegetarian",
     image:
-      "https://images.unsplash.com/photo-1551782450-17144efb9c50?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1400&q=80",
+      burgerImages.portobello,
     description:
       "A meaty vegetarian option featuring marinated and grilled portobello mushroom caps, roasted red peppers, and goat cheese.",
     ingredients: [
@@ -353,7 +353,7 @@ export const burgersData: Burger[] = [
     name: "Hawaiian Teriyaki Burger",
     category: "Gourmet",
     image:
-      "https://images.unsplash.com/photo-1565299507177-b0ac66763828?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1400&q=80",
+      "hawaiian",
     description:
       "A tropical-inspired burger with teriyaki glaze, grilled pineapple, and Swiss cheese that brings the flavors of Hawaii to your plate.",
     ingredients: [
@@ -404,7 +404,7 @@ export const burgersData: Burger[] = [
     name: "Double Bacon Smash Burger",
     category: "Classic",
     image:
-      "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1400&q=80",
+      "doubleBacon",
     description:
       "A decadent burger featuring two thin, crispy-edged smashed patties, double cheese, and plenty of bacon for the ultimate indulgence.",
     ingredients: [
@@ -452,7 +452,7 @@ export const burgersData: Burger[] = [
     name: "Turkey Avocado Burger",
     category: "Healthy",
     image:
-      "https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1400&q=80",
+      "turkey",
     description:
       "A lighter burger option made with lean ground turkey, topped with creamy avocado, sprouts, and a zesty yogurt sauce.",
     ingredients: [
@@ -502,7 +502,7 @@ export const burgersData: Burger[] = [
     id: "11",
     name: "Blue Cheese Burger",
     category: "Gourmet",
-    image: "https://images.unsplash.com/photo-1612197553921-33fc1ed179b5?auto=format&fit=crop&w=1400&q=80",
+    image: "blueCheese",
     description: "Bold and tangy blue cheese paired with caramelized onions and arugula for a rich, gourmet experience.",
     ingredients: [
       "1 lb ground beef",
@@ -541,7 +541,7 @@ export const burgersData: Burger[] = [
     id: "12",
     name: "Breakfast Burger",
     category: "Specialty",
-    image: "https://images.unsplash.com/photo-1601050690591-ef8f4bdcfb0e?auto=format&fit=crop&w=1400&q=80",
+    image: "breakfast",
     description: "A morning twist with fried egg, crispy bacon, cheddar cheese, and a hash brown patty on a toasted bun.",
     ingredients: [
       "1 lb ground beef",
@@ -579,7 +579,7 @@ export const burgersData: Burger[] = [
     id: "13",
     name: "Kimchi Burger",
     category: "Fusion",
-    image: "https://images.unsplash.com/photo-1620221642211-bd52aa3d38d7?auto=format&fit=crop&w=1400&q=80",
+    image: "kimchi",
     description: "A Korean-inspired burger with spicy kimchi, gochujang mayo, and crispy beef patty.",
     ingredients: [
       "1 lb ground beef",
@@ -617,7 +617,7 @@ export const burgersData: Burger[] = [
     id: "14",
     name: "Salmon Burger",
     category: "Seafood",
-    image: './assets/images/Salmon Burger.png',
+    image: 'salmonBurger',
     description: "A light yet flavorful burger made with fresh salmon, dill, and lemon, perfect for seafood lovers.",
     ingredients: [
       "1 lb salmon filet, skin removed",
