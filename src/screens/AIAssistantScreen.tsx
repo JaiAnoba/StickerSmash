@@ -137,7 +137,7 @@ const AIAssistantScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#B91C1C" barStyle="light-content" />
+      <StatusBar backgroundColor="#8B0000" barStyle="light-content" />
       
       {/* Header */}
       <View style={styles.header}>

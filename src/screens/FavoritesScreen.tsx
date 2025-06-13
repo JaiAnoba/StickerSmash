@@ -97,7 +97,7 @@ const FavoritesScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      <StatusBar backgroundColor="#8B0000" barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
