@@ -1,4 +1,5 @@
 import type { Burger } from "../types/Burger"
+import salmonBurgerImg from '../../assets/images/SalmonBurger.png';
 
 export const burgersData: Burger[] = [
   {
@@ -616,7 +617,7 @@ export const burgersData: Burger[] = [
     id: "14",
     name: "Salmon Burger",
     category: "Seafood",
-    image: "https://images.unsplash.com/photo-1585238342020-fd1c3f5a646d?auto=format&fit=crop&w=1400&q=80",
+    image: './assets/images/Salmon Burger.png',
     description: "A light yet flavorful burger made with fresh salmon, dill, and lemon, perfect for seafood lovers.",
     ingredients: [
       "1 lb salmon filet, skin removed",
