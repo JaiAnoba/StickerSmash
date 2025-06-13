@@ -4,6 +4,7 @@ import type React from "react"
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import type { Burger } from "../types/Burger"
+import { burgerImages } from '../data/burgerImages';
 
 interface FavoritesContextType {
   favorites: Burger[]
@@ -47,9 +48,18 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
   }
 
   const addFavorite = (burger: Burger) => {
-    const newFavorites = [...favorites, burger]
-    saveFavorites(newFavorites)
-  }
+    if (!burger.image || !burgerImages[burger.image]) {
+      console.warn(`Burger ${burger.name} has invalid or missing image key.`);
+      return;
+    }
+
+    const exists = favorites.some(item => item.id === burger.id);
+    if (!exists) {
+      const newFavorites = [...favorites, burger];
+      saveFavorites(newFavorites);
+    }
+  };
+
 
   const removeFavorite = (burgerId: string) => {
     const newFavorites = favorites.filter((burger) => burger.id !== burgerId)

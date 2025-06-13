@@ -7,7 +7,7 @@ export const burgersData: Burger[] = [
     id: "1",
     name: "Classic Cheeseburger",
     category: "Classic",
-    image: burgerImages.classic,
+    image: "classic",
     description:
       "The timeless classic burger with juicy beef patty, melted cheese, fresh lettuce, tomato, and our special sauce.",
     ingredients: [
@@ -53,7 +53,7 @@ export const burgersData: Burger[] = [
     name: "Mushroom Swiss Burger",
     category: "Gourmet",
     image:
-      burgerImages.mushroomSwiss,
+      "mushroomSwiss",
     description:
       "A savory delight featuring sautéed mushrooms, caramelized onions, and melted Swiss cheese on a juicy beef patty.",
     ingredients: [
@@ -102,7 +102,7 @@ export const burgersData: Burger[] = [
     name: "Veggie Burger Deluxe",
     category: "Vegetarian",
     image:
-      burgerImages.veggie,
+      "veggie",
     description:
       "A hearty plant-based burger with black beans, quinoa, and roasted vegetables, topped with avocado and sprouts.",
     ingredients: [
@@ -305,7 +305,7 @@ export const burgersData: Burger[] = [
     name: "Portobello Mushroom Burger",
     category: "Vegetarian",
     image:
-      burgerImages.portobello,
+      "portobello",
     description:
       "A meaty vegetarian option featuring marinated and grilled portobello mushroom caps, roasted red peppers, and goat cheese.",
     ingredients: [
