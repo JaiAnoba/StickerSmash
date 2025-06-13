@@ -9,6 +9,7 @@ import {
   ScrollView,
   KeyboardAvoidingView, 
   Platform,
+  Image
 } from 'react-native';
 import axios from 'axios';
 import { AIMessage } from '../types/Burger';
@@ -141,7 +142,13 @@ const AIAssistantScreen: React.FC = () => {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text weight='semiBold' style={styles.headerTitle}>🤖 AI Burger Chef</Text>
+        <View style={styles.headerWrapper}>
+          <Image
+            source={{ uri : "https://img.icons8.com/fluency-systems-regular/48/chatbot.png"}}
+            style={{ width: 18, height: 18, tintColor: 'white', marginRight: 8, top: 4 }}
+          /> 
+          <Text weight='semiBold' style={styles.headerTitle}>AI Burger Chef</Text>
+        </View>
         <Text style={styles.headerSubtitle}>Your personal cooking assistant</Text>
       </View>
 
@@ -200,7 +207,15 @@ const AIAssistantScreen: React.FC = () => {
             onPress={() => sendMessage(inputText)}
             disabled={!inputText.trim() || isTyping}
           >
-            <Text style={styles.sendButtonText}>→</Text>
+            <Image
+              source={{ uri: "https://img.icons8.com/puffy-filled/32/sent.png" }}
+              style={{
+                width: 22,
+                height: 22,
+                tintColor: !inputText.trim() ? '#999' : '#B91C1C',
+              }}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -212,6 +227,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+  },
+  headerWrapper: {
+    flexDirection: 'row',
   },
   header: {
     backgroundColor: "#8B0000",
@@ -322,7 +340,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   sendButton: {
-    backgroundColor: '#B91C1C',
+    backgroundColor: 'rgba(243, 241, 241, 0.8)',
     borderRadius: 20,
     width: 40,
     height: 40,
