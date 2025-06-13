@@ -62,9 +62,25 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
           <View style={styles.timeContainer}>
             <Text style={styles.timeText}>{burger.totalTime}</Text>
           </View>
-          <View style={styles.difficulty}>
-            <Text weight= "semiBold" style={styles.difficultyText}>{burger.difficulty.toUpperCase()}</Text>
+          <View
+            style={[
+              styles.difficulty,
+              burger.difficulty.toLowerCase() === 'medium' && { backgroundColor: '#FEF3C7' }, 
+              burger.difficulty.toLowerCase() === 'hard' && { backgroundColor: '#FECACA' }, 
+            ]}
+          >
+            <Text
+              weight="semiBold"
+              style={[
+                styles.difficultyText,
+                burger.difficulty.toLowerCase() === 'medium' && { color: '#B45309' }, 
+                burger.difficulty.toLowerCase() === 'hard' && { color: '#B91C1C' },  
+              ]}
+            >
+              {burger.difficulty.toUpperCase()}
+            </Text>
           </View>
+
         </View>
 
         <TouchableOpacity onPress={handleFavoritePress} style={styles.favoriteIcon}>
@@ -97,11 +113,11 @@ const styles = StyleSheet.create({
   imageWrapper: {
     position: 'relative',
     alignItems: 'center',
-    marginTop: -40,
+    marginTop: -45,
     zIndex: 10,
   },
   image: {
-    width: 130,
+    width: 120,
     height: 100,
     resizeMode: 'contain',
   },
@@ -119,19 +135,18 @@ const styles = StyleSheet.create({
     height: 18,
     tintColor: 'black', 
   },
-
   heartFilled: {
     tintColor: '#8B0000', 
   },
   infoSection: {
     alignItems: 'flex-start',
-    marginTop: 12,
+    marginTop: 6,
     paddingLeft: 4,
   },
   name: {
     fontSize: 14,
     textAlign: 'left',
-    marginBottom: 4,
+    marginBottom: 2,
     maxWidth: '100%',
     overflow: 'hidden',
   },
