@@ -51,7 +51,8 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             <View style={styles.metaInfo}>
               <View style={styles.metaItem}>
                 <Text style={styles.metaLabel}>Difficulty</Text>
-                <Text style={[
+                <Text weight='semiBold' 
+                style={[
                   styles.metaValue,
                   burger.difficulty === 'Easy' && styles.easyText,
                   burger.difficulty === 'Medium' && styles.mediumText,
@@ -62,13 +63,13 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
               </View>
               <View style={styles.metaItem}>
                 <Text style={styles.metaLabel}>Cook Time</Text>
-                <Text style={styles.metaValue}>{burger.cookTime}</Text>
+                <Text weight='semiBold' style={styles.metaValue}>{burger.cookTime}</Text>
               </View>
               <View style={styles.metaItem}>
                 <Text style={styles.metaLabel}>Rating</Text>
                 <View style={styles.ratingContainer}>
                   <Text style={styles.stars}>{renderStars(burger.rating)}</Text>
-                  <Text style={styles.ratingValue}>{burger.rating}</Text>
+                  <Text weight='semiBold' style={styles.ratingValue}>{burger.rating}</Text>
                 </View>
               </View>
             </View>
@@ -77,7 +78,7 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       case 'ingredients':
         return (
           <View style={styles.tabContent}>
-            <Text style={styles.sectionTitle}>Ingredients</Text>
+            <Text weight='semiBold' style={styles.sectionTitle}>Ingredients</Text>
             {burger.ingredients.map((ingredient: string, index: number) => (
               <View key={index} style={styles.listItem}>
                 <Text style={styles.bullet}>•</Text>
@@ -89,11 +90,11 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       case 'instructions':
         return (
           <View style={styles.tabContent}>
-            <Text style={styles.sectionTitle}>Cooking Instructions</Text>
+            <Text weight='semiBold' style={styles.sectionTitle}>Cooking Instructions</Text>
             {burger.instructions.map((instruction: string, index: number) => (
               <View key={index} style={styles.instructionItem}>
                 <View style={styles.stepNumber}>
-                  <Text style={styles.stepNumberText}>{index + 1}</Text>
+                  <Text weight='semiBold' style={styles.stepNumberText}>{index + 1}</Text>
                 </View>
                 <Text style={styles.instructionText}>{instruction}</Text>
               </View>
@@ -107,7 +108,7 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#B91C1C" barStyle="light-content" />
+      <StatusBar backgroundColor="#8B0000" barStyle="light-content" />
       
       {/* Header */}
       <View style={styles.header}>
@@ -115,14 +116,14 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backButtonText}>←</Text>
+          <Image
+            source={{ uri: 'https://img.icons8.com/sf-black/100/back.png' }}
+            style={styles.backIcon}
+          />
         </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>
-          {burger.name}
-        </Text>
-        <TouchableOpacity style={styles.favoriteButton}>
+        {/* <TouchableOpacity style={styles.favoriteButton}>
           <Text style={styles.favoriteIcon}>♡</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -136,8 +137,8 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         
         {/* Info Section */}
         <View style={styles.infoSection}>
-          <Text style={styles.burgerName}>{burger.name}</Text>
-          <Text style={styles.burgerCategory}>{burger.category}</Text>
+          <Text weight = 'semiBold' style={styles.burgerName}>{burger.name}</Text>
+          <Text weight= 'medium' style={styles.burgerCategory}>{burger.category}</Text>
           
           {/* Tabs */}
           <View style={styles.tabsContainer}>
@@ -178,10 +179,10 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#8B0000',
   },
   header: {
-    backgroundColor: '#B91C1C',
+    backgroundColor: '#8B0000',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -192,22 +193,19 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(215, 214, 214, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
+    tintColor: 'white',
   },
   backButtonText: {
     color: 'white',
     fontSize: 20,
     fontWeight: 'bold',
-  },
-  headerTitle: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'center',
-    marginHorizontal: 10,
   },
   favoriteButton: {
     width: 40,
@@ -225,38 +223,35 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   imageContainer: {
-    backgroundColor: '#B91C1C',
+    backgroundColor: '#8B0000',
     paddingBottom: 30,
     alignItems: 'center',
   },
   burgerImage: {
     width: 280,
     height: 280,
-    borderRadius: 140,
     resizeMode: 'cover',
-    borderWidth: 8,
-    borderColor: 'white',
+    zIndex: 999,
   },
   infoSection: {
     backgroundColor: 'white',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    marginTop: -30,
-    paddingTop: 30,
+    marginTop: -155,
+    paddingTop: 120,
     paddingHorizontal: 20,
     flex: 1,
   },
   burgerName: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 21,
     color: '#333',
-    textAlign: 'center',
-    marginBottom: 8,
+    textAlign: 'left',
+    marginBottom: 2,
   },
   burgerCategory: {
-    fontSize: 16,
-    color: '#B91C1C',
-    textAlign: 'center',
+    fontSize: 14,
+    color: '#8B0000',
+    textAlign: 'left',
     marginBottom: 30,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -276,12 +271,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   activeTab: {
-    backgroundColor: '#B91C1C',
+    backgroundColor: '#8B0000',
   },
   tabText: {
     fontSize: 14,
     color: '#666',
-    fontWeight: '600',
   },
   activeTabText: {
     color: 'white',
@@ -290,7 +284,7 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   description: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
     lineHeight: 24,
     marginBottom: 25,
@@ -302,30 +296,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
     borderRadius: 15,
     padding: 20,
+    marginBottom: 55,
   },
   metaItem: {
     alignItems: 'center',
   },
   metaLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#666',
     marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   metaValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
     color: '#333',
   },
   easyText: {
     color: '#059669',
+    fontSize: 14,
   },
   mediumText: {
     color: '#D97706',
+    fontSize: 14,
   },
   hardText: {
     color: '#B91C1C',
+    fontSize: 14,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -333,17 +330,15 @@ const styles = StyleSheet.create({
   },
   stars: {
     color: '#B91C1C',
-    fontSize: 16,
+    fontSize: 14,
     marginRight: 4,
   },
   ratingValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
     color: '#333',
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 18,
     color: '#333',
     marginBottom: 20,
   },
@@ -353,15 +348,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   bullet: {
-    fontSize: 16,
+    fontSize: 20,
     color: '#B91C1C',
     marginRight: 12,
     marginTop: 2,
   },
   listText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
     lineHeight: 22,
+    top: 6,
     flex: 1,
   },
   instructionItem: {
@@ -370,10 +366,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   stepNumber: {
-    width: 28,
+    width: 26,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#B91C1C',
+    backgroundColor: '#8B0000',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -382,12 +378,12 @@ const styles = StyleSheet.create({
   stepNumberText: {
     color: 'white',
     fontSize: 14,
-    fontWeight: 'bold',
   },
   instructionText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
     lineHeight: 22,
+    top: 7,
     flex: 1,
   },
 });
