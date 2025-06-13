@@ -11,6 +11,7 @@ import {
   Alert,
   BackHandler,
   ScrollView,
+  Image
 } from "react-native"
 import type { StackNavigationProp } from "@react-navigation/stack"
 import type { RouteProp } from "@react-navigation/native"
@@ -29,6 +30,8 @@ interface Props {
   route: CookingTimerScreenRouteProp
 }
 
+type TabType = "ingredients" | "instructions" | "tips"
+
 const CookingTimerScreen: React.FC<Props> = ({ navigation, route }) => {
   const { burger } = route.params
   const { completeCooking, cancelCooking } = useCooking()
@@ -41,6 +44,7 @@ const CookingTimerScreen: React.FC<Props> = ({ navigation, route }) => {
   const [userRating, setUserRating] = useState<number | null>(null)
   const [tempRating, setTempRating] = useState<number | null>(null)
   const [ratingSaved, setRatingSaved] = useState(false)
+  const [activeTab, setActiveTab] = useState<TabType>("ingredients")
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const scrollViewRef = useRef<ScrollView>(null)
@@ -83,15 +87,6 @@ const CookingTimerScreen: React.FC<Props> = ({ navigation, route }) => {
       }
     }
   }, [isActive, isPaused])
-
-  // Scroll to the bottom when reaching the last step
-  useEffect(() => {
-    if (currentStep === burger.instructions.length - 1) {
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true })
-      }, 300)
-    }
-  }, [currentStep, burger.instructions.length])
 
   const handleBackPress = () => {
     if (isActive) {
@@ -180,16 +175,136 @@ const CookingTimerScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   }
 
+  // Generate AI tips based on burger difficulty
+  const getAITips = () => {
+    const difficultyTips = {
+      Easy: [
+        "Keep the heat medium-high for a perfect sear.",
+        "Don't press down on the patty while cooking to keep juices in.",
+        "Let the burger rest for 2-3 minutes before serving.",
+        "Toast the buns for extra flavor and texture.",
+      ],
+      Medium: [
+        "For juicier burgers, add a small ice cube in the center of each patty.",
+        "Create a small dimple in the center of the patty to prevent it from puffing up.",
+        "Season the meat just before cooking, not in advance.",
+        "For cheese burgers, add cheese during the last minute of cooking and cover to melt perfectly.",
+        "Let the meat come to room temperature before cooking for even results.",
+      ],
+      Hard: [
+        "For gourmet results, grind your own meat blend with a ratio of 80% lean to 20% fat.",
+        "Handle the meat as little as possible to keep the texture light.",
+        "Use a meat thermometer for perfect doneness: 125°F for rare, 135°F for medium-rare, 145°F for medium.",
+        "Rest the burger on a wire rack instead of a plate to prevent the bottom from getting soggy.",
+        "When adding toppings, consider the balance of flavors, textures, and temperatures.",
+        "For the best sear, make sure your cooking surface is extremely hot before adding the patty.",
+      ],
+    }
+
+    return difficultyTips[burger.difficulty as keyof typeof difficultyTips] || difficultyTips.Medium
+  }
+
+  // Render the active tab content
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "ingredients":
+        return (
+          <View style={styles.tabContent}>
+            <View style={styles.ingredientsList}>
+              {burger.ingredients.map((ingredient, index) => (
+                <View key={index} style={styles.ingredientItem}>
+                  <Text style={styles.bulletPoint}>•</Text>
+                  <Text style={styles.ingredientText}>{ingredient}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )
+      case "instructions":
+        return (
+          <View style={styles.tabContent}>
+            <View style={styles.stepCard}>
+              <Text style={styles.stepText}>{burger.instructions[currentStep]}</Text>
+            </View>
+
+            <View style={styles.stepNavigation}>
+              <Button
+                title="Previous"
+                onPress={prevStep}
+                variant="outline"
+                disabled={currentStep === 0}
+                style={{ flex: 1, marginRight: 5 }}
+              />
+              <Button
+                title="Next"
+                onPress={nextStep}
+                variant="outline"
+                disabled={currentStep === burger.instructions.length - 1}
+                style={{ flex: 1, marginLeft: 5 }}
+              />
+            </View>
+
+            <Text style={styles.stepCounter}>
+              Step {currentStep + 1} of {burger.instructions.length}
+            </Text>
+
+            {currentStep === burger.instructions.length - 1 && (
+              <View style={styles.ratingSection}>
+                <Text weight="semiBold" style={styles.ratingTitle}>
+                  How was this recipe?
+                </Text>
+                <View style={styles.ratingContainer}>
+                  <StarRating
+                    rating={tempRating || 0}
+                    editable={true}
+                    onRatingChange={handleTempRatingChange}
+                    size={32}
+                    color="#8B0000"
+                  />
+                  <Text style={styles.ratingText}>{tempRating ? `Your rating: ${tempRating}` : "Tap to rate"}</Text>
+                  <Button
+                    title={ratingSaved ? "Update Rating" : "Save Rating"}
+                    onPress={handleSaveRating}
+                    variant="primary"
+                    disabled={tempRating === null}
+                    style={styles.saveRatingButton}
+                  />
+                </View>
+              </View>
+            )}
+          </View>
+        )
+      case "tips":
+        return (
+          <View style={styles.tabContent}>
+            <View style={styles.tipsContainer}>
+              <Text weight="semiBold" style={styles.tipsTitle}>
+                Chef AI Tips for {burger.difficulty} Burgers
+              </Text>
+              {getAITips().map((tip, index) => (
+                <View key={index} style={styles.tipItem}>
+                  <Text style={styles.tipNumber}>{index + 1}</Text>
+                  <Text style={styles.tipText}>{tip}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )
+      default:
+        return null
+    }
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#8B0000" barStyle="light-content" />
 
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-          <Text style={styles.backButtonText}>←</Text>
+          <Image source={{ uri: "https://img.icons8.com/sf-black/100/back.png" }} style={styles.backIcon} />
         </TouchableOpacity>
         <Text weight="semiBold" style={styles.headerTitle}>
-          Cooking: {burger.name}
+          Cooking
         </Text>
         <View style={styles.placeholder} />
       </View>
@@ -219,71 +334,32 @@ const CookingTimerScreen: React.FC<Props> = ({ navigation, route }) => {
           </View>
         </View>
 
-        <View style={styles.instructionsContainer}>
-          <Text weight="semiBold" style={styles.instructionsTitle}>
-            Step {currentStep + 1} of {burger.instructions.length}
-          </Text>
-
-          <View style={styles.stepCard}>
-            <Text style={styles.stepText}>{burger.instructions[currentStep]}</Text>
-          </View>
-
-          <View style={styles.stepNavigation}>
-            <Button
-              title="Previous"
-              onPress={prevStep}
-              variant="outline"
-              disabled={currentStep === 0}
-              style={{ flex: 1, marginRight: 5 }}
-            />
-            <Button
-              title="Next"
-              onPress={nextStep}
-              variant="outline"
-              disabled={currentStep === burger.instructions.length - 1}
-              style={{ flex: 1, marginLeft: 5 }}
-            />
-          </View>
-
-          {currentStep === burger.instructions.length - 1 && (
-            <View style={styles.ratingSection}>
-              <Text weight="semiBold" style={styles.ratingTitle}>
-                How was this recipe?
-              </Text>
-              <View style={styles.ratingContainer}>
-                <StarRating
-                  rating={tempRating || 0}
-                  editable={true}
-                  onRatingChange={handleTempRatingChange}
-                  size={32}
-                  color="#8B0000"
-                />
-                <Text style={styles.ratingText}>{tempRating ? `Your rating: ${tempRating}` : "Tap to rate"}</Text>
-                <Button
-                  title={ratingSaved ? "Update Rating" : "Save Rating"}
-                  onPress={handleSaveRating}
-                  variant="primary"
-                  disabled={tempRating === null}
-                  style={styles.saveRatingButton}
-                />
-              </View>
-            </View>
-          )}
+        {/* Tab Navigation */}
+        <View style={styles.tabsContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "ingredients" && styles.activeTab]}
+            onPress={() => setActiveTab("ingredients")}
+            >
+            <Text style={[styles.tabText, activeTab === "ingredients" && styles.activeTabText]}>
+                Ingredients
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "instructions" && styles.activeTab]}
+            onPress={() => setActiveTab("instructions")}
+          >
+            <Text style={[styles.tabText, activeTab === "instructions" && styles.activeTabText]}>Instructions</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "tips" && styles.activeTab]}
+            onPress={() => setActiveTab("tips")}
+          >
+            <Text style={[styles.tabText, activeTab === "tips" && styles.activeTabText]}>AI Tips</Text>
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.ingredientsContainer}>
-          <Text weight="semiBold" style={styles.ingredientsTitle}>
-            Ingredients Needed
-          </Text>
-          <View style={styles.ingredientsList}>
-            {burger.ingredients.map((ingredient, index) => (
-              <View key={index} style={styles.ingredientItem}>
-                <Text style={styles.bulletPoint}>•</Text>
-                <Text style={styles.ingredientText}>{ingredient}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
+        {/* Tab Content */}
+        {renderTabContent()}
       </ScrollView>
     </SafeAreaView>
   )
@@ -310,9 +386,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  backButtonText: {
-    color: "white",
-    fontSize: 20,
+  backIcon: {
+    width: 20,
+    height: 20,
+    tintColor: "white",
   },
   headerTitle: {
     color: "white",
@@ -347,22 +424,34 @@ const styles = StyleSheet.create({
   timerControls: {
     width: "100%",
   },
-  instructionsContainer: {
-    backgroundColor: "white",
-    margin: 15,
-    marginTop: 0,
-    borderRadius: 15,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+  tabsContainer: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    marginHorizontal: 15,
+    marginBottom: 10,
+   },
+   tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: "center",
+    borderBottomWidth: 2,
+    borderBottomColor: "transparent",
+   },
+   activeTab: {
+    borderBottomColor: "#8B0000", 
+   },
+  tabText: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
+    },
+    activeTabText: {
+    color: "#8B0000",
+    fontWeight: "700",
   },
-  instructionsTitle: {
-    fontSize: 18,
-    marginBottom: 15,
-    color: "#333",
+  tabContent: {
+    padding: 15,
   },
   stepCard: {
     backgroundColor: "#F9FAFB",
@@ -375,29 +464,25 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: "#4B5563",
   },
+  stepCounter: {
+    textAlign: "center",
+    marginTop: 15,
+    color: "#6B7280",
+    fontSize: 14,
+  },
   stepNavigation: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  ingredientsContainer: {
+  ingredientsList: {
     backgroundColor: "white",
-    margin: 15,
-    marginTop: 0,
     borderRadius: 15,
-    padding: 20,
+    padding: 15,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-  },
-  ingredientsTitle: {
-    fontSize: 18,
-    marginBottom: 15,
-    color: "#333",
-  },
-  ingredientsList: {
-    marginBottom: 10,
   },
   ingredientItem: {
     flexDirection: "row",
@@ -410,6 +495,44 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   ingredientText: {
+    fontSize: 14,
+    color: "#4B5563",
+    flex: 1,
+    lineHeight: 20,
+  },
+  tipsContainer: {
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  tipsTitle: {
+    fontSize: 18,
+    color: "#333",
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  tipItem: {
+    flexDirection: "row",
+    marginBottom: 15,
+    alignItems: "flex-start",
+  },
+  tipNumber: {
+    backgroundColor: "#8B0000",
+    color: "white",
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    textAlign: "center",
+    lineHeight: 24,
+    marginRight: 10,
+    fontWeight: "bold",
+  },
+  tipText: {
     fontSize: 14,
     color: "#4B5563",
     flex: 1,
