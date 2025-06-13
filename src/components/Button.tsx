@@ -8,7 +8,7 @@ import Text from "./CustomText"
 interface ButtonProps {
   title: string
   onPress: () => void
-  variant?: "primary" | "secondary" | "danger"
+  variant?: "primary" | "secondary" | "danger" | "success" | "outline" | string
   size?: "small" | "medium" | "large"
   fullWidth?: boolean
   disabled?: boolean

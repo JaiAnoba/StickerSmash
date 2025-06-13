@@ -13,9 +13,8 @@ import {
   Alert,
   Image,
   Modal,
-  Platform 
 } from "react-native"
-import * as ImagePicker from 'expo-image-picker'
+import * as ImagePicker from "expo-image-picker"
 import { useNavigation } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
 import type { RootStackParamList } from "../../App"
@@ -25,6 +24,7 @@ import { useFavorites } from "../context/FavoritesContext"
 import type { UserStats } from "../types/Burger"
 import Button from "../components/Button"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { useCooking } from "../context/CookingContext"
 
 type NavigationProp = StackNavigationProp<RootStackParamList>
 
@@ -32,6 +32,7 @@ const ProfileScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme()
   const { user, logout, updateUser } = useAuth()
   const { favorites } = useFavorites()
+  const { getRecipesCooked, getTotalCookingTime } = useCooking()
   const navigation = useNavigation<NavigationProp>()
   const [profileImage, setProfileImage] = useState<string | null>(null)
   const [isImageModalVisible, setIsImageModalVisible] = useState(false)
@@ -68,32 +69,31 @@ const ProfileScreen: React.FC = () => {
   }
 
   const handleImagePicker = async () => {
-  // Ask for permission if not already granted
-  const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
-  if (!permissionResult.granted) {
-    Alert.alert("Permission required", "Permission to access gallery is required.")
-    return
-  }
-
-  try {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-      base64: false,
-    })
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const imageUri = result.assets[0].uri
-      await saveProfileImage(imageUri)
-      setIsImageModalVisible(false)
+    // Ask for permission if not already granted
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (!permissionResult.granted) {
+      Alert.alert("Permission required", "Permission to access gallery is required.")
+      return
     }
-  } catch (error) {
-    console.error("Error picking image:", error)
-  }
-}
 
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+        base64: false,
+      })
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const imageUri = result.assets[0].uri
+        await saveProfileImage(imageUri)
+        setIsImageModalVisible(false)
+      }
+    } catch (error) {
+      console.error("Error picking image:", error)
+    }
+  }
 
   const removeProfileImage = async () => {
     try {
@@ -105,8 +105,19 @@ const ProfileScreen: React.FC = () => {
     }
   }
 
-  const loadUserStats = () => {
-    if (user?.stats) {
+  const loadUserStats = async () => {
+    try {
+      // Get stored burger views
+      const viewsData = await AsyncStorage.getItem("burgersViewed")
+      const burgersViewed = viewsData ? Number.parseInt(viewsData, 10) : Math.floor(Math.random() * 50) + 10
+
+      // Get recipes cooked from cooking context
+      const recipesCooked = getRecipesCooked()
+
+      // Get total cooking time from cooking context
+      const totalCookTime = getTotalCookingTime()
+
+      // Calculate favorite category
       const categoryCount: Record<string, number> = {}
       favorites.forEach((burger) => {
         categoryCount[burger.category] = (categoryCount[burger.category] || 0) + 1
@@ -122,15 +133,18 @@ const ProfileScreen: React.FC = () => {
       })
 
       setStats({
-        ...user.stats,
+        burgersViewed,
+        recipesCooked,
         favoriteCategory: favorites.length > 0 ? topCategory : "None yet",
+        totalCookTime,
       })
-    } else {
+    } catch (error) {
+      console.error("Error loading user stats:", error)
       setStats({
         burgersViewed: Math.floor(Math.random() * 50) + 10,
-        recipesCooked: Math.floor(Math.random() * 20) + 1,
+        recipesCooked: getRecipesCooked(),
         favoriteCategory: favorites.length > 0 ? favorites[0].category : "None yet",
-        totalCookTime: `${Math.floor(Math.random() * 10) + 1}h ${Math.floor(Math.random() * 60)}m`,
+        totalCookTime: getTotalCookingTime(),
       })
     }
   }

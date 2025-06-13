@@ -1,45 +1,49 @@
-"use client";
+"use client"
 
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
-import { View, ActivityIndicator } from "react-native";
-import { useEffect, useCallback, useState } from "react";
-import * as Font from "expo-font";
-import * as SplashScreen from "expo-splash-screen"; 
+import { NavigationContainer } from "@react-navigation/native"
+import { createStackNavigator } from "@react-navigation/stack"
+import { View, ActivityIndicator } from "react-native"
+import { useEffect, useCallback, useState } from "react"
+import * as Font from "expo-font"
+import * as SplashScreen from "expo-splash-screen"
 
-import { ThemeProvider } from "./src/context/ThemeContext";
-import { AuthProvider, useAuth } from "./src/context/AuthContext";
-import { FavoritesProvider } from "./src/context/FavoritesContext";
+import { ThemeProvider } from "./src/context/ThemeContext"
+import { AuthProvider, useAuth } from "./src/context/AuthContext"
+import { FavoritesProvider } from "./src/context/FavoritesContext"
 import { NotificationProvider } from "./src/context/NotificationContext"
+import { RatingProvider } from "./src/context/RatingContext"
+import { CookingProvider } from "./src/context/CookingContext"
 
-import LoginScreen from "./src/screens/LoginScreen";
-import RegisterScreen from "./src/screens/RegisterScreen";
-import MainScreen from "./src/screens/MainScreen";
-import BurgerDetailScreen from "./src/screens/BurgerDetailScreen";
-import EditProfileScreen from "./src/screens/EditProfileScreen";
-import SettingsScreen from "./src/screens/SettingsScreen";
-import CookingHistoryScreen from "./src/screens/CookingHistoryScreen";
-import ShoppingListScreen from "./src/screens/ShoppingListScreen";
-import DataStorageScreen from "./src/screens/DataStorageScreen";
-import ShareAppScreen from "./src/screens/ShareAppScreen";
-import type { Burger } from "./src/types/Burger";
+import CookingTimerScreen from "./src/screens/CookingTimerScreen"
+import LoginScreen from "./src/screens/LoginScreen"
+import RegisterScreen from "./src/screens/RegisterScreen"
+import MainScreen from "./src/screens/MainScreen"
+import BurgerDetailScreen from "./src/screens/BurgerDetailScreen"
+import EditProfileScreen from "./src/screens/EditProfileScreen"
+import SettingsScreen from "./src/screens/SettingsScreen"
+import CookingHistoryScreen from "./src/screens/CookingHistoryScreen"
+import ShoppingListScreen from "./src/screens/ShoppingListScreen"
+import DataStorageScreen from "./src/screens/DataStorageScreen"
+import ShareAppScreen from "./src/screens/ShareAppScreen"
+import type { Burger } from "./src/types/Burger"
 
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync()
 
-const Stack = createStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<RootStackParamList>()
 
 export type RootStackParamList = {
-  Login: undefined;
-  Register: undefined;
-  Main: undefined;
-  BurgerDetail: { burger: Burger };
-  EditProfile: undefined;
-  Settings: undefined;
-  CookingHistory: undefined;
-  ShoppingList: undefined;
-  DataStorage: undefined;
-  ShareApp: undefined;
-};
+  Login: undefined
+  Register: undefined
+  Main: undefined
+  BurgerDetail: { burger: Burger }
+  EditProfile: undefined
+  Settings: undefined
+  CookingTimer: { burger: Burger }
+  CookingHistory: undefined
+  ShoppingList: undefined
+  DataStorage: undefined
+  ShareApp: undefined
+}
 
 const loadFonts = () =>
   Font.loadAsync({
@@ -48,23 +52,23 @@ const loadFonts = () =>
     "Poppins-SemiBold": require("./assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Bold": require("./assets/fonts/Poppins-Bold.ttf"),
     "Poppins-Italic": require("./assets/fonts/Poppins-Italic.ttf"),
-  });
+  })
 
 const AppNavigator = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuth()
 
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#FFFFFF" }}>
         <ActivityIndicator size="large" color="#8B0000" />
       </View>
-    );
+    )
   }
 
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName={user ? "Login" : "Main"}
+        initialRouteName={user ? "Main" : "Login"}
         screenOptions={{
           headerShown: false,
           gestureEnabled: true,
@@ -74,6 +78,7 @@ const AppNavigator = () => {
           <>
             <Stack.Screen name="Main" component={MainScreen} />
             <Stack.Screen name="BurgerDetail" component={BurgerDetailScreen} />
+            <Stack.Screen name="CookingTimer" component={CookingTimerScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="CookingHistory" component={CookingHistoryScreen} />
@@ -89,34 +94,34 @@ const AppNavigator = () => {
         )}
       </Stack.Navigator>
     </NavigationContainer>
-  );
-};
+  )
+}
 
 const App = () => {
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState(false)
 
   useEffect(() => {
     async function prepare() {
       try {
-        await loadFonts();
+        await loadFonts()
       } catch (e) {
-        console.warn(e);
+        console.warn(e)
       } finally {
-        setFontsLoaded(true);
+        setFontsLoaded(true)
       }
     }
 
-    prepare();
-  }, []);
+    prepare()
+  }, [])
 
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded) {
-      await SplashScreen.hideAsync(); 
+      await SplashScreen.hideAsync()
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded])
 
   if (!fontsLoaded) {
-    return null; 
+    return null
   }
 
   return (
@@ -124,14 +129,18 @@ const App = () => {
       <ThemeProvider>
         <AuthProvider>
           <FavoritesProvider>
-              <NotificationProvider>
-                <AppNavigator />
-              </NotificationProvider>
+            <RatingProvider>
+              <CookingProvider>
+                <NotificationProvider>
+                  <AppNavigator />
+                </NotificationProvider>
+              </CookingProvider>
+            </RatingProvider>
           </FavoritesProvider>
         </AuthProvider>
       </ThemeProvider>
     </View>
-  );
-};
+  )
+}
 
-export default App;
+export default App

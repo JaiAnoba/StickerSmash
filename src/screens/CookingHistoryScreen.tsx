@@ -2,131 +2,126 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, FlatList, Alert } from "react-native"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import { useTheme } from "../context/ThemeContext"
-import type { Burger } from "../types/Burger"
-import Button from "../components/Button"
+import { View, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar, FlatList, Image } from "react-native"
+import type { StackNavigationProp } from "@react-navigation/stack"
+import type { RootStackParamList } from "../../App"
+import { useCooking } from "../context/CookingContext"
+import Text from "../components/CustomText"
 
-interface CookingRecord {
-  id: string
-  burger: Burger
-  cookedAt: string
-  cookTime: string
-  rating?: number
-  notes?: string
+type CookingHistoryScreenNavigationProp = StackNavigationProp<RootStackParamList, "CookingHistory">
+
+interface Props {
+  navigation: CookingHistoryScreenNavigationProp
 }
 
-const CookingHistoryScreen: React.FC = () => {
-  const { colors, isDarkMode } = useTheme()
-  const [cookingHistory, setCookingHistory] = useState<CookingRecord[]>([])
-  const [loading, setLoading] = useState(true)
+const CookingHistoryScreen: React.FC<Props> = ({ navigation }) => {
+  const { cookingSessions } = useCooking()
+  const [groupedSessions, setGroupedSessions] = useState<any>({})
 
   useEffect(() => {
-    loadCookingHistory()
-  }, [])
+    // Group sessions by date
+    const grouped = cookingSessions
+      .filter((session) => session.completed)
+      .reduce(
+        (acc, session) => {
+          const date = new Date(session.date).toLocaleDateString()
+          if (!acc[date]) {
+            acc[date] = []
+          }
+          acc[date].push(session)
+          return acc
+        },
+        {} as Record<string, typeof cookingSessions>,
+      )
 
-  const loadCookingHistory = async () => {
-    try {
-      const history = await AsyncStorage.getItem("cookingHistory")
-      if (history) {
-        setCookingHistory(JSON.parse(history))
-      }
-    } catch (error) {
-      console.error("Error loading cooking history:", error)
-    } finally {
-      setLoading(false)
+    // Sort dates in descending order
+    const sortedGrouped = Object.keys(grouped)
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+      .reduce(
+        (acc, date) => {
+          acc[date] = grouped[date]
+          return acc
+        },
+        {} as Record<string, typeof cookingSessions>,
+      )
+
+    setGroupedSessions(sortedGrouped)
+  }, [cookingSessions])
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const hrs = Math.floor(mins / 60)
+
+    if (hrs > 0) {
+      return `${hrs}h ${mins % 60}m`
+    } else {
+      return `${mins}m`
     }
   }
 
-  const clearHistory = () => {
-    Alert.alert("Clear History", "Are you sure you want to clear all cooking history?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Clear",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await AsyncStorage.removeItem("cookingHistory")
-            setCookingHistory([])
-          } catch (error) {
-            console.error("Error clearing history:", error)
-          }
-        },
-      },
-    ])
-  }
-
-  const renderStars = (rating: number): string => {
-    return "★".repeat(Math.floor(rating)) + "☆".repeat(5 - Math.floor(rating))
-  }
-
-  const renderHistoryItem = ({ item }: { item: CookingRecord }) => (
-    <View style={[styles.historyItem, { backgroundColor: colors.card, borderColor: colors.border }]}>
-      <View style={styles.historyHeader}>
-        <Text style={[styles.burgerName, { color: colors.text }]}>{item.burger.name}</Text>
-        <Text style={[styles.cookDate, { color: colors.subtext }]}>{new Date(item.cookedAt).toLocaleDateString()}</Text>
+  const renderSessionItem = ({ item }: { item: any }) => (
+    <View style={styles.sessionItem}>
+      <View style={styles.sessionIconContainer}>
+        <Text style={styles.sessionIcon}>🍔</Text>
       </View>
-
-      <Text style={[styles.category, { color: colors.subtext }]}>{item.burger.category}</Text>
-
-      <View style={styles.historyDetails}>
-        <Text style={[styles.cookTime, { color: colors.subtext }]}>Cook Time: {item.cookTime}</Text>
-        {item.rating && (
-          <Text style={[styles.rating, { color: colors.primary }]}>
-            {renderStars(item.rating)} ({item.rating}/5)
-          </Text>
-        )}
+      <View style={styles.sessionInfo}>
+        <Text weight="semiBold" style={styles.sessionName}>
+          {item.burgerName}
+        </Text>
+        <Text style={styles.sessionTime}>
+          {formatTime(item.cookingTime)} •{" "}
+          {new Date(item.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </Text>
       </View>
-
-      {item.notes && <Text style={[styles.notes, { color: colors.text }]}>Notes: {item.notes}</Text>}
     </View>
   )
 
-  if (loading) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={styles.loadingContainer}>
-          <Text style={[styles.loadingText, { color: colors.text }]}>Loading history...</Text>
-        </View>
-      </SafeAreaView>
-    )
-  }
+  const renderDateSection = ({ item }: { item: string }) => (
+    <View style={styles.dateSection}>
+      <Text weight="semiBold" style={styles.dateHeader}>
+        {item}
+      </Text>
+      <FlatList
+        data={groupedSessions[item]}
+        renderItem={renderSessionItem}
+        keyExtractor={(item, index) => `${item.burgerId}-${index}`}
+        scrollEnabled={false}
+      />
+    </View>
+  )
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? "light-content" : "dark-content"} />
+    <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="#8B0000" barStyle="light-content" />
 
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text style={styles.headerTitle}>Cooking History</Text>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Image source={{ uri: "https://img.icons8.com/sf-black/100/back.png" }} style={styles.backIcon} />
+        </TouchableOpacity>
+        <Text weight="semiBold" style={styles.headerTitle}>
+          Cooking History
+        </Text>
+        <View style={styles.placeholder} />
       </View>
 
-      {cookingHistory.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>👨‍🍳</Text>
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>No Cooking History</Text>
-          <Text style={[styles.emptySubtitle, { color: colors.subtext }]}>
-            Start cooking some burgers to see your history here!
-          </Text>
-        </View>
-      ) : (
-        <>
-          <View style={styles.statsHeader}>
-            <Text style={[styles.totalRecords, { color: colors.text }]}>
-              Total Recipes Cooked: {cookingHistory.length}
-            </Text>
-            <Button title="Clear History" onPress={clearHistory} variant="danger" size="small" icon="🗑️" />
-          </View>
-
+      <View style={styles.content}>
+        {Object.keys(groupedSessions).length > 0 ? (
           <FlatList
-            data={cookingHistory}
-            keyExtractor={(item) => item.id}
-            renderItem={renderHistoryItem}
-            contentContainerStyle={styles.listContainer}
-            showsVerticalScrollIndicator={false}
+            data={Object.keys(groupedSessions)}
+            renderItem={renderDateSection}
+            keyExtractor={(item) => item}
+            contentContainerStyle={styles.listContent}
           />
-        </>
-      )}
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>👨‍🍳</Text>
+            <Text weight="semiBold" style={styles.emptyTitle}>
+              No cooking history yet
+            </Text>
+            <Text style={styles.emptyText}>Start cooking your favorite burger recipes and they'll appear here.</Text>
+          </View>
+        )}
+      </View>
     </SafeAreaView>
   )
 }
@@ -134,110 +129,107 @@ const CookingHistoryScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#F9FAFB",
   },
   header: {
-    paddingVertical: 20,
-    paddingHorizontal: 20,
+    backgroundColor: "#8B0000",
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
+    tintColor: "white",
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
     color: "white",
+    fontSize: 18,
   },
-  loadingContainer: {
+  placeholder: {
+    width: 40,
+  },
+  content: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
-  loadingText: {
-    fontSize: 16,
+  listContent: {
+    padding: 15,
   },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 40,
-  },
-  emptyIcon: {
-    fontSize: 64,
+  dateSection: {
     marginBottom: 20,
   },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
+  dateHeader: {
+    fontSize: 16,
     marginBottom: 10,
-    textAlign: "center",
+    color: "#4B5563",
   },
-  emptySubtitle: {
-    fontSize: 16,
-    textAlign: "center",
-    lineHeight: 24,
-  },
-  statsHeader: {
+  sessionItem: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 20,
-  },
-  totalRecords: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  listContainer: {
-    padding: 20,
-    paddingTop: 0,
-  },
-  historyItem: {
+    backgroundColor: "white",
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    elevation: 2,
+    padding: 15,
+    marginBottom: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    elevation: 2,
   },
-  historyHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  burgerName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    flex: 1,
-    marginRight: 10,
-  },
-  cookDate: {
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  category: {
-    fontSize: 14,
-    marginBottom: 8,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  historyDetails: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  sessionIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FEF2F2",
+    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    marginRight: 15,
   },
-  cookTime: {
-    fontSize: 14,
+  sessionIcon: {
+    fontSize: 20,
   },
-  rating: {
-    fontSize: 14,
-    fontWeight: "500",
+  sessionInfo: {
+    flex: 1,
+    justifyContent: "center",
   },
-  notes: {
+  sessionName: {
+    fontSize: 16,
+    marginBottom: 4,
+    color: "#1F2937",
+  },
+  sessionTime: {
     fontSize: 14,
-    fontStyle: "italic",
-    marginTop: 4,
+    color: "#6B7280",
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyIcon: {
+    fontSize: 50,
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    marginBottom: 10,
+    color: "#1F2937",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#6B7280",
+    textAlign: "center",
+    maxWidth: 300,
   },
 })
 
