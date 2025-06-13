@@ -13,6 +13,8 @@ import {
   Animated,
   Easing,
   Alert,
+  Modal,
+  Dimensions,
 } from "react-native"
 import { Audio } from "expo-av"
 import type { StackNavigationProp } from "@react-navigation/stack"
@@ -34,6 +36,8 @@ interface Props {
   route: BurgerDetailScreenRouteProp
 }
 
+const { width, height } = Dimensions.get("window")
+
 const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const { burger } = route.params
   const { getUserRating, addRating } = useRatings()
@@ -42,11 +46,15 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const [tempRating, setTempRating] = useState<number | null>(null)
   const [ratingSaved, setRatingSaved] = useState(false)
   const [hasCookedBurger, setHasCookedBurger] = useState(false)
+  const [modalVisible, setModalVisible] = useState(true)
 
   // Animation values
   const buttonScale = useRef(new Animated.Value(1)).current
   const buttonOpacity = useRef(new Animated.Value(1)).current
   const [sound, setSound] = useState<Audio.Sound | null>(null)
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const slideAnim = useRef(new Animated.Value(height)).current
+  const imageTranslateY = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
     // Load user's rating when the component mounts
@@ -58,18 +66,32 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     // Check if user has cooked this burger before
     checkIfBurgerCooked()
 
-    // Clean up sound
-    return () => {
-      if (sound) {
-        sound.unloadAsync()
-      }
-    }
+    // Start animations
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+        easing: Easing.out(Easing.ease),
+      }),
+      Animated.timing(imageTranslateY, {
+        toValue: -80, // Move image up to overlap with modal
+        duration: 300,
+        delay: 150,
+        useNativeDriver: true,
+        easing: Easing.out(Easing.ease),
+      }),
+    ]).start()
+
   }, [burger.id, getUserRating, cookingSessions])
 
-  // Add this new useFocusEffect to reset button opacity when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
-      // Reset button opacity when screen comes into focus
       buttonOpacity.setValue(1)
       buttonScale.setValue(1)
       return () => {}
@@ -95,18 +117,6 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   }
 
-  const playSound = async () => {
-    try {
-      const { sound: sizzleSound } = await Audio.Sound.createAsync(require("../../assets/sounds/sizzle.mp3"), {
-        shouldPlay: true,
-      })
-      setSound(sizzleSound)
-      await sizzleSound.playAsync()
-    } catch (error) {
-      console.log("Error playing sound:", error)
-    }
-  }
-
   const handleStartCooking = async () => {
     // Start button animation
     Animated.sequence([
@@ -124,14 +134,37 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       }),
     ]).start()
 
-    // Play sizzle sound
-    await playSound()
-
     // Start cooking and navigate after animations
     setTimeout(() => {
       startCooking(burger)
       navigation.navigate("CookingTimer", { burger })
     }, 500)
+  }
+
+  const handleClose = () => {
+    // Animate out
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: height,
+        duration: 200,
+        useNativeDriver: true,
+        easing: Easing.in(Easing.ease),
+      }),
+      Animated.timing(imageTranslateY, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+        easing: Easing.in(Easing.ease),
+      }),
+    ]).start(() => {
+      setModalVisible(false)
+      navigation.goBack()
+    })
   }
 
   const renderStars = (rating: number): string => {
@@ -149,201 +182,261 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#8B0000" barStyle="light-content" />
+    <Modal visible={modalVisible} transparent={true} animationType="none" onRequestClose={handleClose}>
+      <SafeAreaView style={styles.container}>
+        <StatusBar backgroundColor="rgba(0,0,0,0.5)" barStyle="light-content" />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Image source={{ uri: "https://img.icons8.com/sf-black/100/back.png" }} style={styles.backIcon} />
-        </TouchableOpacity>
-      </View>
+        {/* Backdrop */}
+        <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]}>
+          <TouchableOpacity style={styles.backdropTouchable} onPress={handleClose} />
+        </Animated.View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Image Section */}
-        <View style={styles.imageContainer}>
+        {/* Burger Image */}
+        <Animated.View
+          style={[
+            styles.floatingImageContainer,
+            {
+              transform: [{ translateY: Animated.add(slideAnim, imageTranslateY) }],
+            },
+          ]}
+        >
           <Image source={burgerImages[burger.image]} style={styles.burgerImage} />
-        </View>
+        </Animated.View>
 
-        {/* Info Section */}
-        <View style={styles.infoSection}>
-          <Text weight="semiBold" style={styles.burgerName}>
-            {burger.name}
-          </Text>
-          <Text weight="medium" style={styles.burgerCategory}>
-            {burger.category}
-          </Text>
+        {/* Content Modal */}
+        <Animated.View
+          style={[
+            styles.modalContent,
+            {
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
+          {/* Header */}
+          <View style={styles.modalHeader}>
+            {/* <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+              <Image source={{ uri: "https://img.icons8.com/sf-black/100/back.png" }} style={styles.closeIcon} />
+            </TouchableOpacity> */}
+            <View style={styles.headerSpacer} />
+          </View>
 
-          {/* Details Content */}
-          <View style={styles.tabContent}>
-            <Text style={styles.description}>{burger.description}</Text>
-            <View style={styles.metaInfo}>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Difficulty</Text>
-                <Text
-                  weight="semiBold"
+          {/* Content */}
+          <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            <View style={styles.contentContainer}>
+              {/* Burger Name and Category - Name now above category */}
+              <View style={styles.titleSection}>
+                <Text weight="semiBold" style={styles.burgerName}>
+                  {burger.name}
+                </Text>
+                <Text weight="medium" style={styles.burgerCategory}>
+                  {burger.category}
+                </Text>
+              </View>
+
+              {/* Details Content */}
+              <View style={styles.tabContent}>
+                <Text style={styles.description}>{burger.description}</Text>
+                <View style={styles.metaInfo}>
+                  <View style={styles.metaItem}>
+                    <Text style={styles.metaLabel}>Difficulty</Text>
+                    <Text
+                      weight="semiBold"
+                      style={[
+                        styles.metaValue,
+                        burger.difficulty === "Easy" && styles.easyText,
+                        burger.difficulty === "Medium" && styles.mediumText,
+                        burger.difficulty === "Hard" && styles.hardText,
+                      ]}
+                    >
+                      {burger.difficulty}
+                    </Text>
+                  </View>
+                  <View style={styles.metaItem}>
+                    <Text style={styles.metaLabel}>Cook Time</Text>
+                    <Text weight="semiBold" style={styles.metaValue}>
+                      {burger.cookTime}
+                    </Text>
+                  </View>
+                  <View style={styles.metaItem}>
+                    <Text style={styles.metaLabel}>Rating</Text>
+                    <View style={styles.ratingContainer}>
+                      <Text style={styles.stars}>{renderStars(burger.rating)}</Text>
+                      <Text weight="semiBold" style={styles.ratingValue}>
+                        {burger.rating}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* User Rating Section - Only show if user has cooked this burger */}
+                {hasCookedBurger && (
+                  <View style={styles.userRatingSection}>
+                    <Text weight="semiBold" style={styles.userRatingTitle}>
+                      Rate this burger
+                    </Text>
+                    <View style={styles.userRatingContainer}>
+                      <StarRating
+                        rating={tempRating || 0}
+                        editable={true}
+                        onRatingChange={handleTempRatingChange}
+                        size={32}
+                        color="#8B0000"
+                      />
+                      <Text style={styles.userRatingText}>
+                        {tempRating ? `Your rating: ${tempRating}` : "Tap to rate"}
+                      </Text>
+                      <Button
+                        title={ratingSaved ? "Update Rating" : "Save Rating"}
+                        onPress={handleSaveRating}
+                        variant="primary"
+                        disabled={tempRating === null}
+                        style={styles.saveRatingButton}
+                      />
+                    </View>
+                  </View>
+                )}
+
+                {/* Let's Start Button with Animation */}
+                <Animated.View
                   style={[
-                    styles.metaValue,
-                    burger.difficulty === "Easy" && styles.easyText,
-                    burger.difficulty === "Medium" && styles.mediumText,
-                    burger.difficulty === "Hard" && styles.hardText,
+                    styles.startButtonContainer,
+                    {
+                      transform: [{ scale: buttonScale }],
+                      opacity: buttonOpacity,
+                    },
                   ]}
                 >
-                  {burger.difficulty}
-                </Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Cook Time</Text>
-                <Text weight="semiBold" style={styles.metaValue}>
-                  {burger.cookTime}
-                </Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Rating</Text>
-                <View style={styles.ratingContainer}>
-                  <Text style={styles.stars}>{renderStars(burger.rating)}</Text>
-                  <Text weight="semiBold" style={styles.ratingValue}>
-                    {burger.rating}
+                  <TouchableOpacity style={styles.startButton} onPress={handleStartCooking} activeOpacity={0.8}>
+                    <Text weight="semiBold" style={styles.startButtonText}>
+                      Let's Start Cooking!
+                    </Text>
+                  </TouchableOpacity>
+                </Animated.View>
+
+                {/* Nutrition Facts */}
+                {/* <View style={styles.nutritionSection}>
+                  <Text weight="semiBold" style={styles.sectionTitle}>
+                    Nutrition Facts
                   </Text>
-                </View>
+                  <View style={styles.nutritionGrid}>
+                    <View style={styles.nutritionItem}>
+                      <Text style={styles.nutritionValue}>{burger.nutrition.calories}</Text>
+                      <Text style={styles.nutritionLabel}>Calories</Text>
+                    </View>
+                    <View style={styles.nutritionItem}>
+                      <Text style={styles.nutritionValue}>{burger.nutrition.protein}g</Text>
+                      <Text style={styles.nutritionLabel}>Protein</Text>
+                    </View>
+                    <View style={styles.nutritionItem}>
+                      <Text style={styles.nutritionValue}>{burger.nutrition.carbs}g</Text>
+                      <Text style={styles.nutritionLabel}>Carbs</Text>
+                    </View>
+                    <View style={styles.nutritionItem}>
+                      <Text style={styles.nutritionValue}>{burger.nutrition.fat}g</Text>
+                      <Text style={styles.nutritionLabel}>Fat</Text>
+                    </View>
+                  </View>
+                </View> */}
               </View>
             </View>
-
-            {/* User Rating Section - Only show if user has cooked this burger */}
-            {hasCookedBurger && (
-              <View style={styles.userRatingSection}>
-                <Text weight="semiBold" style={styles.userRatingTitle}>
-                  Rate this burger
-                </Text>
-                <View style={styles.userRatingContainer}>
-                  <StarRating
-                    rating={tempRating || 0}
-                    editable={true}
-                    onRatingChange={handleTempRatingChange}
-                    size={32}
-                    color="#8B0000"
-                  />
-                  <Text style={styles.userRatingText}>{tempRating ? `Your rating: ${tempRating}` : "Tap to rate"}</Text>
-                  <Button
-                    title={ratingSaved ? "Update Rating" : "Save Rating"}
-                    onPress={handleSaveRating}
-                    variant="primary"
-                    disabled={tempRating === null}
-                    style={styles.saveRatingButton}
-                  />
-                </View>
-              </View>
-            )}
-
-            {/* Let's Start Button with Animation */}
-            <Animated.View
-              style={[
-                styles.startButtonContainer,
-                {
-                  transform: [{ scale: buttonScale }],
-                  opacity: buttonOpacity,
-                },
-              ]}
-            >
-              <TouchableOpacity style={styles.startButton} onPress={handleStartCooking} activeOpacity={0.8}>
-                <Text weight="semiBold" style={styles.startButtonText}>
-                  Let's Start Cooking!
-                </Text>
-              </TouchableOpacity>
-            </Animated.View>
-
-            {/* Nutrition Facts */}
-            {/* <View style={styles.nutritionSection}>
-              <Text weight="semiBold" style={styles.sectionTitle}>
-                Nutrition Facts
-              </Text>
-              <View style={styles.nutritionGrid}>
-                <View style={styles.nutritionItem}>
-                  <Text style={styles.nutritionValue}>{burger.nutrition.calories}</Text>
-                  <Text style={styles.nutritionLabel}>Calories</Text>
-                </View>
-                <View style={styles.nutritionItem}>
-                  <Text style={styles.nutritionValue}>{burger.nutrition.protein}g</Text>
-                  <Text style={styles.nutritionLabel}>Protein</Text>
-                </View>
-                <View style={styles.nutritionItem}>
-                  <Text style={styles.nutritionValue}>{burger.nutrition.carbs}g</Text>
-                  <Text style={styles.nutritionLabel}>Carbs</Text>
-                </View>
-                <View style={styles.nutritionItem}>
-                  <Text style={styles.nutritionValue}>{burger.nutrition.fat}g</Text>
-                  <Text style={styles.nutritionLabel}>Fat</Text>
-                </View>
-              </View>
-            </View> */}
-          </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+          </ScrollView>
+        </Animated.View>
+      </SafeAreaView>
+    </Modal>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#8B0000",
-  },
-  header: {
-    backgroundColor: "#8B0000",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    justifyContent: "space-between",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(215, 214, 214, 0.2)",
     justifyContent: "center",
     alignItems: "center",
   },
-  backIcon: {
-    width: 20,
-    height: 20,
-    tintColor: "white",
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
-  content: {
+  backdropTouchable: {
     flex: 1,
   },
-  imageContainer: {
-    backgroundColor: "#8B0000",
-    paddingBottom: 30,
+  floatingImageContainer: {
+    position: "absolute",
     alignItems: "center",
-    position: "relative",
+    justifyContent: "center",
+    width: "65%",
+    zIndex: 5,
+    top: "34%",
   },
   burgerImage: {
-    width: 280,
-    height: 280,
+    width: 220,
+    height: 220,
     resizeMode: "cover",
-    zIndex: 1,
   },
-  infoSection: {
+  modalContent: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "63%", 
     backgroundColor: "white",
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    marginTop: -155,
-    paddingTop: 120,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 10,
+    paddingTop: 50,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
+    paddingVertical: 15,
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeIcon: {
+    width: 20,
+    height: 20,
+    tintColor: "#333",
+    zIndex: 999,
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  scrollContent: {
     flex: 1,
+    marginTop: 30,
+  },
+  contentContainer: {
+    padding: 20,
+  },
+  titleSection: {
+    alignItems: "flex-start",
+    marginBottom: 20,
   },
   burgerName: {
-    fontSize: 21,
+    fontSize: 20,
     color: "#333",
     textAlign: "left",
-    marginBottom: 2,
+    marginBottom: 5,
   },
   burgerCategory: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#8B0000",
-    textAlign: "left",
-    marginBottom: 30,
+    textAlign: "center",
     textTransform: "uppercase",
     letterSpacing: 1,
     fontWeight: "600",
@@ -352,11 +445,11 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   description: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#666",
     lineHeight: 24,
     marginBottom: 25,
-    textAlign: "center",
+    textAlign: "left",
   },
   metaInfo: {
     flexDirection: "row",
@@ -377,20 +470,20 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   metaValue: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#333",
   },
   easyText: {
     color: "#059669",
-    fontSize: 14,
+    fontSize: 12,
   },
   mediumText: {
     color: "#D97706",
-    fontSize: 14,
+    fontSize: 12,
   },
   hardText: {
     color: "#B91C1C",
-    fontSize: 14,
+    fontSize: 12,
   },
   ratingContainer: {
     flexDirection: "row",
@@ -398,52 +491,52 @@ const styles = StyleSheet.create({
   },
   stars: {
     color: "#B91C1C",
-    fontSize: 14,
+    fontSize: 13,
     marginRight: 4,
   },
   ratingValue: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#333",
   },
   userRatingSection: {
-    marginTop: 20,
-    marginBottom: 30,
+    marginBottom: 20,
     backgroundColor: "#F9FAFB",
     borderRadius: 15,
     padding: 20,
   },
   userRatingTitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: "#333",
-    marginBottom: 15,
+    marginBottom: 5,
     textAlign: "center",
   },
   userRatingContainer: {
     alignItems: "center",
   },
   userRatingText: {
-    marginTop: 10,
+    marginTop: 5,
     marginBottom: 15,
     color: "#666",
-    fontSize: 14,
+    fontSize: 13,
   },
   saveRatingButton: {
     minWidth: 150,
   },
   startButtonContainer: {
-    marginBottom: 30,
+    
   },
   startButton: {
     backgroundColor: "#8B0000",
-    borderRadius: 12,
+    borderRadius: 50,
     paddingVertical: 16,
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
+    marginBottom: -50,
   },
   startButtonText: {
     color: "white",
-    fontSize: 18,
+    fontSize: 15,
   },
   nutritionSection: {
     backgroundColor: "#F9FAFB",
