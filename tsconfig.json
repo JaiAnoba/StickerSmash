@@ -4,7 +4,7 @@
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "jsx": "react-native",
+    "jsx": "react-jsx", 
     "types": ["react", "react-native"],
     "lib": [
       "dom",
