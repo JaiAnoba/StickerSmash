@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
-  Alert,
   ActivityIndicator,
   ScrollView,
   Image,
@@ -20,12 +19,13 @@ import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import Button from "../components/Button";
 import Text from "../components/CustomText";
+import { validatePassword } from "../utils/validatePassword"; // import the shared validator
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 const RegisterScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme();
-  const { register, logout } = useAuth();
+  const { register } = useAuth();
   const navigation = useNavigation<NavigationProp>();
 
   const [name, setName] = useState("");
@@ -36,32 +36,47 @@ const RegisterScreen: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
   const validateForm = () => {
+    let isValid = true;
+    setNameError("");
+    setEmailError("");
+    setPasswordError("");
+    setConfirmPasswordError("");
+
     if (!name.trim()) {
-      Alert.alert("Error", "Please enter your name");
-      return false;
+      setNameError("Full name is required");
+      isValid = false;
+    } else if (name.trim().length < 2) {
+      setNameError("Name must be at least 2 characters");
+      isValid = false;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim()) {
-      Alert.alert("Error", "Please enter your email");
-      return false;
+      setEmailError("Email is required");
+      isValid = false;
+    } else if (!emailRegex.test(email)) {
+      setEmailError("Invalid email format");
+      isValid = false;
     }
-    if (!email.includes("@")) {
-      Alert.alert("Error", "Please enter a valid email address");
-      return false;
+
+    const pwdValidation = validatePassword(password);
+    if (pwdValidation) {
+      setPasswordError(pwdValidation);
+      isValid = false;
     }
-    if (!password.trim()) {
-      Alert.alert("Error", "Please enter a password");
-      return false;
-    }
-    if (password.length < 6) {
-      Alert.alert("Error", "Password must be at least 6 characters long");
-      return false;
-    }
+
     if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
-      return false;
+      setConfirmPasswordError("Passwords do not match");
+      isValid = false;
     }
-    return true;
+
+    return isValid;
   };
 
   const handleRegister = async () => {
@@ -71,22 +86,26 @@ const RegisterScreen: React.FC = () => {
     try {
       const success = await register(name, email, password);
       if (success) {
-        Alert.alert("Success", "Account created! Please log in.");
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "Login" }],
-        });
+        navigation.reset({ index: 0, routes: [{ name: "Login" }] });
       } else {
-        Alert.alert("Error", "Registration failed. Email might already be in use.");
+        setEmailError("Email already in use or registration failed");
       }
     } catch (error) {
-      Alert.alert("Error", "Registration failed. Please try again.");
+      setEmailError("Something went wrong. Try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const navigateToLogin = () => navigation.navigate("Login");
+  const inputStyle = (error: string) => [
+    styles.input,
+    {
+      backgroundColor: colors.inputBackground,
+      color: colors.text,
+      borderColor: error ? "red" : colors.border,
+      fontFamily: "Poppins-Regular",
+    },
+  ];
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -94,83 +113,92 @@ const RegisterScreen: React.FC = () => {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <View style={styles.header}>
-            <Image source={require('../../assets/images/b.png')} style={styles.logo} />
-            <Text weight="bold" style={styles.title}>
-              Join Burgify
-            </Text>
+            <Image source={require("../../assets/images/b.png")} style={styles.logo} />
+            <Text weight="bold" style={styles.title}>Join Burgify</Text>
             <Text style={styles.subtitle}>Create your account and start your burger journey</Text>
           </View>
 
           <View style={styles.form}>
+            {/* Full Name */}
             <View style={styles.inputContainer}>
               <Text weight="semiBold" style={styles.label}>Full Name</Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text, borderColor: colors.border, fontFamily: "Poppins-Regular" }]}
+                style={inputStyle(nameError)}
                 placeholder="Enter your full name"
                 placeholderTextColor={colors.subtext}
                 value={name}
                 onChangeText={setName}
-                autoCapitalize="words"
-                autoCorrect={false}
               />
+              {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
             </View>
 
+            {/* Email */}
             <View style={styles.inputContainer}>
               <Text weight="semiBold" style={styles.label}>Email</Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text, borderColor: colors.border, fontFamily: "Poppins-Regular" }]}
+                style={inputStyle(emailError)}
                 placeholder="Enter your email"
                 placeholderTextColor={colors.subtext}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
-                autoCorrect={false}
               />
+              {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
             </View>
 
+            {/* Password */}
             <View style={styles.inputContainer}>
               <Text weight="semiBold" style={styles.label}>Password</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
-                  style={[styles.passwordInput, { backgroundColor: colors.inputBackground, color: colors.text, borderColor: colors.border, fontFamily: "Poppins-Regular" }]}
+                  style={inputStyle(passwordError)}
                   placeholder="Enter your password"
                   placeholderTextColor={colors.subtext}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
-                  autoCorrect={false}
                 />
-                <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword(!showPassword)} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword(!showPassword)}>
                   <Image
-                    source={{ uri: showPassword ? "https://img.icons8.com/fluency-systems-regular/48/visible--v1.png" : "https://img.icons8.com/fluency-systems-regular/48/closed-eye.png" }}
+                    source={{
+                      uri: showPassword
+                        ? "https://img.icons8.com/fluency-systems-regular/48/visible--v1.png"
+                        : "https://img.icons8.com/fluency-systems-regular/48/closed-eye.png",
+                    }}
                     style={[styles.eyeIcon, { tintColor: colors.subtext }]}
                   />
                 </TouchableOpacity>
               </View>
+              {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
             </View>
 
+            {/* Confirm Password */}
             <View style={styles.inputContainer}>
               <Text weight="semiBold" style={styles.label}>Confirm Password</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
-                  style={[styles.passwordInput, { backgroundColor: colors.inputBackground, color: colors.text, borderColor: colors.border, fontFamily: "Poppins-Regular" }]}
+                  style={inputStyle(confirmPasswordError)}
                   placeholder="Confirm your password"
                   placeholderTextColor={colors.subtext}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   secureTextEntry={!showConfirmPassword}
                   autoCapitalize="none"
-                  autoCorrect={false}
                 />
-                <TouchableOpacity style={styles.eyeButton} onPress={() => setShowConfirmPassword(!showConfirmPassword)} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.eyeButton} onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
                   <Image
-                    source={{ uri: showConfirmPassword ? "https://img.icons8.com/fluency-systems-regular/48/visible--v1.png" : "https://img.icons8.com/fluency-systems-regular/48/closed-eye.png" }}
+                    source={{
+                      uri: showConfirmPassword
+                        ? "https://img.icons8.com/fluency-systems-regular/48/visible--v1.png"
+                        : "https://img.icons8.com/fluency-systems-regular/48/closed-eye.png",
+                    }}
                     style={[styles.eyeIcon, { tintColor: colors.subtext }]}
                   />
                 </TouchableOpacity>
               </View>
+              {confirmPasswordError ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
             </View>
 
             <Button
@@ -185,7 +213,7 @@ const RegisterScreen: React.FC = () => {
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>Already have an account?</Text>
-            <TouchableOpacity onPress={navigateToLogin}>
+            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
               <Text weight="semiBold" style={[styles.linkText, { color: colors.primary }]}>Sign in here</Text>
             </TouchableOpacity>
           </View>
@@ -200,7 +228,7 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1 },
   content: { flex: 1, paddingHorizontal: 30, paddingVertical: 40 },
   header: { alignItems: "center", marginBottom: 40 },
-  logo: { width: 50, height: 50, resizeMode: 'contain', marginBottom: 10, },
+  logo: { width: 50, height: 50, resizeMode: "contain", marginBottom: 10 },
   title: { fontSize: 22, textAlign: "center", marginBottom: 10 },
   subtitle: { fontSize: 14, textAlign: "center", lineHeight: 24 },
   form: { marginBottom: 30 },
@@ -208,7 +236,6 @@ const styles = StyleSheet.create({
   label: { fontSize: 14, marginBottom: 8 },
   input: { borderRadius: 999, padding: 16, fontSize: 13, borderWidth: 1 },
   passwordContainer: { position: "relative" },
-  passwordInput: { borderRadius: 999, padding: 16, paddingRight: 50, fontSize: 13, borderWidth: 1 },
   eyeButton: { position: "absolute", right: 16, top: 12, padding: 4 },
   eyeIcon: { width: 20, height: 20 },
   registerButton: { borderRadius: 999, marginTop: 10 },
@@ -216,6 +243,7 @@ const styles = StyleSheet.create({
   footer: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
   footerText: { fontSize: 14, marginRight: 5 },
   linkText: { fontSize: 14 },
+  errorText: { color: "red", fontSize: 12, marginTop: 4 },
 });
 
 export default RegisterScreen;

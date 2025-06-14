@@ -72,7 +72,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
 
-        {/* Only shows app screens if logged in */}
+        {/* App Screens */}
         {user && (
           <>
             <Stack.Screen name="Main" component={MainScreen} />
