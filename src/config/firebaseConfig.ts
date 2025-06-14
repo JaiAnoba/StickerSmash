@@ -12,8 +12,6 @@ const firebaseConfig = {
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-
-// Export auth instance properly
 const auth = getAuth(app);
 
-export { app, auth };  
+export { app, auth };

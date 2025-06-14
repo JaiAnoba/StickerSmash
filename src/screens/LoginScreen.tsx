@@ -28,7 +28,7 @@ type NavigationProp = StackNavigationProp<RootStackParamList>
 
 const LoginScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme()
-  const { user, login } = useAuth();
+  const { user, login, resetPassword } = useAuth();
   const navigation = useNavigation<NavigationProp>()
 
   const [email, setEmail] = useState("")
@@ -86,26 +86,24 @@ const LoginScreen: React.FC = () => {
 
   const handleResetPassword = async () => {
     if (!resetEmail.trim() || !resetEmail.includes("@")) {
-      Alert.alert("Error", "Please enter a valid email address")
-      return
+      Alert.alert("Error", "Please enter a valid email address");
+      return;
     }
 
-    setResetLoading(true)
+    setResetLoading(true);
     try {
-      // Simulate API call for password reset
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // For demo purposes, always show success
-      setResetSent(true)
-
-      // In a real app, you would call an API endpoint:
-      // await authService.sendPasswordResetEmail(resetEmail)
-    } catch (error) {
-      Alert.alert("Error", "Failed to send reset email. Please try again.")
+      const success = await resetPassword(resetEmail); 
+      if (success) {
+        setResetSent(true);
+      } else {
+        Alert.alert("Error", "Failed to send reset email. Please try again.");
+      }
+    } catch (error: any) {
+      Alert.alert("Error", error?.message || "Failed to send reset email. Please try again.");
     } finally {
-      setResetLoading(false)
+      setResetLoading(false);
     }
-  }
+  };
 
   const closeResetModal = () => {
     setForgotPasswordModalVisible(false)

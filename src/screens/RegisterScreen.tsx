@@ -25,7 +25,7 @@ type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 const RegisterScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme();
-  const { register, user } = useAuth();
+  const { register, logout } = useAuth();
   const navigation = useNavigation<NavigationProp>();
 
   const [name, setName] = useState("");
@@ -71,7 +71,8 @@ const RegisterScreen: React.FC = () => {
     try {
       const success = await register(name, email, password);
       if (success) {
-        Alert.alert("Success", "Account created successfully!", [
+        await logout();
+        Alert.alert("Success", "Account created successfully! Please login.", [
           {
             text: "OK",
             onPress: () => {

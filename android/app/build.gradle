@@ -112,6 +112,10 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+
+    project.ext.react = [
+        enableHermes: false
+    ]
 }
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
