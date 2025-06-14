@@ -71,13 +71,10 @@ const RegisterScreen: React.FC = () => {
     try {
       const success = await register(name, email, password);
       if (success) {
-        await logout();
         Alert.alert("Success", "Account created successfully! Please login.", [
           {
             text: "OK",
-            onPress: () => {
-              navigation.navigate("Login");
-            },
+            onPress: () => navigation.navigate("Login"),
           },
         ]);
       } else {

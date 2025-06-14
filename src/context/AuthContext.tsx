@@ -1,79 +1,80 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import AsyncStorage from "@react-native-async-storage/async-storage"
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { db } from "../../firebase";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  Timestamp,
+} from "firebase/firestore";
+import SHA256 from "crypto-js/sha256";
+import Hex from "crypto-js/enc-hex"; // for .toString(Hex)
 
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged, updateProfile } from "firebase/auth";
-import { auth } from "../../firebase"; 
 interface User {
-  id: string
-  name: string
-  email: string
-  joinDate: string
-  stats?: {
-    burgersViewed: number
-    recipesCooked: number
-    favoriteCategory: string
-    totalCookTime: string
-  }
+  id: string;
+  name: string;
+  email: string;
+  joinDate: string;
+  role?: "admin" | "user";
 }
 
 interface AuthContextType {
-  user: User | null
-  isLoading: boolean
-  login: (email: string, password: string) => Promise<boolean>
-  register: (name: string, email: string, password: string) => Promise<boolean>
-  logout: () => Promise<void>
-  updateUser: (userData: Partial<User>) => Promise<void>
-  resetPassword: (email: string) => Promise<boolean>
+  user: User | null;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<boolean>;
+  updateUser: (userData: Partial<User>) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthProviderProps {
-  children: ReactNode
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    checkAuthState()
-  }, [])
-
-  const checkAuthState = async () => {
-    try {
-      const userToken = await AsyncStorage.getItem("userToken")
-      const userData = await AsyncStorage.getItem("userData")
-
-      if (userToken && userData) {
-        setUser(JSON.parse(userData))
-      }
-    } catch (error) {
-      console.error("Error checking auth state:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    const loadUser = async () => {
+      const storedUser = await AsyncStorage.getItem("userData");
+      if (storedUser) setUser(JSON.parse(storedUser));
+      setIsLoading(false);
+    };
+    loadUser();
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const currentUser = userCredential.user;
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("email", "==", email));
+      const querySnapshot = await getDocs(q);
 
-      const userData: User = {
-        id: currentUser.uid,
-        name: currentUser.displayName || "User",
-        email: currentUser.email || "",
-        joinDate: currentUser.metadata.creationTime || new Date().toISOString(),
-      };
+      if (!querySnapshot.empty) {
+        const doc = querySnapshot.docs[0];
+        const userData = doc.data();
+        const hashedInput = SHA256(password).toString(Hex);
+        const isValid = hashedInput === userData.password;
 
-      await AsyncStorage.setItem("userToken", currentUser.uid);
-      await AsyncStorage.setItem("userData", JSON.stringify(userData));
-      setUser(userData);
-      return true;
+        if (isValid) {
+          const currentUser: User = {
+            id: doc.id,
+            name: userData.name,
+            email: userData.email,
+            joinDate: userData.joinDate,
+            role: userData.role || "user",
+          };
+
+          await AsyncStorage.setItem("userData", JSON.stringify(currentUser));
+          setUser(currentUser);
+          return true;
+        }
+      }
+
+      return false;
     } catch (error) {
       console.error("Login error:", error);
       return false;
@@ -81,99 +82,91 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+  try {
+    console.log("🔍 Checking if user already exists...");
+    const usersRef = collection(db, "users");
 
-      // For demo purposes, accept any valid input
-      if (name.trim() && email.includes("@") && password.length >= 6) {
-        const userData: User = {
-          id: Date.now().toString(),
-          name: name,
-          email: email,
-          joinDate: new Date().toISOString(),
-          stats: {
-            burgersViewed: 0,
-            recipesCooked: 0,
-            favoriteCategory: "None yet",
-            totalCookTime: "0m",
-          },
-        }
-
-        await AsyncStorage.setItem("userToken", "mock-token-" + Date.now())
-        await AsyncStorage.setItem("userData", JSON.stringify(userData))
-        setUser(userData)
-        return true
-      }
-
-      return false
-    } catch (error) {
-      console.error("Registration error:", error)
-      return false
+    const q = query(usersRef, where("email", "==", email));
+    const existing = await getDocs(q);
+    if (!existing.empty) {
+      console.warn("⚠️ Email already exists");
+      return false;
     }
+
+    console.log("🔐 Hashing password...");
+    const hashedPassword = SHA256(password).toString(Hex);
+    const role = email.endsWith("@admin.com") ? "admin" : "user";
+
+    console.log("📝 Saving new user to Firestore...");
+    const docRef = await addDoc(usersRef, {
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      joinDate: Timestamp.now().toDate().toISOString(),
+    });
+
+    console.log("✅ Registration success, saving to AsyncStorage...");
+    const newUser: User = {
+      id: docRef.id,
+      name,
+      email,
+      role,
+      joinDate: new Date().toISOString(),
+    };
+
+    await AsyncStorage.setItem("userData", JSON.stringify(newUser));
+    setUser(newUser);
+    return true;
+  } catch (error: any) {
+    console.error("❌ Registration error:", error.message || error);
+    return false;
   }
+};
+
 
   const logout = async (): Promise<void> => {
     try {
-      await AsyncStorage.removeItem("userToken")
-      await AsyncStorage.removeItem("userData")
-      setUser(null)
+      await AsyncStorage.removeItem("userData");
+      setUser(null);
     } catch (error) {
-      console.error("Logout error:", error)
+      console.error("Logout error:", error);
     }
-  }
+  };
 
   const updateUser = async (userData: Partial<User>): Promise<void> => {
     try {
       if (user) {
-        const updatedUser = { ...user, ...userData }
-        await AsyncStorage.setItem("userData", JSON.stringify(updatedUser))
-        setUser(updatedUser)
+        const updatedUser = { ...user, ...userData };
+        await AsyncStorage.setItem("userData", JSON.stringify(updatedUser));
+        setUser(updatedUser);
       }
     } catch (error) {
-      console.error("Update user error:", error)
+      console.error("Update user error:", error);
     }
-  }
+  };
 
   const resetPassword = async (email: string): Promise<boolean> => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // For demo purposes, always return success
-      // In a real app, you would call an API endpoint
-
-      // Store the reset request in AsyncStorage for demo purposes
-      await AsyncStorage.setItem("passwordResetRequested", email)
-
-      return true
+      console.log("Password reset requested for:", email);
+      return true;
     } catch (error) {
-      console.error("Password reset error:", error)
-      return false
+      console.error("Password reset error:", error);
+      return false;
     }
-  }
+  };
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        login,
-        register,
-        logout,
-        updateUser,
-        resetPassword,
-      }}
+      value={{ user, isLoading, login, register, logout, resetPassword, updateUser }}
     >
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
 
 export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
-  }
-  return context
-}
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
+  return context;
+};
