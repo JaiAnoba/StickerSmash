@@ -82,48 +82,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
-  try {
-    console.log("🔍 Checking if user already exists...");
-    const usersRef = collection(db, "users");
+    try {
+      console.log("Checking if user already exists...");
+      const usersRef = collection(db, "users");
 
-    const q = query(usersRef, where("email", "==", email));
-    const existing = await getDocs(q);
-    if (!existing.empty) {
-      console.warn("⚠️ Email already exists");
+      const q = query(usersRef, where("email", "==", email));
+      const existing = await getDocs(q);
+      if (!existing.empty) {
+        console.warn("Email already exists");
+        return false;
+      }
+
+      console.log("Hashing password...");
+      const hashedPassword = SHA256(password).toString(Hex);
+      const role = email.endsWith("@admin.com") ? "admin" : "user";
+
+      console.log("Saving new user to Firestore...");
+      await addDoc(usersRef, {
+        name,
+        email,
+        password: hashedPassword,
+        role,
+        joinDate: Timestamp.now().toDate().toISOString(),
+      });
+
+      console.log("Registration successful.");
+      return true;
+    } catch (error: any) {
+      console.error("Registration error:", error.message || error);
       return false;
     }
-
-    console.log("🔐 Hashing password...");
-    const hashedPassword = SHA256(password).toString(Hex);
-    const role = email.endsWith("@admin.com") ? "admin" : "user";
-
-    console.log("📝 Saving new user to Firestore...");
-    const docRef = await addDoc(usersRef, {
-      name,
-      email,
-      password: hashedPassword,
-      role,
-      joinDate: Timestamp.now().toDate().toISOString(),
-    });
-
-    console.log("✅ Registration success, saving to AsyncStorage...");
-    const newUser: User = {
-      id: docRef.id,
-      name,
-      email,
-      role,
-      joinDate: new Date().toISOString(),
-    };
-
-    await AsyncStorage.setItem("userData", JSON.stringify(newUser));
-    setUser(newUser);
-    return true;
-  } catch (error: any) {
-    console.error("❌ Registration error:", error.message || error);
-    return false;
-  }
-};
-
+  };
 
   const logout = async (): Promise<void> => {
     try {

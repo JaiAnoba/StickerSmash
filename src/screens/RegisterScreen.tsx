@@ -71,14 +71,13 @@ const RegisterScreen: React.FC = () => {
     try {
       const success = await register(name, email, password);
       if (success) {
-        Alert.alert("Success", "Account created successfully! Please login.", [
-          {
-            text: "OK",
-            onPress: () => navigation.navigate("Login"),
-          },
-        ]);
+        Alert.alert("Success", "Account created! Please log in.");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Login" }],
+        });
       } else {
-        Alert.alert("Error", "Registration failed. Please try again.");
+        Alert.alert("Error", "Registration failed. Email might already be in use.");
       }
     } catch (error) {
       Alert.alert("Error", "Registration failed. Please try again.");

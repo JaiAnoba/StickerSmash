@@ -67,14 +67,13 @@ const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName={user ? "Main" : "Login"}
-        screenOptions={{
-          headerShown: false,
-          gestureEnabled: true,
-        }}
-      >
-        {user ? (
+      <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: true }}>
+        {/* Login & Register */}
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
+
+        {/* Only shows app screens if logged in */}
+        {user && (
           <>
             <Stack.Screen name="Main" component={MainScreen} />
             <Stack.Screen name="BurgerDetail" component={BurgerDetailScreen} />
@@ -85,11 +84,6 @@ const AppNavigator = () => {
             <Stack.Screen name="ShoppingList" component={ShoppingListScreen} />
             <Stack.Screen name="DataStorage" component={DataStorageScreen} />
             <Stack.Screen name="ShareApp" component={ShareAppScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
           </>
         )}
       </Stack.Navigator>
