@@ -4,6 +4,8 @@ import type React from "react"
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged, updateProfile } from "firebase/auth";
+import { auth } from "../../firebase"; 
 interface User {
   id: string
   name: string
@@ -58,39 +60,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const currentUser = userCredential.user;
 
-      // Accept demo credentials or any email/password for demo purposes
-      if (
-        (email === "demo@burgerpedia.com" && password === "demo123") ||
-        (email.includes("@") && password.length >= 3)
-      ) {
-        const userData: User = {
-          id: Date.now().toString(),
-          name: email === "demo@burgerpedia.com" ? "Demo User" : "User",
-          email: email,
-          joinDate: new Date().toISOString(),
-          stats: {
-            burgersViewed: 25,
-            recipesCooked: 8,
-            favoriteCategory: "Classic",
-            totalCookTime: "3h 45m",
-          },
-        }
+      const userData: User = {
+        id: currentUser.uid,
+        name: currentUser.displayName || "User",
+        email: currentUser.email || "",
+        joinDate: currentUser.metadata.creationTime || new Date().toISOString(),
+      };
 
-        await AsyncStorage.setItem("userToken", "mock-token-" + Date.now())
-        await AsyncStorage.setItem("userData", JSON.stringify(userData))
-        setUser(userData)
-        return true
-      }
-
-      return false
+      await AsyncStorage.setItem("userToken", currentUser.uid);
+      await AsyncStorage.setItem("userData", JSON.stringify(userData));
+      setUser(userData);
+      return true;
     } catch (error) {
-      console.error("Login error:", error)
-      return false
+      console.error("Login error:", error);
+      return false;
     }
-  }
+  };
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {

@@ -18,7 +18,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "firebase-fix.d.ts"
+    "firebase.ds.ts"
   ],
    "expo": {
     "jsEngine": "jsc"
