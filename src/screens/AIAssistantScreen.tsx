@@ -1,3 +1,4 @@
+import { AI_CHEF_API_KEY } from '@env';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -65,7 +66,7 @@ const AIAssistantScreen: React.FC = () => {
         },
         {
           headers: {
-            'Authorization': 'Bearer T0wyDO2Tv2RClj7PxmyTpC4YnNZdVNwgsL9Hemcb',
+            'Authorization': `Bearer ${AI_CHEF_API_KEY}`,
             'Content-Type': 'application/json',
           },
         }
