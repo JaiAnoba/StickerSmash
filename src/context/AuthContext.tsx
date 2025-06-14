@@ -9,10 +9,12 @@ import {
   where,
   getDocs,
   addDoc,
+  doc,
+  updateDoc,
   Timestamp,
 } from "firebase/firestore";
 import SHA256 from "crypto-js/sha256";
-import Hex from "crypto-js/enc-hex"; // for .toString(Hex)
+import Hex from "crypto-js/enc-hex"; 
 
 interface User {
   id: string;
@@ -137,7 +139,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const resetPassword = async (email: string): Promise<boolean> => {
     try {
-      console.log("Password reset requested for:", email);
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("email", "==", email));
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        console.warn("No user found with that email.");
+        return false;
+      }
+
+      const userDoc = snapshot.docs[0];
+      const userId = userDoc.id;
+
+      const tempPassword = SHA256("123456").toString(Hex);
+      const userRef = doc(db, "users", userId);
+
+      await updateDoc(userRef, { password: tempPassword });
+
+      console.log(`Password for ${email} reset to '123456' (hashed).`);
       return true;
     } catch (error) {
       console.error("Password reset error:", error);
