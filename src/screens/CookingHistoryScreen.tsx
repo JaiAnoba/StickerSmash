@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react" 
 import { View, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar, FlatList, Image } from "react-native"
 import type { StackNavigationProp } from "@react-navigation/stack"
 import type { RootStackParamList } from "../../App"

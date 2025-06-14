@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 import type { Burger } from "../types/Burger"
 
 import { db } from "../../firebase";
-import { collection, addDoc, setDoc, doc, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc } from "firebase/firestore";
 import { useAuth } from "./AuthContext";
 
 interface CookingSession {
@@ -40,14 +40,32 @@ export const CookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const loadCookingSessions = async () => {
     try {
-      const storedSessions = await AsyncStorage.getItem("cookingSessions")
-      if (storedSessions) {
-        setCookingSessions(JSON.parse(storedSessions))
+      let loadedSessions: CookingSession[] = [];
+
+      // Try to load from Firestore first if user is logged in
+      if (user) {
+        const sessionsRef = collection(db, "users", user.id, "cookingSessions");
+        const snapshot = await getDocs(sessionsRef);
+
+        loadedSessions = snapshot.docs.map((doc) => ({
+          ...doc.data(),
+        })) as CookingSession[];
+
+        console.log("Loaded from Firestore:", loadedSessions.length);
+      } else {
+        // Otherwise load from AsyncStorage
+        const storedSessions = await AsyncStorage.getItem("cookingSessions");
+        if (storedSessions) {
+          loadedSessions = JSON.parse(storedSessions);
+          console.log("Loaded from AsyncStorage:", loadedSessions.length);
+        }
       }
+
+      setCookingSessions(loadedSessions);
     } catch (error) {
-      console.error("Error loading cooking sessions:", error)
+      console.error("Error loading cooking sessions:", error);
     }
-  }
+  };
 
   const saveCookingSessions = async (sessions: CookingSession[]) => {
     try {
