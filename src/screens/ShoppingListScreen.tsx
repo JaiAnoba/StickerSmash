@@ -18,6 +18,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 import { useTheme } from "../context/ThemeContext"
 import Button from "../components/Button"
 
+import { collection, setDoc, doc, getDocs } from "firebase/firestore";
+import { useAuth } from "../context/AuthContext";
+import { db } from "../../firebase"
+
 interface ShoppingItem {
   id: string
   name: string
@@ -35,6 +39,7 @@ const ShoppingListScreen: React.FC = () => {
   const [newItemQuantity, setNewItemQuantity] = useState("")
   const [newItemCategory, setNewItemCategory] = useState("Meat")
   const [loading, setLoading] = useState(true)
+  const { user } = useAuth(); 
 
   const categories = ["Meat", "Vegetables", "Dairy", "Condiments", "Bread", "Spices", "Other"]
 
@@ -44,25 +49,46 @@ const ShoppingListScreen: React.FC = () => {
 
   const loadShoppingList = async () => {
     try {
-      const list = await AsyncStorage.getItem("shoppingList")
+      // load from AsyncStorage
+      const list = await AsyncStorage.getItem("shoppingList");
       if (list) {
-        setShoppingList(JSON.parse(list))
+        setShoppingList(JSON.parse(list));
+      }
+
+      // If user is logged in, fetch from Firestore
+      if (user) {
+        const snapshot = await getDocs(collection(db, "users", user.id, "shoppingList"));
+        const firestoreList: ShoppingItem[] = snapshot.docs.map((doc) => doc.data() as ShoppingItem);
+        setShoppingList(firestoreList);
+        await AsyncStorage.setItem("shoppingList", JSON.stringify(firestoreList));
       }
     } catch (error) {
-      console.error("Error loading shopping list:", error)
+      console.error("Error loading shopping list:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const saveShoppingList = async (list: ShoppingItem[]) => {
     try {
-      await AsyncStorage.setItem("shoppingList", JSON.stringify(list))
-      setShoppingList(list)
+      await AsyncStorage.setItem("shoppingList", JSON.stringify(list));
+      setShoppingList(list);
+
+      if (user) {
+        const userListRef = collection(db, "users", user.id, "shoppingList");
+
+        // Optional: Clear all existing user shopping items first (advanced cleanup)
+        // You may use getDocs + deleteDoc for that if needed
+
+        for (const item of list) {
+          const itemRef = doc(userListRef, item.id); 
+          await setDoc(itemRef, item);
+        }
+      }
     } catch (error) {
-      console.error("Error saving shopping list:", error)
+      console.error("Error saving shopping list:", error);
     }
-  }
+  };
 
   const addItem = () => {
     if (!newItemName.trim()) {

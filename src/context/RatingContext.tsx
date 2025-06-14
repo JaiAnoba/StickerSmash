@@ -24,6 +24,7 @@ const RatingContext = createContext<RatingContextType | undefined>(undefined)
 
 export const RatingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [ratings, setRatings] = useState<Rating[]>([])
+  const { user } = useAuth(); 
 
   useEffect(() => {
     loadRatings()
@@ -47,8 +48,6 @@ export const RatingProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       console.error("Error saving ratings:", error)
     }
   }
-
-  const { user } = useAuth(); 
 
   const addRating = async (burgerId: string, rating: number) => {
     if (!user) return;
