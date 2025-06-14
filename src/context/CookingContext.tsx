@@ -5,10 +5,14 @@ import { createContext, useState, useContext, useEffect } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import type { Burger } from "../types/Burger"
 
+import { db } from "../../firebase";
+import { collection, addDoc, setDoc, doc, deleteDoc } from "firebase/firestore";
+import { useAuth } from "./AuthContext";
+
 interface CookingSession {
   burgerId: string
   burgerName: string
-  cookingTime: number // in seconds
+  cookingTime: number
   date: string
   completed: boolean
 }
@@ -28,6 +32,7 @@ const CookingContext = createContext<CookingContextType | undefined>(undefined)
 export const CookingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cookingSessions, setCookingSessions] = useState<CookingSession[]>([])
   const [currentSession, setCurrentSession] = useState<CookingSession | null>(null)
+  const { user } = useAuth();
 
   useEffect(() => {
     loadCookingSessions()
@@ -63,23 +68,41 @@ export const CookingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setCurrentSession(newSession)
   }
 
-  const completeCooking = (elapsedTime: number) => {
+  const completeCooking = async (elapsedTime: number) => {
     if (currentSession) {
       const completedSession: CookingSession = {
         ...currentSession,
         cookingTime: elapsedTime,
         completed: true,
+      };
+
+      const updatedSessions = [...cookingSessions, completedSession];
+      setCookingSessions(updatedSessions);
+      saveCookingSessions(updatedSessions);
+      setCurrentSession(null);
+
+      // Save to Firestore if logged in
+      
+      if (user) {
+        try {
+          const userCookingRef = collection(db, "users", user.id, "cookingSessions");
+          await addDoc(userCookingRef, {
+            burgerId: completedSession.burgerId,
+            burgerName: completedSession.burgerName,
+            cookingTime: completedSession.cookingTime,
+            date: completedSession.date,
+            completed: completedSession.completed,
+            savedAt: new Date().toISOString(),
+          });
+          console.log("Cooking session saved under user document.");
+        } catch (err) {
+          console.error("Error saving session:", err);
+        }
       }
 
-      const updatedSessions = [...cookingSessions, completedSession]
-      setCookingSessions(updatedSessions)
-      saveCookingSessions(updatedSessions)
-      setCurrentSession(null)
-
-      // Update user stats in AsyncStorage
-      updateUserStats(completedSession)
+      updateUserStats(completedSession);
     }
-  }
+  };
 
   const cancelCooking = () => {
     setCurrentSession(null)
