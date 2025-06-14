@@ -3,6 +3,9 @@
 import type React from "react"
 import { createContext, useState, useContext, useEffect } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { db } from "../../firebase";
+import { collection, query, where, getDocs, setDoc, doc, Timestamp } from "firebase/firestore";
+import { useAuth } from "./AuthContext";
 
 interface Rating {
   burgerId: string
@@ -45,29 +48,41 @@ export const RatingProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }
 
+  const { user } = useAuth(); 
+
   const addRating = async (burgerId: string, rating: number) => {
+    if (!user) return;
+
     const newRating: Rating = {
       burgerId,
       rating,
       date: new Date().toISOString(),
-    }
+    };
 
-    // Check if user already rated this burger
-    const existingIndex = ratings.findIndex((r) => r.burgerId === burgerId)
+    // Local cache update
+    const existingIndex = ratings.findIndex((r) => r.burgerId === burgerId);
+    let updatedRatings: Rating[];
 
-    let updatedRatings: Rating[]
     if (existingIndex >= 0) {
-      // Update existing rating
-      updatedRatings = [...ratings]
-      updatedRatings[existingIndex] = newRating
+      updatedRatings = [...ratings];
+      updatedRatings[existingIndex] = newRating;
     } else {
-      // Add new rating
-      updatedRatings = [...ratings, newRating]
+      updatedRatings = [...ratings, newRating];
     }
 
-    setRatings(updatedRatings)
-    await saveRatings(updatedRatings)
-  }
+    setRatings(updatedRatings);
+    await saveRatings(updatedRatings);
+
+    // Firestore write
+    const ratingRef = doc(db, "ratings", `${burgerId}_${user.id}`);
+    await setDoc(ratingRef, {
+      burgerId,
+      rating,
+      userId: user.id,
+      userName: user.name,
+      timestamp: Timestamp.now(),
+    });
+  };
 
   const getUserRating = (burgerId: string): number | null => {
     const userRating = ratings.find((r) => r.burgerId === burgerId)
