@@ -62,7 +62,7 @@ const CookingHistoryScreen: React.FC<Props> = ({ navigation }) => {
   const renderSessionItem = ({ item }: { item: any }) => (
     <View style={styles.sessionItem}>
       <View style={styles.sessionIconContainer}>
-        <Text style={styles.sessionIcon}>🍔</Text>
+        <Image source={{ uri: "https://img.icons8.com/material-rounded/96/hamburger.png" }} style={{width: 22, height: 22, tintColor: '#8B0000', zIndex: 50,}} />
       </View>
       <View style={styles.sessionInfo}>
         <Text weight="semiBold" style={styles.sessionName}>
@@ -114,7 +114,7 @@ const CookingHistoryScreen: React.FC<Props> = ({ navigation }) => {
           />
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>👨‍🍳</Text>
+            <Image source={{ uri: "https://img.icons8.com/windows/64/cook-male.png" }} style={styles.emptyIcon} />
             <Text weight="semiBold" style={styles.emptyTitle}>
               No cooking history yet
             </Text>
@@ -138,12 +138,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 15,
+    marginBottom: 10,
+    borderBottomStartRadius: 50,
+    borderBottomEndRadius: 50,
   },
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   dateHeader: {
-    fontSize: 16,
+    fontSize: 14,
     marginBottom: 10,
     color: "#4B5563",
   },
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
     color: "#1F2937",
   },
   sessionTime: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#6B7280",
   },
   emptyState: {
