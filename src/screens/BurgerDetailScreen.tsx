@@ -272,7 +272,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
                     <View style={styles.ratingContainer}>
                       <Image
                         source={{ uri: "https://img.icons8.com/fluency-systems-filled/96/star.png" }}
-                        style={{ width: 14, height: 14, tintColor: "#ffbd59", marginRight: 4 }}
+                        style={{ width: 14, height: 14, tintColor: "#8B0000", marginRight: 4 }}
                       />
                       <Text weight="semiBold" style={styles.ratingValue}>
                         {burger.rating}
