@@ -3,9 +3,6 @@
 import type React from "react"
 import { createContext, useState, useContext, useEffect } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { db } from "../../firebase";
-import { collection, query, where, getDocs, setDoc, doc, Timestamp } from "firebase/firestore";
-import { useAuth } from "./AuthContext";
 
 interface Rating {
   burgerId: string
@@ -24,7 +21,6 @@ const RatingContext = createContext<RatingContextType | undefined>(undefined)
 
 export const RatingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [ratings, setRatings] = useState<Rating[]>([])
-  const { user } = useAuth(); 
 
   useEffect(() => {
     loadRatings()
@@ -50,38 +46,28 @@ export const RatingProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }
 
   const addRating = async (burgerId: string, rating: number) => {
-    if (!user) return;
-
     const newRating: Rating = {
       burgerId,
       rating,
       date: new Date().toISOString(),
-    };
-
-    // Local cache update
-    const existingIndex = ratings.findIndex((r) => r.burgerId === burgerId);
-    let updatedRatings: Rating[];
-
-    if (existingIndex >= 0) {
-      updatedRatings = [...ratings];
-      updatedRatings[existingIndex] = newRating;
-    } else {
-      updatedRatings = [...ratings, newRating];
     }
 
-    setRatings(updatedRatings);
-    await saveRatings(updatedRatings);
+    // Check if user already rated this burger
+    const existingIndex = ratings.findIndex((r) => r.burgerId === burgerId)
 
-    // Firestore write
-    const ratingRef = doc(db, "ratings", `${burgerId}_${user.id}`);
-    await setDoc(ratingRef, {
-      burgerId,
-      rating,
-      userId: user.id,
-      userName: user.name,
-      timestamp: Timestamp.now(),
-    });
-  };
+    let updatedRatings: Rating[]
+    if (existingIndex >= 0) {
+      // Update existing rating
+      updatedRatings = [...ratings]
+      updatedRatings[existingIndex] = newRating
+    } else {
+      // Add new rating
+      updatedRatings = [...ratings, newRating]
+    }
+
+    setRatings(updatedRatings)
+    await saveRatings(updatedRatings)
+  }
 
   const getUserRating = (burgerId: string): number | null => {
     const userRating = ratings.find((r) => r.burgerId === burgerId)
@@ -89,8 +75,6 @@ export const RatingProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }
 
   const getAverageRating = (burgerId: string): number => {
-    // In a real app, this would fetch from a backend
-    // For now, we'll just return the user's rating or the default rating
     const userRating = getUserRating(burgerId)
     return userRating || 4.5 // Default to 4.5 if no user rating
   }
