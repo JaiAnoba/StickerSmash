@@ -14,6 +14,7 @@ interface ButtonProps {
   disabled?: boolean
   loading?: boolean
   icon?: string
+  iconColor?: string
   textColor?: string
   backgroundColor?: string
   borderColor?: string  
@@ -29,6 +30,7 @@ const Button: React.FC<ButtonProps> = ({
   disabled = false,
   loading = false,
   icon,
+  iconColor,
   textColor,
   backgroundColor,
   borderColor, 
@@ -126,7 +128,14 @@ const Button: React.FC<ButtonProps> = ({
             typeof icon === "string" && icon.startsWith("http") ? (
               <Image source={{ uri: icon }} style={styles.iconImage} />
             ) : (
-              <Text style={[styles.iconText, { marginRight: 8 }]}>{icon}</Text>
+              <Text
+                style={[
+                  styles.iconText,
+                  { marginRight: 8, color: iconColor || getTextColor() },
+                ]}
+              >
+                {icon}
+              </Text>
             )
           )}
           <Text weight="semiBold" style={[styles.text, { color: textColor || getTextColor(), fontSize: getTextSize() }]}>

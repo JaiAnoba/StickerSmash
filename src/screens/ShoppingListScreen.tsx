@@ -4,7 +4,6 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import {
   View,
-  Text,
   StyleSheet,
   SafeAreaView,
   StatusBar,
@@ -13,10 +12,13 @@ import {
   TextInput,
   Alert,
   Modal,
+  Image
 } from "react-native"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { useTheme } from "../context/ThemeContext"
 import Button from "../components/Button"
+import { useNavigation } from "@react-navigation/native"
+import Text from "../components/CustomText"
 
 interface ShoppingItem {
   id: string
@@ -35,6 +37,7 @@ const ShoppingListScreen: React.FC = () => {
   const [newItemQuantity, setNewItemQuantity] = useState("")
   const [newItemCategory, setNewItemCategory] = useState("Meat")
   const [loading, setLoading] = useState(true)
+  const navigation = useNavigation()
 
   const categories = ["Meat", "Vegetables", "Dairy", "Condiments", "Bread", "Spices", "Other"]
 
@@ -152,7 +155,7 @@ const ShoppingListScreen: React.FC = () => {
       <View style={styles.itemLeft}>
         <Text style={styles.categoryIcon}>{getCategoryIcon(item.category)}</Text>
         <View style={styles.itemDetails}>
-          <Text style={[styles.itemName, { color: colors.text }, item.completed && styles.completedText]}>
+          <Text weight='semiBold' style={[styles.itemName, { color: colors.text }, item.completed && styles.completedText]}>
             {item.name}
           </Text>
           <Text style={[styles.itemQuantity, { color: colors.subtext }]}>
@@ -174,7 +177,10 @@ const ShoppingListScreen: React.FC = () => {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.deleteButton} onPress={() => deleteItem(item.id)}>
-          <Text style={styles.deleteIcon}>🗑️</Text>
+          <Image
+            source={{ uri: "https://img.icons8.com/forma-bold/72/delete-forever.png" }}
+            style={styles.deleteIcon}
+          />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -198,13 +204,22 @@ const ShoppingListScreen: React.FC = () => {
       <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text style={styles.headerTitle}>Shopping List</Text>
+        <TouchableOpacity style={styles.side} onPress={() => navigation.goBack()}>
+          <Image source={{ uri: "https://img.icons8.com/sf-black/100/back.png" }} style={styles.backIcon} />
+        </TouchableOpacity>
+
+        <Text weight="semiBold" style={styles.headerTitle}>Shopping List</Text>
+
+        <View style={styles.side} />
       </View>
 
       {shoppingList.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>🛒</Text>
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>Empty Shopping List</Text>
+          <Image
+            source={{ uri: "https://img.icons8.com/material-outlined/96/shopping-cart--v1.png" }}
+            style={styles.emptyIcon}
+          />
+          <Text weight='semiBold' style={[styles.emptyTitle, { color: colors.text }]}>Empty Shopping List</Text>
           <Text style={[styles.emptySubtitle, { color: colors.subtext }]}>
             Add ingredients you need for your burger recipes!
           </Text>
@@ -253,7 +268,7 @@ const ShoppingListScreen: React.FC = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Add Shopping Item</Text>
+            <Text weight='semiBold' style={[styles.modalTitle, { color: colors.text }]}>Add Shopping Item</Text>
 
             <TextInput
               style={[
@@ -277,7 +292,7 @@ const ShoppingListScreen: React.FC = () => {
               onChangeText={setNewItemQuantity}
             />
 
-            <Text style={[styles.categoryLabel, { color: colors.text }]}>Category:</Text>
+            <Text weight='semiBold' style={[styles.categoryLabel, { color: colors.text }]}>Category:</Text>
             <View style={styles.categoryGrid}>
               {categories.map((category) => (
                 <TouchableOpacity
@@ -304,7 +319,7 @@ const ShoppingListScreen: React.FC = () => {
             </View>
 
             <View style={styles.modalButtons}>
-              <Button title="Add Item" onPress={addItem} icon="+" style={styles.modalButton} />
+              <Button title="Add Item" onPress={addItem} icon="+" iconColor="white" style={styles.modalButton} />
               <Button
                 title="Cancel"
                 onPress={() => setIsAddModalVisible(false)}
@@ -326,12 +341,34 @@ const styles = StyleSheet.create({
   header: {
     paddingVertical: 20,
     paddingHorizontal: 20,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+    borderBottomStartRadius: 50,
+    borderBottomEndRadius: 50,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 20,
     color: "white",
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  side: {
+    width: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
+    tintColor: "white",
   },
   loadingContainer: {
     flex: 1,
@@ -345,20 +382,22 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 40,
+    paddingBlock: 20,
+    paddingInline: 40,
   },
   emptyIcon: {
-    fontSize: 64,
+    width: 64,
+    height: 64,
     marginBottom: 20,
+    resizeMode: "contain",
   },
   emptyTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 18,
     marginBottom: 10,
     textAlign: "center",
   },
   emptySubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     textAlign: "center",
     lineHeight: 24,
   },
@@ -369,8 +408,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   progress: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 14,
   },
   headerButtons: {
     flexDirection: "row",
@@ -413,7 +451,6 @@ const styles = StyleSheet.create({
   },
   itemName: {
     fontSize: 16,
-    fontWeight: "500",
     marginBottom: 4,
   },
   completedText: {
@@ -427,8 +464,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   checkbox: {
-    width: 24,
-    height: 24,
+    width: 22,
+    height: 22,
     borderRadius: 12,
     borderWidth: 2,
     justifyContent: "center",
@@ -438,13 +475,14 @@ const styles = StyleSheet.create({
   checkmark: {
     color: "white",
     fontSize: 14,
-    fontWeight: "bold",
   },
   deleteButton: {
     padding: 4,
   },
   deleteIcon: {
-    fontSize: 18,
+    width: 20,
+    height: 20,
+    resizeMode: "contain",
   },
   addButton: {
     position: "absolute",
@@ -464,7 +502,6 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: "white",
     fontSize: 24,
-    fontWeight: "bold",
   },
   // Modal Styles
   modalOverlay: {
@@ -487,21 +524,20 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 18,
     textAlign: "center",
     marginBottom: 20,
   },
   input: {
-    borderRadius: 12,
+    borderRadius: 50,
     padding: 16,
     marginBottom: 16,
-    fontSize: 16,
+    fontSize: 14,
+    fontFamily: 'Poppins-Regular',
     borderWidth: 1,
   },
   categoryLabel: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 14,
     marginBottom: 12,
   },
   categoryGrid: {
@@ -525,7 +561,6 @@ const styles = StyleSheet.create({
   },
   categoryButtonText: {
     fontSize: 12,
-    fontWeight: "500",
     textAlign: "center",
   },
   modalButtons: {
