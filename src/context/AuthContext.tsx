@@ -8,6 +8,7 @@ interface User {
   id: string
   name: string
   email: string
+  password: string 
   joinDate: string
   stats?: {
     burgersViewed: number
@@ -70,6 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           id: Date.now().toString(),
           name: email === "demo@burgerpedia.com" ? "Demo User" : "User",
           email: email,
+          password,
           joinDate: new Date().toISOString(),
           stats: {
             burgersViewed: 25,
@@ -103,6 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           id: Date.now().toString(),
           name: name,
           email: email,
+          password: password,
           joinDate: new Date().toISOString(),
           stats: {
             burgersViewed: 0,

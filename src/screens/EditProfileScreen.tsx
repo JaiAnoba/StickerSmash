@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TextInput,
   SafeAreaView,
@@ -11,12 +10,16 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../App';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
+import Text from "../components/CustomText"
 
 type EditProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'EditProfile'>;
 
@@ -25,79 +28,135 @@ interface Props {
 }
 
 const EditProfileScreen: React.FC<Props> = ({ navigation }) => {
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
   const { user, updateUser } = useAuth();
-  const [name, setName] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [hasChanges, setHasChanges] = useState<boolean>(false);
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPasswordFields, setShowPasswordFields] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [initialProfileImage, setInitialProfileImage] = useState<string | null>(null);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
       setName(user.name);
       setEmail(user.email);
+      setPassword(user.password ?? '');
     }
+    loadProfileImage();
   }, [user]);
 
   useEffect(() => {
-    if (user) {
-      const nameChanged = name !== user.name;
-      const emailChanged = email !== user.email;
-      setHasChanges(nameChanged || emailChanged);
+    checkForChanges();
+  }, [name, email, profileImage, newPassword, confirmPassword]);
+
+  const loadProfileImage = async () => {
+    try {
+      const savedImage = await AsyncStorage.getItem('profileImage');
+      setProfileImage(savedImage);
+      setInitialProfileImage(savedImage);
+    } catch (err) {
+      console.error('Failed to load profile image:', err);
     }
-  }, [name, email, user]);
+  };
+
+  const saveProfileImage = async (uri: string) => {
+    try {
+      await AsyncStorage.setItem('profileImage', uri);
+      setProfileImage(uri);
+    } catch (err) {
+      console.error('Failed to save profile image:', err);
+    }
+  };
+
+  const removeProfileImage = async () => {
+    try {
+      await AsyncStorage.removeItem('profileImage');
+      setProfileImage(null);
+      checkForChanges();
+    } catch (err) {
+      console.error('Failed to remove profile image:', err);
+    }
+  };
+
+  const checkForChanges = () => {
+    const nameChanged = name !== user?.name;
+    const emailChanged = email !== user?.email;
+    const imageChanged = profileImage !== initialProfileImage;
+    const passwordChanged = newPassword.length > 0;
+    setHasChanges(nameChanged || emailChanged || imageChanged || passwordChanged);
+  };
+
+  const handlePickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission required', 'Please allow gallery access.');
+      return;
+    }
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets?.length > 0) {
+        const uri = result.assets[0].uri;
+        await saveProfileImage(uri);
+        checkForChanges();
+      }
+    } catch (err) {
+      console.error('Error picking image:', err);
+    }
+  };
 
   const handleSave = async () => {
-    if (!name.trim()) {
-      Alert.alert('Error', 'Name cannot be empty');
-      return;
-    }
+    if (!name.trim()) return Alert.alert('Error', 'Name cannot be empty');
+    if (!email.trim()) return Alert.alert('Error', 'Email cannot be empty');
+    if (!/\S+@\S+\.\S+/.test(email)) return Alert.alert('Error', 'Enter a valid email');
 
-    if (!email.trim()) {
-      Alert.alert('Error', 'Email cannot be empty');
-      return;
-    }
-
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      Alert.alert('Error', 'Please enter a valid email address');
-      return;
+    if (showPasswordFields) {
+      if (!newPassword || !confirmPassword) {
+        return Alert.alert('Error', 'Please fill out both new password fields.');
+      }
+      if (newPassword !== confirmPassword) {
+        return Alert.alert('Error', 'New passwords do not match.');
+      }
     }
 
     setIsLoading(true);
-
     try {
       await updateUser({
         name: name.trim(),
         email: email.trim(),
+        ...(showPasswordFields ? { password: newPassword } : {})
       });
-
-      Alert.alert('Success', 'Profile updated successfully!', [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
-    } catch (error) {
+      setInitialProfileImage(profileImage);
+      Alert.alert('Success', 'Profile updated successfully!', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+    } catch (err) {
       Alert.alert('Error', 'Failed to update profile. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCancel = () => {
+  const handleBackPress = () => {
     if (hasChanges) {
-      Alert.alert(
-        'Discard Changes',
-        'You have unsaved changes. Are you sure you want to go back?',
-        [
-          { text: 'Keep Editing', style: 'cancel' },
-          {
-            text: 'Discard',
-            style: 'destructive',
-            onPress: () => navigation.goBack(),
-          },
-        ]
-      );
+      Alert.alert('Discard Changes', 'You have unsaved changes. Do you want to go back?', [
+        { text: 'Stay', style: 'cancel' },
+        { text: 'Discard', style: 'destructive', onPress: () => navigation.goBack() },
+      ]);
     } else {
       navigation.goBack();
     }
@@ -105,14 +164,16 @@ const EditProfileScreen: React.FC<Props> = ({ navigation }) => {
 
   const ProfileAvatar = () => (
     <View style={[styles.avatarContainer, { backgroundColor: colors.primary }]}>
-      <Text style={styles.avatarText}>
-        {name ? name.charAt(0).toUpperCase() : '👤'}
-      </Text>
-      <TouchableOpacity 
-        style={[styles.editAvatarButton, { backgroundColor: colors.card }]}
-        onPress={() => Alert.alert('Coming Soon', 'Avatar editing feature coming soon!')}
-      >
-        <Text style={styles.editAvatarIcon}>📷</Text>
+      {profileImage ? (
+        <Image source={{ uri: profileImage }} style={styles.avatarImage} />
+      ) : (
+        <Text style={styles.avatarText}>{name ? name.charAt(0).toUpperCase() : ''}</Text>
+      )}
+      <TouchableOpacity style={[styles.editAvatarButton, { backgroundColor: colors.card, zIndex: 999, }]} onPress={handlePickImage}>
+        <Image
+          source={{ uri: 'https://img.icons8.com/puffy/32/camera.png' }}
+          style={{ width: 18, height: 18 }}
+        />
       </TouchableOpacity>
     </View>
   );
@@ -120,33 +181,34 @@ const EditProfileScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar backgroundColor={colors.primary} barStyle="light-content" />
-      
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoidingView}
-      >
+
+      {/* Header */}
+      <View style={[styles.headerContainer, { backgroundColor: colors.background }]}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
+          <Image
+            source={{ uri: 'https://img.icons8.com/material-rounded/96/chevron-left.png' }}
+            style={styles.backIcon}
+          />
+        </TouchableOpacity>
+        <Text weight='semiBold' style={[styles.headerTitle, { color: colors.text }]}>Edit Profile</Text>
+      </View>
+
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardAvoidingView}>
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Avatar Section */}
           <View style={styles.avatarSection}>
             <ProfileAvatar />
-            <Text style={[styles.avatarHint, { color: colors.subtext }]}>
-              Tap camera icon to change avatar
-            </Text>
+            {profileImage && (
+              <TouchableOpacity onPress={removeProfileImage} style={{ marginTop: 8 }}>
+                <Text weight='semiBold' style={{ color: '#8B0000' }}>Remove</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
-          {/* Form */}
           <View style={styles.form}>
             <View style={styles.inputContainer}>
-              <Text style={[styles.label, { color: colors.text }]}>Full Name</Text>
+              <Text weight='semiBold' style={[styles.label, { color: colors.text }]}>Full Name</Text>
               <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    borderColor: colors.border,
-                    color: colors.text,
-                  }
-                ]}
+                style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: colors.text }]}
                 placeholder="Enter your full name"
                 placeholderTextColor={colors.subtext}
                 value={name}
@@ -155,16 +217,9 @@ const EditProfileScreen: React.FC<Props> = ({ navigation }) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={[styles.label, { color: colors.text }]}>Email Address</Text>
+              <Text weight='semiBold'  style={[styles.label, { color: colors.text }]}>Email Address</Text>
               <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    borderColor: colors.border,
-                    color: colors.text,
-                  }
-                ]}
+                style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: colors.text }]}
                 placeholder="Enter your email"
                 placeholderTextColor={colors.subtext}
                 value={email}
@@ -174,26 +229,92 @@ const EditProfileScreen: React.FC<Props> = ({ navigation }) => {
               />
             </View>
 
-            {/* Account Info */}
-            <View style={[styles.infoSection, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={[styles.infoTitle, { color: colors.text }]}>Account Information</Text>
-              
-              <View style={styles.infoRow}>
-                <Text style={[styles.infoLabel, { color: colors.subtext }]}>Member Since:</Text>
-                <Text style={[styles.infoValue, { color: colors.text }]}>
-                  {user?.joinDate ? new Date(user.joinDate).toLocaleDateString() : 'Unknown'}
-                </Text>
-              </View>
-              
-              <View style={styles.infoRow}>
-                <Text style={[styles.infoLabel, { color: colors.subtext }]}>User ID:</Text>
-                <Text style={[styles.infoValue, { color: colors.text }]}>
-                  {user?.id || 'Unknown'}
-                </Text>
+            {/* Current Pass */}
+            <View style={styles.inputContainer}>
+              <Text weight='semiBold' style={[styles.label, { color: colors.text }]}>Password</Text>
+              <View style={styles.passwordField}>
+                <TextInput
+                  style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: colors.text }]}
+                  placeholder="Current password"
+                  placeholderTextColor={colors.subtext}
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  editable={false}
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                  <Image
+                    source={{
+                      uri: showPassword
+                        ? 'https://img.icons8.com/fluency-systems-regular/48/visible--v1.png'
+                        : 'https://img.icons8.com/fluency-systems-regular/48/closed-eye.png',
+                    }}
+                    style={styles.eyeImage}
+                  />
+                </TouchableOpacity>
               </View>
             </View>
 
-            {/* Action Buttons */}
+            <TouchableOpacity onPress={() => setShowPasswordFields(!showPasswordFields)} style={styles.changePasswordLink}>
+              <Text weight='semiBold' style={{ color: colors.primary }}>
+                {showPasswordFields ? 'Cancel' : 'Change Password'}
+              </Text>
+            </TouchableOpacity>
+
+            {showPasswordFields && (
+              <>
+                {/* New Pass */}
+                <View style={styles.inputContainer}>
+                  <Text weight='semiBold' style={[styles.label, { color: colors.text }]}>New Password</Text>
+                  <View style={styles.passwordField}>
+                    <TextInput
+                      style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: colors.text }]}
+                      placeholder="Enter new password"
+                      placeholderTextColor={colors.subtext}
+                      secureTextEntry={!showNewPassword}
+                      value={newPassword}
+                      onChangeText={setNewPassword}
+                    />
+                    <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)} style={styles.eyeIcon}>
+                      <Image
+                        source={{
+                          uri: showNewPassword
+                            ? 'https://img.icons8.com/fluency-systems-regular/48/visible--v1.png'
+                            : 'https://img.icons8.com/fluency-systems-regular/48/closed-eye.png',
+                        }}
+                        style={styles.eyeImage}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {/* Confirm Pass */}
+                <View style={styles.inputContainer}>
+                  <Text weight='semiBold' style={[styles.label, { color: colors.text }]}>Confirm Password</Text>
+                  <View style={styles.passwordField}>
+                    <TextInput
+                      style={[styles.input, { backgroundColor: colors.inputBackground, borderColor: colors.border, color: colors.text }]}
+                      placeholder="Confirm new password"
+                      placeholderTextColor={colors.subtext}
+                      secureTextEntry={!showConfirmPassword}
+                      value={confirmPassword}
+                      onChangeText={setConfirmPassword}
+                    />
+                    <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
+                      <Image
+                        source={{
+                          uri: showConfirmPassword
+                            ? 'https://img.icons8.com/fluency-systems-regular/48/visible--v1.png'
+                            : 'https://img.icons8.com/fluency-systems-regular/48/closed-eye.png',
+                        }}
+                        style={styles.eyeImage}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+              </>
+            )}
+
             <View style={styles.buttonContainer}>
               <Button
                 title="Save Changes"
@@ -201,37 +322,8 @@ const EditProfileScreen: React.FC<Props> = ({ navigation }) => {
                 loading={isLoading}
                 disabled={!hasChanges || isLoading}
                 fullWidth
-                size="large"
+                size="small"
               />
-              
-              <Button
-                title="Cancel"
-                onPress={handleCancel}
-                variant="secondary"
-                fullWidth
-                style={styles.cancelButton}
-              />
-            </View>
-
-            {/* Additional Options */}
-            <View style={styles.additionalOptions}>
-              <TouchableOpacity
-                style={[styles.optionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-                onPress={() => Alert.alert('Coming Soon', 'Change password feature coming soon!')}
-              >
-                <Text style={styles.optionIcon}>🔒</Text>
-                <Text style={[styles.optionText, { color: colors.text }]}>Change Password</Text>
-                <Text style={[styles.optionArrow, { color: colors.primary }]}>→</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[styles.optionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-                onPress={() => Alert.alert('Coming Soon', 'Delete account feature coming soon!')}
-              >
-                <Text style={styles.optionIcon}>🗑️</Text>
-                <Text style={[styles.optionText, { color: '#DC2626' }]}>Delete Account</Text>
-                <Text style={styles.optionArrow}>→</Text>
-              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
@@ -241,19 +333,31 @@ const EditProfileScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-  },
-  avatarSection: {
+  container: { flex: 1, paddingTop: 20, },
+  headerContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 30,
+    justifyContent: 'center',
+    position: 'relative',
+    paddingTop: 10,
   },
+  backButton: {
+    position: 'absolute',
+    left: 15,
+    padding: 5,
+    zIndex: 1,
+  },
+  backIcon: {
+    width: 22,
+    height: 22,
+    tintColor: 'black',
+  },
+  headerTitle: {
+    fontSize: 20,
+  },
+  keyboardAvoidingView: { flex: 1 },
+  content: { flex: 1 },
+  avatarSection: { alignItems: 'center', paddingVertical: 30 },
   avatarContainer: {
     width: 100,
     height: 100,
@@ -261,13 +365,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    marginBottom: 10,
   },
-  avatarText: {
-    fontSize: 36,
-    color: 'white',
-    fontWeight: 'bold',
-  },
+  avatarImage: { width: 100, height: 100, borderRadius: 50 },
+  avatarText: { fontSize: 36, color: 'white' },
   editAvatarButton: {
     position: 'absolute',
     bottom: 0,
@@ -277,92 +377,19 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    elevation: 1,
   },
-  editAvatarIcon: {
-    fontSize: 16,
-  },
-  avatarHint: {
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  form: {
-    paddingHorizontal: 20,
-    paddingBottom: 30,
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-  },
-  infoSection: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 30,
-    borderWidth: 1,
-  },
-  infoTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  infoLabel: {
-    fontSize: 14,
-  },
-  infoValue: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  buttonContainer: {
-    marginBottom: 30,
-  },
-  cancelButton: {
-    marginTop: 10,
-  },
-  additionalOptions: {
-    marginTop: 20,
-  },
-  optionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 10,
-    borderWidth: 1,
-  },
-  optionIcon: {
-    fontSize: 20,
-    marginRight: 12,
-  },
-  optionText: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  optionArrow: {
-    fontSize: 16,
-    color: '#DC2626',
-  },
+  avatarHint: { fontSize: 14, textAlign: 'center', marginTop: 8 },
+  form: { paddingHorizontal: 20, paddingBottom: 30 },
+  inputContainer: { marginBottom: 20 },
+  label: { fontSize: 14, marginBottom: 8 },
+  input: { borderWidth: 1, borderRadius: 50, paddingHorizontal: 16, paddingVertical: 14, fontSize: 12, fontFamily: "Poppins-Regular",},
+  changePasswordLink: { alignItems: 'flex-end', marginBottom: 10 },
+  buttonContainer: { marginTop: 10, borderRadius: 50, },
+  passwordField: { position: 'relative', justifyContent: 'center', },
+  eyeIcon: { position: 'absolute', right: 12, top: 10, padding: 5, zIndex: 10, },
+  eyeImage: { width: 20, height: 20, tintColor: 'black', },
+
 });
 
 export default EditProfileScreen;

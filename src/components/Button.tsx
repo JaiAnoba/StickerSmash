@@ -66,8 +66,8 @@ const Button: React.FC<ButtonProps> = ({
     switch (size) {
       case "small":
         return {
-          paddingVertical: 8,
-          paddingHorizontal: 16,
+          paddingVertical: 10,
+          paddingHorizontal: 20,
         }
       case "large":
         return {
@@ -87,7 +87,7 @@ const Button: React.FC<ButtonProps> = ({
       case "small":
         return 14
       case "large":
-        return 18
+        return 16
       default:
         return 16
     }
@@ -125,7 +125,7 @@ const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 12,
+    borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   icon: {
-    fontSize: 16,
+    fontSize: 14,
   },
 })
 

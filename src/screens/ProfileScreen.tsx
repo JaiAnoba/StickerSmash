@@ -11,9 +11,7 @@ import {
   ScrollView,
   Alert,
   Image,
-  Modal,
 } from "react-native"
-import * as ImagePicker from "expo-image-picker"
 import { useNavigation } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
 import type { RootStackParamList } from "../../App"
@@ -21,7 +19,6 @@ import { useTheme } from "../context/ThemeContext"
 import { useAuth } from "../context/AuthContext"
 import { useFavorites } from "../context/FavoritesContext"
 import type { UserStats } from "../types/Burger"
-import Button from "../components/Button"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { useCooking } from "../context/CookingContext"
 import Text from "../components/CustomText"
@@ -30,12 +27,11 @@ type NavigationProp = StackNavigationProp<RootStackParamList>
 
 const ProfileScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme()
-  const { user, logout, updateUser } = useAuth()
+  const { user, logout } = useAuth()
   const { favorites } = useFavorites()
   const { getRecipesCooked, getTotalCookingTime } = useCooking()
   const navigation = useNavigation<NavigationProp>()
   const [profileImage, setProfileImage] = useState<string | null>(null)
-  const [isImageModalVisible, setIsImageModalVisible] = useState(false)
   const [stats, setStats] = useState<UserStats>({
     recipesCooked: 0,
     totalCookTime: "0m",
@@ -63,43 +59,6 @@ const ProfileScreen: React.FC = () => {
       setProfileImage(imageUri)
     } catch (error) {
       console.error("Error saving profile image:", error)
-    }
-  }
-
-  const handleImagePicker = async () => {
-    // Ask for permission if not already granted
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
-    if (!permissionResult.granted) {
-      Alert.alert("Permission required", "Permission to access gallery is required.")
-      return
-    }
-
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-        base64: false,
-      })
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const imageUri = result.assets[0].uri
-        await saveProfileImage(imageUri)
-        setIsImageModalVisible(false)
-      }
-    } catch (error) {
-      console.error("Error picking image:", error)
-    }
-  }
-
-  const removeProfileImage = async () => {
-    try {
-      await AsyncStorage.removeItem("profileImage")
-      setProfileImage(null)
-      setIsImageModalVisible(false)
-    } catch (error) {
-      console.error("Error removing profile image:", error)
     }
   }
 
@@ -216,8 +175,10 @@ const ProfileScreen: React.FC = () => {
             />
           </TouchableOpacity>
         </View>
+
+        {/* Profile Info */}
           <View style={styles.profileInfo}>
-            <TouchableOpacity style={styles.avatarContainer} onPress={() => setIsImageModalVisible(true)}>
+            <View style={styles.avatarContainer} >
               {profileImage ? (
                 <Image source={{ uri: profileImage }} style={styles.avatarImage} />
               ) : (
@@ -225,14 +186,7 @@ const ProfileScreen: React.FC = () => {
                   <Text weight='semiBold' style={styles.avatarText}>{user?.name ? user.name.charAt(0).toUpperCase() : "👤"}</Text>
                 </View>
               )}
-              <View style={styles.cameraIcon}>
-                <Image
-                  source={{ uri: "https://img.icons8.com/puffy/32/camera.png" }}
-                  style={{ width: 18, height: 18, tintColor: 'white'}}
-                  resizeMode="contain"
-                />
-              </View>
-            </TouchableOpacity>
+            </View>
             <Text weight='semiBold' style={styles.userName}>{user?.name || "User"}</Text>
             <Text style={styles.userEmail}>{user?.email || "user@example.com"}</Text>
             <Text style={styles.joinDate}>
@@ -306,41 +260,6 @@ const ProfileScreen: React.FC = () => {
 
         </View>
       </ScrollView>
-
-      {/* Profile Image Modal */}
-      <Modal
-        visible={isImageModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setIsImageModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Profile Picture</Text>
-
-            <View style={styles.modalButtons}>
-              <Button title="Choose from Gallery" onPress={handleImagePicker} icon="📷" style={styles.modalButton} />
-
-              {profileImage && (
-                <Button
-                  title="Remove Picture"
-                  onPress={removeProfileImage}
-                  variant="danger"
-                  icon="🗑️"
-                  style={styles.modalButton}
-                />
-              )}
-
-              <Button
-                title="Cancel"
-                onPress={() => setIsImageModalVisible(false)}
-                variant="secondary"
-                style={styles.modalButton}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   )
 }
@@ -407,21 +326,10 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: "black",
   },
-  cameraIcon: {
-    position: "absolute",
-    bottom: -5,
-    right: -5,
-    borderRadius: 14,
-    backgroundColor: "#8B0000",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cameraText: {
-    fontSize: 14,
-  },
   userName: {
     fontSize: 17,
     color: "white",
+    marginTop: -3,
     marginBottom: 5,
   },
   userEmail: {
@@ -504,38 +412,6 @@ const styles = StyleSheet.create({
   menuSubtitle: {
     fontSize: 12,
     marginTop: 2,
-  },
-  // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  modalContent: {
-    width: "100%",
-    maxWidth: 350,
-    borderRadius: 20,
-    padding: 20,
-    borderWidth: 1,
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  modalButtons: {
-    gap: 10,
-  },
-  modalButton: {
-    marginBottom: 5,
   },
 })
 
