@@ -3,7 +3,6 @@
 import type React from "react"
 import {
   View,
-  Text,
   StyleSheet,
   SafeAreaView,
   StatusBar,
@@ -11,27 +10,31 @@ import {
   TouchableOpacity,
   Alert,
   Share,
+  Image
 } from "react-native"
 import { useTheme } from "../context/ThemeContext"
 import Button from "../components/Button"
+import Text from '../components/CustomText'
+import { useNavigation } from "@react-navigation/native";
 
 const ShareAppScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme()
+  const navigation = useNavigation();
 
   const shareApp = async () => {
     try {
       const result = await Share.share({
         message:
-          "Check out Burgerpedia! 🍔 The ultimate app for burger lovers with amazing recipes, cooking tips, and an AI chef assistant. Download it now!",
-        url: "https://burgerpedia.app", // Replace with actual app store URL
-        title: "Burgerpedia - The Ultimate Burger App",
+          "Check out Burgerpedia! The ultimate app for burger lovers with amazing recipes, cooking tips, and an AI chef assistant. Download it now!",
+        url: "https://burgify.app", // Mock
+        title: "Burgify - The Ultimate Burger App",
       })
 
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
-          Alert.alert("Success", "Thanks for sharing Burgerpedia!")
+          Alert.alert("Success", "Thanks for sharing Burgify!")
         } else {
-          Alert.alert("Success", "Thanks for sharing Burgerpedia!")
+          Alert.alert("Success", "Thanks for sharing Burgify!")
         }
       }
     } catch (error) {
@@ -44,7 +47,7 @@ const ShareAppScreen: React.FC = () => {
     try {
       await Share.share({
         message:
-          "Hey! I found this amazing burger app called Burgerpedia 🍔 It has tons of delicious recipes and even an AI chef to help you cook! You should definitely check it out: https://burgerpedia.app",
+          "Hey! I found this amazing burger app called Burgify. It has tons of delicious recipes and even an AI chef to help you cook! You should definitely check it out: https://burgify.app",
       })
     } catch (error) {
       console.error("Error sharing with friends:", error)
@@ -54,11 +57,11 @@ const ShareAppScreen: React.FC = () => {
   const shareOnSocial = async (platform: string) => {
     const messages = {
       facebook:
-        "Just discovered Burgerpedia! 🍔 Amazing burger recipes and cooking tips all in one app. #Burgerpedia #BurgerLovers",
+        "Just discovered Burgify! Amazing burger recipes and cooking tips all in one app. #Burgify #BurgerLovers",
       twitter:
-        "Just discovered @Burgerpedia! 🍔 Amazing burger recipes and an AI chef assistant. Perfect for all burger lovers! #Burgerpedia #BurgerLovers #Cooking",
+        "Just discovered @Burgify! Amazing burger recipes and an AI chef assistant. Perfect for all burger lovers! #Burgify #BurgerLovers #Cooking",
       instagram:
-        "Loving this new burger app! 🍔✨ So many delicious recipes to try. #Burgerpedia #BurgerLovers #Foodie",
+        "Loving this new burger app! So many delicious recipes to try. #Burgify #BurgerLovers #Foodie",
     }
 
     try {
@@ -78,22 +81,23 @@ const ShareAppScreen: React.FC = () => {
   const ShareOption: React.FC<{
     title: string
     subtitle: string
-    icon: string
     onPress: () => void
     color?: string
-  }> = ({ title, subtitle, icon, onPress, color }) => (
+  }> = ({ title, subtitle, onPress }) => (
     <TouchableOpacity
       style={[styles.shareOption, { backgroundColor: colors.card, borderColor: colors.border }]}
       onPress={onPress}
     >
       <View style={styles.shareOptionLeft}>
-        <Text style={[styles.shareIcon, color ? { color } : null]}>{icon}</Text>
         <View style={styles.shareContent}>
-          <Text style={[styles.shareTitle, { color: colors.text }]}>{title}</Text>
+          <Text weight='medium' style={[styles.shareTitle, { color: colors.text }]}>{title}</Text>
           <Text style={[styles.shareSubtitle, { color: colors.subtext }]}>{subtitle}</Text>
         </View>
       </View>
-      <Text style={[styles.shareArrow, { color: colors.primary }]}>→</Text>
+      <Image
+        source={{ uri: "https://img.icons8.com/material-rounded/48/chevron-right.png" }}
+        style={styles.arrowIcon}
+      />
     </TouchableOpacity>
   )
 
@@ -102,14 +106,20 @@ const ShareAppScreen: React.FC = () => {
       <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text style={styles.headerTitle}>Share Burgerpedia</Text>
+      
+        <TouchableOpacity style={styles.side} onPress={() => navigation.goBack()}>
+          <Image source={{ uri: "https://img.icons8.com/sf-black/100/back.png" }} style={styles.backIcon} />
+        </TouchableOpacity>
+      
+        <Text weight='semiBold' style={styles.headerTitle}>Share</Text>
+      
+        <View style={styles.side} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
         <View style={styles.heroSection}>
-          <Text style={styles.heroIcon}>🍔</Text>
-          <Text style={[styles.heroTitle, { color: colors.text }]}>Share the Love for Burgers!</Text>
+          <Text weight='semiBold' style={[styles.heroTitle, { color: colors.text }]}>Share the Love for Burgers!</Text>
           <Text style={[styles.heroSubtitle, { color: colors.subtext }]}>
             Help your friends discover amazing burger recipes and cooking tips
           </Text>
@@ -117,33 +127,31 @@ const ShareAppScreen: React.FC = () => {
 
         {/* Quick Share */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Share</Text>
+          <Text weight='semiBold' style={[styles.sectionTitle, { color: colors.text }]}>Quick Share</Text>
 
-          <Button title="Share Burgerpedia" onPress={shareApp} icon="📤" style={styles.primaryShareButton} fullWidth />
+          <Button title="Share Burgify" onPress={shareApp} size='small' style={styles.primaryShareButton} fullWidth />
         </View>
 
         {/* Share Options */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Share With</Text>
+          <Text weight='semiBold' style={[styles.sectionTitle, { color: colors.text }]}>Share With</Text>
 
           <ShareOption
             title="Friends & Family"
             subtitle="Send a personal message"
-            icon="👥"
             onPress={shareWithFriends}
           />
 
-          <ShareOption title="Copy Link" subtitle="Copy app link to clipboard" icon="🔗" onPress={copyLink} />
+          <ShareOption title="Copy Link" subtitle="Copy app link to clipboard" onPress={copyLink} />
         </View>
 
         {/* Social Media */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Social Media</Text>
+          <Text weight='semiBold' style={[styles.sectionTitle, { color: colors.text }]}>Social Media</Text>
 
           <ShareOption
             title="Facebook"
             subtitle="Share on your timeline"
-            icon="📘"
             onPress={() => shareOnSocial("facebook")}
             color="#1877F2"
           />
@@ -151,7 +159,6 @@ const ShareAppScreen: React.FC = () => {
           <ShareOption
             title="Twitter"
             subtitle="Tweet about the app"
-            icon="🐦"
             onPress={() => shareOnSocial("twitter")}
             color="#1DA1F2"
           />
@@ -159,7 +166,6 @@ const ShareAppScreen: React.FC = () => {
           <ShareOption
             title="Instagram"
             subtitle="Share to your story"
-            icon="📷"
             onPress={() => shareOnSocial("instagram")}
             color="#E4405F"
           />
@@ -167,38 +173,33 @@ const ShareAppScreen: React.FC = () => {
 
         {/* Why Share */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Why Share Burgerpedia?</Text>
+          <Text weight='semiBold' style={[styles.sectionTitle, { color: colors.text }]}>Why Share Burgerpedia?</Text>
 
           <View style={[styles.benefitCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.benefitItem}>
-              <Text style={styles.benefitIcon}>🍔</Text>
               <Text style={[styles.benefitText, { color: colors.text }]}>Amazing burger recipes for every taste</Text>
             </View>
 
             <View style={styles.benefitItem}>
-              <Text style={styles.benefitIcon}>🤖</Text>
               <Text style={[styles.benefitText, { color: colors.text }]}>AI chef assistant for cooking help</Text>
             </View>
 
             <View style={styles.benefitItem}>
-              <Text style={styles.benefitIcon}>⏱️</Text>
               <Text style={[styles.benefitText, { color: colors.text }]}>Built-in cooking timer and tools</Text>
             </View>
 
             <View style={styles.benefitItem}>
-              <Text style={styles.benefitIcon}>🛒</Text>
               <Text style={[styles.benefitText, { color: colors.text }]}>Smart shopping list generator</Text>
             </View>
 
             <View style={styles.benefitItem}>
-              <Text style={styles.benefitIcon}>❤️</Text>
               <Text style={[styles.benefitText, { color: colors.text }]}>Save and organize favorite recipes</Text>
             </View>
           </View>
         </View>
 
         {/* Referral Program */}
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Referral Rewards</Text>
 
           <View
@@ -210,35 +211,34 @@ const ShareAppScreen: React.FC = () => {
               },
             ]}
           >
-            <Text style={styles.rewardIcon}>🎁</Text>
             <Text style={[styles.rewardTitle, { color: colors.text }]}>Coming Soon!</Text>
             <Text style={[styles.rewardDescription, { color: colors.subtext }]}>
-              Earn rewards for every friend you refer to Burgerpedia. Get exclusive recipes, premium features, and more!
+              Earn rewards for every friend you refer to Burgify. Get exclusive recipes, premium features, and more!
             </Text>
           </View>
-        </View>
+        </View> */}
 
         {/* App Info */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>About Burgerpedia</Text>
+          <Text weight='semiBold' style={[styles.sectionTitle, { color: colors.text }]}>About Burgify</Text>
 
           <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={[styles.infoText, { color: colors.text }]}>
-              Burgerpedia is the ultimate companion for burger enthusiasts. Whether you're a beginner or a seasoned
+              Burgify is the ultimate companion for burger enthusiasts. Whether you're a beginner or a seasoned
               chef, our app provides everything you need to create delicious burgers at home.
             </Text>
 
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Text style={[styles.statNumber, { color: colors.primary }]}>100+</Text>
+                <Text weight='semiBold' style={[styles.statNumber, { color: colors.primary }]}>100+</Text>
                 <Text style={[styles.statLabel, { color: colors.subtext }]}>Recipes</Text>
               </View>
               <View style={styles.statItem}>
-                <Text style={[styles.statNumber, { color: colors.primary }]}>50K+</Text>
+                <Text weight='semiBold' style={[styles.statNumber, { color: colors.primary }]}>50K+</Text>
                 <Text style={[styles.statLabel, { color: colors.subtext }]}>Users</Text>
               </View>
               <View style={styles.statItem}>
-                <Text style={[styles.statNumber, { color: colors.primary }]}>4.8★</Text>
+                <Text weight='semiBold' style={[styles.statNumber, { color: colors.primary }]}>4.8★</Text>
                 <Text style={[styles.statLabel, { color: colors.subtext }]}>Rating</Text>
               </View>
             </View>
@@ -247,7 +247,7 @@ const ShareAppScreen: React.FC = () => {
 
         <View style={styles.footer}>
           <Text style={[styles.footerText, { color: colors.subtext }]}>
-            Thank you for being part of the Burgerpedia community! 🍔❤️
+            Thank you for being part of the Burgify community!
           </Text>
         </View>
       </ScrollView>
@@ -263,11 +263,33 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20,
     alignItems: "center",
+    justifyContent: "space-between", 
+    marginBottom: 5,
+    flexDirection: "row",
+    backgroundColor: "#8B0000",
+    borderBottomStartRadius: 50,
+    borderBottomEndRadius: 50,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
+    tintColor: "white",
+  },
+  side: {
+    width: 40, 
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "white",
+    fontSize: 18,
+    color: 'white',
+    textAlign: "center", 
   },
   content: {
     flex: 1,
@@ -282,13 +304,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   heroTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 16,
     textAlign: "center",
     marginBottom: 10,
   },
   heroSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     textAlign: "center",
     lineHeight: 24,
   },
@@ -296,8 +317,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 15,
     marginBottom: 15,
   },
   primaryShareButton: {
@@ -308,14 +328,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     borderRadius: 12,
-    padding: 16,
+    padding: 10,
     marginBottom: 12,
-    borderWidth: 1,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   shareOptionLeft: {
     flexDirection: "row",
@@ -330,25 +344,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   shareTitle: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 13,
     marginBottom: 2,
   },
   shareSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
   },
-  shareArrow: {
-    fontSize: 16,
+  arrowIcon: {
+    width: 16,
+    height: 16,
+    resizeMode: "contain",
   },
   benefitCard: {
     borderRadius: 12,
     padding: 20,
     borderWidth: 1,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   benefitItem: {
     flexDirection: "row",
@@ -361,7 +371,7 @@ const styles = StyleSheet.create({
     width: 24,
   },
   benefitText: {
-    fontSize: 16,
+    fontSize: 12,
     flex: 1,
   },
   rewardCard: {
@@ -369,11 +379,6 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
     borderWidth: 1,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   rewardIcon: {
     fontSize: 32,
@@ -381,7 +386,6 @@ const styles = StyleSheet.create({
   },
   rewardTitle: {
     fontSize: 20,
-    fontWeight: "bold",
     marginBottom: 8,
   },
   rewardDescription: {
@@ -393,14 +397,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     borderWidth: 1,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   infoText: {
-    fontSize: 16,
+    fontSize: 12,
     lineHeight: 24,
     marginBottom: 20,
   },
@@ -412,21 +411,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statNumber: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 14,
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: 12,
   },
   footer: {
     alignItems: "center",
     paddingVertical: 30,
   },
   footerText: {
-    fontSize: 14,
+    fontSize: 12,
     textAlign: "center",
-    fontStyle: "italic",
+    fontFamily: 'Poppins-Italic',
   },
 })
 

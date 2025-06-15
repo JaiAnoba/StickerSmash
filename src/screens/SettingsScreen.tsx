@@ -15,7 +15,6 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Settings, Language } from '../types/Burger';
 import { useTheme } from '../context/ThemeContext';
-import Button from '../components/Button';
 import Text from '../components/CustomText'
 import { useNavigation } from "@react-navigation/native";
 
@@ -551,7 +550,7 @@ const styles = StyleSheet.create({
   settingRight: {
     alignItems: 'center',
   },
- arrowIcon: {
+  arrowIcon: {
     width: 16,
     height: 16,
     resizeMode: "contain",
@@ -576,7 +575,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
-    fontStyle: 'italic',
+    fontFamily: 'Poppins-Italic',
   },
   // Modal Styles
   modalOverlay: {
