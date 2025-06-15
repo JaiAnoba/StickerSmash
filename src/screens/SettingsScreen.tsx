@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
@@ -11,16 +10,18 @@ import {
   Alert,
   Modal,
   FlatList,
+  Image
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Settings, Language } from '../types/Burger';
 import { useTheme } from '../context/ThemeContext';
-import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
+import Text from '../components/CustomText'
+import { useNavigation } from "@react-navigation/native";
 
 const SettingsScreen: React.FC = () => {
   const { colors, isDarkMode, toggleTheme } = useTheme();
-  const { logout } = useAuth();
+  const navigation = useNavigation();
   const [settings, setSettings] = useState<Settings>({
     notifications: true,
     darkMode: isDarkMode,
@@ -83,23 +84,6 @@ const SettingsScreen: React.FC = () => {
     setIsLanguageModalVisible(false);
   };
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-          },
-        },
-      ]
-    );
-  };
-
   const handleClearData = () => {
     Alert.alert(
       'Clear All Data',
@@ -149,21 +133,21 @@ const SettingsScreen: React.FC = () => {
   const SettingRow: React.FC<{
     title: string;
     subtitle?: string;
-    icon: string;
+    iconComponent?: React.ReactNode;
     value?: boolean;
     onToggle?: () => void;
     onPress?: () => void;
     showArrow?: boolean;
-  }> = ({ title, subtitle, icon, value, onToggle, onPress, showArrow = false }) => (
+  }> = ({ title, subtitle, iconComponent, value, onToggle, onPress, showArrow = false }) => (
     <TouchableOpacity 
       style={[styles.settingRow, { backgroundColor: colors.card, borderColor: colors.border }]} 
       onPress={onPress}
       disabled={!onPress && !onToggle}
     >
       <View style={styles.settingLeft}>
-        <Text style={styles.settingIcon}>{icon}</Text>
+        {iconComponent}
         <View style={styles.settingText}>
-          <Text style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
+          <Text weight='medium' style={[styles.settingTitle, { color: colors.text }]}>{title}</Text>
           {subtitle && <Text style={[styles.settingSubtitle, { color: colors.subtext }]}>{subtitle}</Text>}
         </View>
       </View>
@@ -176,13 +160,18 @@ const SettingsScreen: React.FC = () => {
             thumbColor={value ? 'white' : '#F3F4F6'}
           />
         )}
-        {showArrow && <Text style={[styles.arrow, { color: colors.primary }]}>→</Text>}
+        {showArrow && (
+          <Image
+            source={{ uri: "https://img.icons8.com/material-rounded/48/chevron-right.png" }}
+            style={styles.arrowIcon}
+          />
+        )}
       </View>
     </TouchableOpacity>
   );
 
   const SectionHeader: React.FC<{ title: string }> = ({ title }) => (
-    <Text style={[styles.sectionHeader, { color: colors.text }]}>{title}</Text>
+    <Text weight='semiBold' style={[styles.sectionHeader, { color: colors.text }]}>{title}</Text>
   );
 
   const LanguageItem: React.FC<{ language: Language }> = ({ language }) => (
@@ -200,7 +189,7 @@ const SettingsScreen: React.FC = () => {
       <Text style={[
         styles.languageText,
         { color: colors.text },
-        selectedLanguage === language && { fontWeight: 'bold', color: colors.primary }
+        selectedLanguage === language && { color: colors.primary }
       ]}>
         {language}
       </Text>
@@ -216,7 +205,14 @@ const SettingsScreen: React.FC = () => {
       
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text style={styles.headerTitle}>Settings</Text>
+
+        <TouchableOpacity style={styles.side} onPress={() => navigation.goBack()}>
+          <Image source={{ uri: "https://img.icons8.com/sf-black/100/back.png" }} style={styles.backIcon} />
+        </TouchableOpacity>
+
+        <Text weight='semiBold' style={styles.headerTitle}>Settings</Text>
+
+        <View style={styles.side} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -225,25 +221,40 @@ const SettingsScreen: React.FC = () => {
         <SectionHeader title="Preferences" />
         
         <SettingRow
-          title="Push Notifications"
-          subtitle="Get notified about new recipes and updates"
-          icon="🔔"
-          value={settings.notifications}
-          onToggle={() => toggleSetting('notifications')}
+            title="Push Notifications"
+            subtitle="Get notified about new recipes and updates"
+            iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/external-anggara-basic-outline-anggara-putra/48/external-notification-bell-user-interface-anggara-basic-outline-anggara-putra.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+            }
+            value={settings.notifications}
+            onToggle={() => toggleSetting('notifications')}
         />
         
         <SettingRow
-          title="Dark Mode"
-          subtitle="Switch to dark theme"
-          icon="🌙"
-          value={settings.darkMode}
-          onToggle={() => toggleSetting('darkMode')}
+            title="Dark Mode"
+            subtitle="Switch to dark theme"
+            iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/material-outlined/48/do-not-disturb-2.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+            }
+            value={settings.darkMode}
+            onToggle={() => toggleSetting('darkMode')}
         />
         
         <SettingRow
           title="Auto-save Favorites"
           subtitle="Automatically save liked recipes"
-          icon="💾"
+          iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/sf-regular/48/save.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+          }
           value={settings.autoSave}
           onToggle={() => toggleSetting('autoSave')}
         />
@@ -251,7 +262,12 @@ const SettingsScreen: React.FC = () => {
         <SettingRow
           title="Language"
           subtitle={settings.language}
-          icon="🌐"
+          iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/fluency-systems-regular/48/globe--v1.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+          }
           showArrow
           onPress={() => setIsLanguageModalVisible(true)}
         />
@@ -262,7 +278,12 @@ const SettingsScreen: React.FC = () => {
         <SettingRow
           title="Cooking Timer"
           subtitle="Enable built-in cooking timer"
-          icon="⏱️"
+          iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/fluency-systems-filled/48/timer.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+          }
           value={settings.cookingTimer}
           onToggle={() => toggleSetting('cookingTimer')}
         />
@@ -270,7 +291,12 @@ const SettingsScreen: React.FC = () => {
         <SettingRow
           title="Shopping List"
           subtitle="Create shopping lists from recipes"
-          icon="🛒"
+          iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/windows/64/shopping-cart.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+          }
           value={settings.shoppingList}
           onToggle={() => toggleSetting('shoppingList')}
         />
@@ -278,7 +304,12 @@ const SettingsScreen: React.FC = () => {
         <SettingRow
           title="Nutrition Information"
           subtitle="Show calorie and nutrition data"
-          icon="🥗"
+          iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/windows/64/organic-food.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+          }
           value={settings.nutritionInfo}
           onToggle={() => toggleSetting('nutritionInfo')}
         />
@@ -288,22 +319,37 @@ const SettingsScreen: React.FC = () => {
         
         <SettingRow
           title="Privacy Policy"
-          icon="🔒"
-          showArrow
-          onPress={() => Alert.alert('Privacy Policy', 'View our privacy policy at burgerpedia.com/privacy')}
-        />
+            iconComponent={
+            <Image
+                source={{ uri: 'https://img.icons8.com/material-outlined/48/lock-2.png' }}
+                style={{ width: 22, height: 22, marginRight: 12 }}
+              />
+            }
+            showArrow
+            onPress={() => Alert.alert('Privacy Policy', 'View our privacy policy at burgerpedia.com/privacy')}
+          />
         
         <SettingRow
-          title="Terms of Service"
-          icon="📄"
-          showArrow
-          onPress={() => Alert.alert('Terms of Service', 'View our terms at burgerpedia.com/terms')}
-        />
+            title="Terms of Service"
+            iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/material-outlined/48/documents--v2.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+            }
+            showArrow
+            onPress={() => Alert.alert('Terms of Service', 'View our terms at burgerpedia.com/terms')}
+          />
         
         <SettingRow
           title="Data & Storage"
           subtitle="Manage your app data"
-          icon="📊"
+          iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/forma-light/48/data-backup.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+          }
           showArrow
           onPress={() => Alert.alert('Data Management', 'Data management options coming soon!')}
         />
@@ -313,7 +359,12 @@ const SettingsScreen: React.FC = () => {
         
         <SettingRow
           title="Help Center"
-          icon="❓"
+          iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/fluency-systems-regular/48/help--v1.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+          }
           showArrow
           onPress={() => Alert.alert('Help Center', 'Visit our help center at help.burgerpedia.com')}
         />
@@ -321,7 +372,12 @@ const SettingsScreen: React.FC = () => {
         <SettingRow
           title="Contact Us"
           subtitle="Get in touch with our team"
-          icon="📧"
+          iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/material-outlined/48/email.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+          }
           showArrow
           onPress={() => Alert.alert('Contact Us', 'Email us at support@burgerpedia.com')}
         />
@@ -329,7 +385,12 @@ const SettingsScreen: React.FC = () => {
         <SettingRow
           title="Rate App"
           subtitle="Rate us on the app store"
-          icon="⭐"
+          iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/fluency-systems-regular/48/star--v1.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+          }
           showArrow
           onPress={() => Alert.alert('Rate App', 'Thank you for using Burgerpedia!')}
         />
@@ -340,13 +401,23 @@ const SettingsScreen: React.FC = () => {
         <SettingRow
           title="App Version"
           subtitle="1.0.0"
-          icon="📱"
+          iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/material-outlined/48/iphone--v2.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+          }
         />
         
         <SettingRow
           title="Build Number"
           subtitle="2024.01.15"
-          icon="🔧"
+          iconComponent={
+            <Image
+                  source={{ uri: 'https://img.icons8.com/fluency-systems-regular/48/open-end-wrench.png' }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
+                />
+          }
         />
 
         {/* Danger Zone */}
@@ -362,22 +433,12 @@ const SettingsScreen: React.FC = () => {
           ]}
           onPress={handleClearData}
         >
-          <Text style={styles.dangerIcon}>🗑️</Text>
           <Text style={[styles.dangerText, { color: colors.primary }]}>Clear All Data</Text>
         </TouchableOpacity>
         
-        <Button
-          title="Logout"
-          onPress={handleLogout}
-          variant="danger"
-          fullWidth
-          style={styles.logoutButton}
-          icon="🚪"
-        />
-
         <View style={styles.footer}>
           <Text style={[styles.footerText, { color: colors.subtext }]}>
-            Made with ❤️ for burger lovers
+            Made with love for burger lovers
           </Text>
         </View>
       </ScrollView>
@@ -392,9 +453,9 @@ const SettingsScreen: React.FC = () => {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Select Language</Text>
+              <Text weight='semiBold' style={[styles.modalTitle, { color: colors.text }]}>Select Language</Text>
               <TouchableOpacity
-                style={[styles.closeButton, { backgroundColor: colors.inputBackground }]}
+                style={styles.closeButton}
                 onPress={() => setIsLanguageModalVisible(false)}
               >
                 <Text style={[styles.closeButtonText, { color: colors.text }]}>×</Text>
@@ -407,15 +468,6 @@ const SettingsScreen: React.FC = () => {
               renderItem={({ item }) => <LanguageItem language={item} />}
               style={styles.languageList}
             />
-            
-            <View style={styles.modalFooter}>
-              <Button
-                title="Cancel"
-                onPress={() => setIsLanguageModalVisible(false)}
-                variant="secondary"
-                fullWidth
-              />
-            </View>
           </View>
         </View>
       </Modal>
@@ -430,37 +482,52 @@ const styles = StyleSheet.create({
   header: {
     paddingVertical: 20,
     paddingHorizontal: 20,
+    flexDirection: "row",
     alignItems: 'center',
+    justifyContent: "space-between", 
+    marginBottom: 5,
+    backgroundColor: "#8B0000",
+    borderBottomStartRadius: 50,
+    borderBottomEndRadius: 50,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
+    tintColor: "white",
+  },
+  side: {
+    width: 40, 
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 18,
     color: 'white',
+    textAlign: "center", 
   },
   content: {
     flex: 1,
     paddingHorizontal: 20,
   },
   sectionHeader: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 16,
     marginTop: 25,
     marginBottom: 15,
     marginLeft: 5,
   },
   settingRow: {
     borderRadius: 12,
-    padding: 16,
+    padding: 14,
     marginBottom: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    borderWidth: 1,
   },
   settingLeft: {
     flexDirection: 'row',
@@ -475,18 +542,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   settingTitle: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 14,
     marginBottom: 2,
   },
   settingSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
   },
   settingRight: {
     alignItems: 'center',
   },
-  arrow: {
-    fontSize: 16,
+ arrowIcon: {
+    width: 16,
+    height: 16,
+    resizeMode: "contain",
   },
   dangerButton: {
     borderRadius: 12,
@@ -494,26 +562,20 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
   },
   dangerIcon: {
     fontSize: 20,
     marginRight: 12,
   },
   dangerText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  logoutButton: {
-    marginTop: 10,
-    marginBottom: 20,
+    fontSize: 14,
   },
   footer: {
     alignItems: 'center',
     paddingVertical: 30,
   },
   footerText: {
-    fontSize: 14,
+    fontSize: 12,
     fontStyle: 'italic',
   },
   // Modal Styles
@@ -529,7 +591,6 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     borderRadius: 20,
     maxHeight: '80%',
-    borderWidth: 1,
     elevation: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
@@ -544,19 +605,14 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 16,
   },
   closeButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
   },
   closeButtonText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 30,
   },
   languageList: {
     maxHeight: 300,
@@ -567,23 +623,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    borderBottomWidth: 1,
   },
   selectedLanguage: {
-    borderRadius: 8,
+    borderRadius: 50,
     marginHorizontal: 10,
     paddingHorizontal: 10,
   },
   languageText: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 14,
   },
   checkmark: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 16,
   },
   modalFooter: {
-    padding: 20,
+    padding: 10,
     paddingTop: 10,
   },
 });
