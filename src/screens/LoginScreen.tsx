@@ -68,7 +68,12 @@ const LoginScreen: React.FC = () => {
     setIsLoading(true);
     try {
       const success = await login(email, password);
-      if (!success) {
+      if (success) {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Main" }],
+        });
+      } else {
         setPasswordError("Invalid email or password");
       }
     } catch (error) {
