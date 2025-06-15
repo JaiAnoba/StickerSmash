@@ -1,5 +1,5 @@
 {
-  "name": "burgerpedia",
+  "name": "burgify",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
@@ -29,7 +29,6 @@
     "expo-modules-core": "~2.4.0",
     "expo-splash-screen": "~0.30.9",
     "expo-status-bar": "~2.2.3",
-    "firebase": "^11.9.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-native": "0.79.3",

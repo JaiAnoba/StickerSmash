@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -43,12 +43,6 @@ const LoginScreen: React.FC = () => {
 
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-
-  useEffect(() => {
-    if (user) {
-      navigation.reset({ index: 0, routes: [{ name: "Main" }] });
-    }
-  }, [user]);
 
   const handleLogin = async () => {
     let hasError = false;

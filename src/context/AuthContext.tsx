@@ -1,180 +1,191 @@
-"use client";
+"use client"
 
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { db } from "../../firebase";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  doc,
-  updateDoc,
-  Timestamp,
-} from "firebase/firestore";
-import SHA256 from "crypto-js/sha256";
-import Hex from "crypto-js/enc-hex"; 
+import type React from "react"
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 interface User {
-  id: string;
-  name: string;
-  email: string;
-  joinDate: string;
-  role?: "admin" | "user";
+  id: string
+  name: string
+  email: string
+  joinDate: string
+  stats?: {
+    burgersViewed: number
+    recipesCooked: number
+    favoriteCategory: string
+    totalCookTime: string
+  }
 }
 
 interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string) => Promise<boolean>;
-  logout: () => Promise<void>;
-  resetPassword: (email: string) => Promise<boolean>;
-  updateUser: (userData: Partial<User>) => Promise<void>;
+  user: User | null
+  isLoading: boolean
+  login: (email: string, password: string) => Promise<boolean>
+  register: (name: string, email: string, password: string) => Promise<boolean>
+  logout: () => Promise<void>
+  updateUser: (userData: Partial<User>) => Promise<void>
+  resetPassword: (email: string) => Promise<boolean>
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+interface AuthProviderProps {
+  children: ReactNode
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const loadUser = async () => {
-      const storedUser = await AsyncStorage.getItem("userData");
-      if (storedUser) setUser(JSON.parse(storedUser));
-      setIsLoading(false);
-    };
-    loadUser();
-  }, []);
+    checkAuthState()
+  }, [])
+
+  const checkAuthState = async () => {
+    try {
+      const userToken = await AsyncStorage.getItem("userToken")
+      const userData = await AsyncStorage.getItem("userData")
+
+      if (userToken && userData) {
+        setUser(JSON.parse(userData))
+      }
+    } catch (error) {
+      console.error("Error checking auth state:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("email", "==", email));
-      const querySnapshot = await getDocs(q);
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      if (!querySnapshot.empty) {
-        const doc = querySnapshot.docs[0];
-        const userData = doc.data();
-        const hashedInput = SHA256(password).toString(Hex);
-        const isValid = hashedInput === userData.password;
-
-        if (isValid) {
-          const currentUser: User = {
-            id: doc.id,
-            name: userData.name,
-            email: userData.email,
-            joinDate: userData.joinDate,
-            role: userData.role || "user",
-          };
-
-          await AsyncStorage.setItem("userData", JSON.stringify(currentUser));
-          setUser(currentUser);
-          return true;
+      // Accept demo credentials or any email/password for demo purposes
+      if (
+        (email === "demo@burgerpedia.com" && password === "demo123") ||
+        (email.includes("@") && password.length >= 3)
+      ) {
+        const userData: User = {
+          id: Date.now().toString(),
+          name: email === "demo@burgerpedia.com" ? "Demo User" : "User",
+          email: email,
+          joinDate: new Date().toISOString(),
+          stats: {
+            burgersViewed: 25,
+            recipesCooked: 8,
+            favoriteCategory: "Classic",
+            totalCookTime: "3h 45m",
+          },
         }
+
+        await AsyncStorage.setItem("userToken", "mock-token-" + Date.now())
+        await AsyncStorage.setItem("userData", JSON.stringify(userData))
+        setUser(userData)
+        return true
       }
 
-      return false;
+      return false
     } catch (error) {
-      console.error("Login error:", error);
-      return false;
+      console.error("Login error:", error)
+      return false
     }
-  };
+  }
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-      console.log("Checking if user already exists...");
-      const usersRef = collection(db, "users");
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      const q = query(usersRef, where("email", "==", email));
-      const existing = await getDocs(q);
-      if (!existing.empty) {
-        console.warn("Email already exists");
-        return false;
+      // For demo purposes, accept any valid input
+      if (name.trim() && email.includes("@") && password.length >= 6) {
+        const userData: User = {
+          id: Date.now().toString(),
+          name: name,
+          email: email,
+          joinDate: new Date().toISOString(),
+          stats: {
+            burgersViewed: 0,
+            recipesCooked: 0,
+            favoriteCategory: "None yet",
+            totalCookTime: "0m",
+          },
+        }
+
+        await AsyncStorage.setItem("userToken", "mock-token-" + Date.now())
+        await AsyncStorage.setItem("userData", JSON.stringify(userData))
+        setUser(userData)
+        return true
       }
 
-      console.log("Hashing password...");
-      const hashedPassword = SHA256(password).toString(Hex);
-      const role = email.endsWith("@admin.com") ? "admin" : "user";
-
-      console.log("Saving new user to Firestore...");
-      await addDoc(usersRef, {
-        name,
-        email,
-        password: hashedPassword,
-        role,
-        joinDate: Timestamp.now().toDate().toISOString(),
-      });
-
-      console.log("Registration successful.");
-      return true;
-    } catch (error: any) {
-      console.error("Registration error:", error.message || error);
-      return false;
+      return false
+    } catch (error) {
+      console.error("Registration error:", error)
+      return false
     }
-  };
+  }
 
   const logout = async (): Promise<void> => {
     try {
-      await AsyncStorage.removeItem("userData");
-      setUser(null);
+      await AsyncStorage.removeItem("userToken")
+      await AsyncStorage.removeItem("userData")
+      setUser(null)
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("Logout error:", error)
     }
-  };
+  }
 
   const updateUser = async (userData: Partial<User>): Promise<void> => {
     try {
       if (user) {
-        const updatedUser = { ...user, ...userData };
-        await AsyncStorage.setItem("userData", JSON.stringify(updatedUser));
-        setUser(updatedUser);
+        const updatedUser = { ...user, ...userData }
+        await AsyncStorage.setItem("userData", JSON.stringify(updatedUser))
+        setUser(updatedUser)
       }
     } catch (error) {
-      console.error("Update user error:", error);
+      console.error("Update user error:", error)
     }
-  };
+  }
 
   const resetPassword = async (email: string): Promise<boolean> => {
     try {
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("email", "==", email));
-      const snapshot = await getDocs(q);
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      if (snapshot.empty) {
-        console.warn("No user found with that email.");
-        return false;
-      }
+      // For demo purposes, always return success
+      // In a real app, you would call an API endpoint
 
-      const userDoc = snapshot.docs[0];
-      const userId = userDoc.id;
+      // Store the reset request in AsyncStorage for demo purposes
+      await AsyncStorage.setItem("passwordResetRequested", email)
 
-      const tempPassword = SHA256("123456").toString(Hex);
-      const userRef = doc(db, "users", userId);
-
-      await updateDoc(userRef, { password: tempPassword });
-
-      console.log(`Password for ${email} reset to '123456' (hashed).`);
-      return true;
+      return true
     } catch (error) {
-      console.error("Password reset error:", error);
-      return false;
+      console.error("Password reset error:", error)
+      return false
     }
-  };
+  }
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, register, logout, resetPassword, updateUser }}
+      value={{
+        user,
+        isLoading,
+        login,
+        register,
+        logout,
+        updateUser,
+        resetPassword,
+      }}
     >
       {children}
     </AuthContext.Provider>
-  );
-};
+  )
+}
 
 export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within an AuthProvider");
-  return context;
-};
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider")
+  }
+  return context
+}
