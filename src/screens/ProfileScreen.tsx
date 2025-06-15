@@ -170,7 +170,7 @@ const ProfileScreen: React.FC = () => {
           </View>
           <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate("Settings")}>
             <Image
-              source={{ uri: "https://img.icons8.com/puffy/32/settings.png" }}
+              source={{ uri: "https://img.icons8.com/puffy/48/settings.png" }}
               style={styles.settingsIcon}
             />
           </TouchableOpacity>
@@ -214,12 +214,12 @@ const ProfileScreen: React.FC = () => {
             onPress={() => navigation.navigate("EditProfile")}
           />
 
-          <MenuButton
+          {/* <MenuButton
             title="Favorite Burgers"
             subtitle={`${favorites.length} saved burgers`}
             icon="https://img.icons8.com/puffy/48/like.png"
             onPress={() => navigation.navigate("Main")}
-          />
+          /> */}
 
           <MenuButton
             title="Cooking History"
@@ -235,12 +235,12 @@ const ProfileScreen: React.FC = () => {
             onPress={() => navigation.navigate("ShoppingList")}
           />
 
-          <MenuButton
+          {/* <MenuButton
             title="Data & Storage"
             subtitle="Manage your app data"
             icon="https://img.icons8.com/forma-light/48/data-backup.png"
             onPress={() => navigation.navigate("DataStorage")}
-          />
+          /> */}
 
           <MenuButton
             title="Share App"

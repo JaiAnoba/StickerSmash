@@ -17,10 +17,14 @@ import { Settings, Language } from '../types/Burger';
 import { useTheme } from '../context/ThemeContext';
 import Text from '../components/CustomText'
 import { useNavigation } from "@react-navigation/native";
+import type { StackNavigationProp } from "@react-navigation/stack"
+import type { RootStackParamList } from "../../App"
+
+type NavigationProp = StackNavigationProp<RootStackParamList>
 
 const SettingsScreen: React.FC = () => {
   const { colors, isDarkMode, toggleTheme } = useTheme();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>()
   const [settings, setSettings] = useState<Settings>({
     notifications: true,
     darkMode: isDarkMode,
@@ -350,7 +354,7 @@ const SettingsScreen: React.FC = () => {
                 />
           }
           showArrow
-          onPress={() => Alert.alert('Data Management', 'Data management options coming soon!')}
+          onPress={() => navigation.navigate("DataStorage")}
         />
 
         {/* Support */}
