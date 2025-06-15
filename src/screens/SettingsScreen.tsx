@@ -436,7 +436,7 @@ const SettingsScreen: React.FC = () => {
           ]}
           onPress={handleClearData}
         >
-          <Text style={[styles.dangerText, { color: colors.primary }]}>Clear All Data</Text>
+          <Text weight='medium' style={[styles.dangerText, { color: colors.primary }]}>Clear All Data</Text>
         </TouchableOpacity>
         
         <View style={styles.footer}>

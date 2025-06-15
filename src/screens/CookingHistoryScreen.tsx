@@ -222,12 +222,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: 18,
     marginBottom: 10,
     color: "#1F2937",
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#6B7280",
     textAlign: "center",
     maxWidth: 300,
