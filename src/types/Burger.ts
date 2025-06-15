@@ -23,9 +23,7 @@ export interface Burger {
 }
 
 export interface UserStats {
-  burgersViewed: number
   recipesCooked: number
-  favoriteCategory: string
   totalCookTime: string
 }
 

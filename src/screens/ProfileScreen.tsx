@@ -4,7 +4,6 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
@@ -25,6 +24,7 @@ import type { UserStats } from "../types/Burger"
 import Button from "../components/Button"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { useCooking } from "../context/CookingContext"
+import Text from "../components/CustomText"
 
 type NavigationProp = StackNavigationProp<RootStackParamList>
 
@@ -37,9 +37,7 @@ const ProfileScreen: React.FC = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null)
   const [isImageModalVisible, setIsImageModalVisible] = useState(false)
   const [stats, setStats] = useState<UserStats>({
-    burgersViewed: 0,
     recipesCooked: 0,
-    favoriteCategory: "None yet",
     totalCookTime: "0m",
   })
 
@@ -107,43 +105,20 @@ const ProfileScreen: React.FC = () => {
 
   const loadUserStats = async () => {
     try {
-      // Get stored burger views
-      const viewsData = await AsyncStorage.getItem("burgersViewed")
-      const burgersViewed = viewsData ? Number.parseInt(viewsData, 10) : Math.floor(Math.random() * 50) + 10
-
       // Get recipes cooked from cooking context
       const recipesCooked = getRecipesCooked()
 
       // Get total cooking time from cooking context
       const totalCookTime = getTotalCookingTime()
 
-      // Calculate favorite category
-      const categoryCount: Record<string, number> = {}
-      favorites.forEach((burger) => {
-        categoryCount[burger.category] = (categoryCount[burger.category] || 0) + 1
-      })
-
-      let topCategory = "None yet"
-      let maxCount = 0
-      Object.entries(categoryCount).forEach(([category, count]) => {
-        if (count > maxCount) {
-          maxCount = count
-          topCategory = category
-        }
-      })
-
       setStats({
-        burgersViewed,
         recipesCooked,
-        favoriteCategory: favorites.length > 0 ? topCategory : "None yet",
         totalCookTime,
       })
     } catch (error) {
       console.error("Error loading user stats:", error)
       setStats({
-        burgersViewed: Math.floor(Math.random() * 50) + 10,
         recipesCooked: getRecipesCooked(),
-        favoriteCategory: favorites.length > 0 ? favorites[0].category : "None yet",
         totalCookTime: getTotalCookingTime(),
       })
     }
@@ -162,10 +137,9 @@ const ProfileScreen: React.FC = () => {
     ])
   }
 
-  const StatCard: React.FC<{ title: string; value: string; icon: string }> = ({ title, value, icon }) => (
+  const StatCard: React.FC<{ title: string; value: string; }> = ({ title, value, }) => (
     <View style={[styles.statCard, { backgroundColor: colors.inputBackground }]}>
-      <Text style={styles.statIcon}>{icon}</Text>
-      <Text style={[styles.statValue, { color: colors.primary }]}>{value}</Text>
+      <Text weight = 'semiBold' style={[styles.statValue, { color: colors.primary }]}>{value}</Text>
       <Text style={[styles.statTitle, { color: colors.subtext }]}>{title}</Text>
     </View>
   )
@@ -175,21 +149,55 @@ const ProfileScreen: React.FC = () => {
     icon: string
     onPress: () => void
     subtitle?: string
-  }> = ({ title, icon, onPress, subtitle }) => (
-    <TouchableOpacity
-      style={[styles.menuButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-      onPress={onPress}
-    >
-      <View style={styles.menuButtonLeft}>
-        <Text style={styles.menuIcon}>{icon}</Text>
-        <View style={styles.menuTextContainer}>
-          <Text style={[styles.menuTitle, { color: colors.text }]}>{title}</Text>
-          {subtitle && <Text style={[styles.menuSubtitle, { color: colors.subtext }]}>{subtitle}</Text>}
+  }> = ({ title, icon, onPress, subtitle }) => {
+    const isLogout = title.toLowerCase() === "logout"
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.menuButton,
+          { backgroundColor: colors.card, borderColor: colors.border },
+        ]}
+        onPress={onPress}
+      >
+        <View style={styles.menuButtonLeft}>
+          <Image
+            source={{ uri: icon }}
+            style={[
+              styles.menuIconImage,
+              isLogout && { tintColor: "#8B0000" },
+            ]}
+          />
+          <View style={styles.menuTextContainer}>
+            <Text
+              weight="semiBold"
+              style={[
+                styles.menuTitle,
+                { color: isLogout ? "black" : colors.text },
+              ]}
+            >
+              {title}
+            </Text>
+            {subtitle && !isLogout && (
+              <Text style={[styles.menuSubtitle, { color: colors.subtext }]}>
+                {subtitle}
+              </Text>
+            )}
+          </View>
         </View>
-      </View>
-      <Text style={[styles.menuArrow, { color: colors.primary }]}>→</Text>
-    </TouchableOpacity>
-  )
+
+        {!isLogout && (
+          <Image
+            source={{
+              uri: "https://img.icons8.com/material-rounded/96/chevron-right.png",
+            }}
+            style={[styles.menuArrow, { tintColor: 'black' }]}
+          />
+        )}
+      </TouchableOpacity>
+    )
+  }
+
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -197,138 +205,105 @@ const ProfileScreen: React.FC = () => {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={[styles.header, { backgroundColor: colors.primary }]}>
+        <View style={[styles.header, { paddingHorizontal: 20 }]}>
+          <View style={styles.headerCenterWrapper}>
+            <Text weight="semiBold" style={styles.headerText}>My Profile</Text>
+          </View>
+          <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate("Settings")}>
+            <Image
+              source={{ uri: "https://img.icons8.com/puffy/32/settings.png" }}
+              style={styles.settingsIcon}
+            />
+          </TouchableOpacity>
+        </View>
           <View style={styles.profileInfo}>
             <TouchableOpacity style={styles.avatarContainer} onPress={() => setIsImageModalVisible(true)}>
               {profileImage ? (
                 <Image source={{ uri: profileImage }} style={styles.avatarImage} />
               ) : (
                 <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>{user?.name ? user.name.charAt(0).toUpperCase() : "👤"}</Text>
+                  <Text weight='semiBold' style={styles.avatarText}>{user?.name ? user.name.charAt(0).toUpperCase() : "👤"}</Text>
                 </View>
               )}
               <View style={styles.cameraIcon}>
-                <Text style={styles.cameraText}>📷</Text>
+                <Image
+                  source={{ uri: "https://img.icons8.com/puffy/32/camera.png" }}
+                  style={{ width: 18, height: 18, tintColor: 'white'}}
+                  resizeMode="contain"
+                />
               </View>
             </TouchableOpacity>
-            <Text style={styles.userName}>{user?.name || "User"}</Text>
+            <Text weight='semiBold' style={styles.userName}>{user?.name || "User"}</Text>
             <Text style={styles.userEmail}>{user?.email || "user@example.com"}</Text>
             <Text style={styles.joinDate}>
               Member since {user?.joinDate ? new Date(user.joinDate).toLocaleDateString() : "Today"}
             </Text>
           </View>
-        </View>
 
         {/* Stats */}
         <View style={styles.statsContainer}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Stats</Text>
+          <Text weight='semiBold' style={[styles.sectionTitle, { color: colors.text }]}>Your Stats</Text>
           <View style={styles.statsGrid}>
-            <StatCard title="Burgers Viewed" value={stats.burgersViewed.toString()} icon="🍔" />
-            <StatCard title="Recipes Cooked" value={stats.recipesCooked.toString()} icon="👨‍🍳" />
-            <StatCard title="Favorite Category" value={stats.favoriteCategory} icon="❤️" />
-            <StatCard title="Total Cook Time" value={stats.totalCookTime} icon="⏱️" />
-          </View>
-        </View>
-
-        {/* Quick Actions */}
-        <View style={styles.quickActionsContainer}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
-          <View style={styles.quickActionsGrid}>
-            <TouchableOpacity
-              style={[styles.quickActionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-              onPress={() => navigation.navigate("Main")}
-            >
-              <Text style={styles.quickActionIcon}>🍔</Text>
-              <Text style={[styles.quickActionText, { color: colors.text }]}>Browse</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.quickActionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-              onPress={() => navigation.navigate("Main")}
-            >
-              <Text style={styles.quickActionIcon}>❤️</Text>
-              <Text style={[styles.quickActionText, { color: colors.text }]}>Favorites</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.quickActionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-              onPress={() => navigation.navigate("Main")}
-            >
-              <Text style={styles.quickActionIcon}>🤖</Text>
-              <Text style={[styles.quickActionText, { color: colors.text }]}>AI Chef</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.quickActionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
-              onPress={() => navigation.navigate("Settings")}
-            >
-              <Text style={styles.quickActionIcon}>⚙️</Text>
-              <Text style={[styles.quickActionText, { color: colors.text }]}>Settings</Text>
-            </TouchableOpacity>
+            <StatCard title="Recipes Cooked" value={stats.recipesCooked.toString()} />
+            <StatCard title="Total Cook Time" value={stats.totalCookTime} />
           </View>
         </View>
 
         {/* Menu */}
         <View style={styles.menuContainer}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Account</Text>
+          <Text weight='semiBold' style={[styles.sectionTitle, { color: colors.text }]}>Account</Text>
 
           <MenuButton
             title="Edit Profile"
             subtitle="Update your personal information"
-            icon="✏️"
+            icon="https://img.icons8.com/fluency-systems-regular/48/edit--v1.png"
             onPress={() => navigation.navigate("EditProfile")}
           />
 
           <MenuButton
             title="Favorite Burgers"
             subtitle={`${favorites.length} saved burgers`}
-            icon="❤️"
+            icon="https://img.icons8.com/puffy/48/like.png"
             onPress={() => navigation.navigate("Main")}
           />
 
           <MenuButton
             title="Cooking History"
             subtitle="View your cooking journey"
-            icon="📚"
+            icon="https://img.icons8.com/fluency-systems-regular/48/activity-history.png"
             onPress={() => navigation.navigate("CookingHistory")}
           />
 
           <MenuButton
             title="Shopping List"
             subtitle="Manage your ingredient lists"
-            icon="🛒"
+            icon="https://img.icons8.com/windows/48/shopping-cart.png"
             onPress={() => navigation.navigate("ShoppingList")}
           />
 
           <MenuButton
             title="Data & Storage"
             subtitle="Manage your app data"
-            icon="📊"
+            icon="https://img.icons8.com/forma-light/48/data-backup.png"
             onPress={() => navigation.navigate("DataStorage")}
           />
 
           <MenuButton
             title="Share App"
             subtitle="Tell friends about Burgerpedia"
-            icon="📤"
+            icon="https://img.icons8.com/forma-light/48/share.png"
             onPress={() => navigation.navigate("ShareApp")}
           />
 
-          <MenuButton
-            title="Settings"
-            subtitle="App preferences and configuration"
-            icon="⚙️"
-            onPress={() => navigation.navigate("Settings")}
-          />
+          <View style={{ marginTop: 5, paddingBottom: 70 }}>
+            <MenuButton
+              title="Logout"
+              subtitle=""
+              icon="https://img.icons8.com/fluency-systems-filled/48/logout-rounded-left.png"
+              onPress={handleLogout}
+            />
+          </View>
 
-          <Button
-            title="Logout"
-            onPress={handleLogout}
-            variant="danger"
-            fullWidth
-            style={styles.logoutButton}
-            icon="🚪"
-          />
         </View>
       </ScrollView>
 
@@ -375,22 +350,50 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: 20,
+    paddingTop: 40,
     paddingBottom: 30,
     alignItems: "center",
+    position: "relative",
+    justifyContent: "center",
+    backgroundColor: '#8B0000',
+  },
+  headerCenterWrapper: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 20,
+    alignItems: "center",
+  },
+  settingsButton: {
+    position: "absolute",
+    right: 20,
+    top: 20,
+  },
+  headerText: {
+    color: 'white',
+    fontSize: 20,
+  },
+  settingsIcon: {
+    width: 22,
+    height: 22,
+    tintColor: "white",
   },
   profileInfo: {
     alignItems: "center",
+    paddingBottom: 30,
+    backgroundColor: '#8B0000',
+    borderBottomStartRadius: 60,
+    borderBottomEndRadius: 60,
   },
   avatarContainer: {
     position: "relative",
-    marginBottom: 15,
+    paddingBottom: 25,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "white",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -398,20 +401,18 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
+    backgroundColor: "rgba(222, 222, 222, 0.2)", 
   },
   avatarText: {
-    fontSize: 32,
-    color: "white",
-    fontWeight: "bold",
+    fontSize: 30,
+    color: "black",
   },
   cameraIcon: {
     position: "absolute",
     bottom: -5,
     right: -5,
-    width: 28,
-    height: 28,
     borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.9)",
+    backgroundColor: "#8B0000",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -419,26 +420,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   userName: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 17,
     color: "white",
     marginBottom: 5,
   },
   userEmail: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.8)",
+    fontSize: 12,
+    color: "rgba(240, 240, 240, 0.8)",
     marginBottom: 5,
   },
   joinDate: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.7)",
+    fontSize: 11,
+    color: "rgba(234, 234, 234, 0.8)",
   },
   statsContainer: {
-    padding: 20,
+    paddingInline: 20,
+    paddingTop: 30,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 14,
     marginBottom: 15,
   },
   statsGrid: {
@@ -459,76 +459,51 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 18,
-    fontWeight: "bold",
     marginBottom: 4,
   },
   statTitle: {
     fontSize: 12,
     textAlign: "center",
   },
-  quickActionsContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  quickActionsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  quickActionButton: {
-    width: "23%",
-    aspectRatio: 1,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-  },
-  quickActionIcon: {
-    fontSize: 24,
-    marginBottom: 5,
-  },
-  quickActionText: {
-    fontSize: 12,
-    fontWeight: "500",
-    textAlign: "center",
-  },
   menuContainer: {
-    padding: 20,
+    paddingInline: 20,
+    paddingBottom: 20,
+    paddingTop: 15,
   },
   menuButton: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     borderRadius: 12,
-    padding: 16,
+    padding: 14,
     marginBottom: 10,
-    borderWidth: 1,
   },
   menuButtonLeft: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
   },
-  menuIcon: {
-    fontSize: 20,
+  menuIconImage: {
+    width: 20,
+    height: 20,
     marginRight: 12,
+    resizeMode: 'contain',
+  },
+  menuArrow: {
+    width: 16,
+    height: 18,
+    marginLeft: 8,
+    tintColor: "black"
   },
   menuTextContainer: {
     flex: 1,
   },
   menuTitle: {
-    fontSize: 16,
-    fontWeight: "500",
+    fontSize: 14,
   },
   menuSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
     marginTop: 2,
-  },
-  menuArrow: {
-    fontSize: 16,
-  },
-  logoutButton: {
-    marginTop: 20,
   },
   // Modal Styles
   modalOverlay: {
