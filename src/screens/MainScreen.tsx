@@ -25,13 +25,13 @@ const MainScreen: React.FC = () => {
               break
             case "Favorites":
               iconSource = focused
-                ? "https://img.icons8.com/puffy-filled/32/like.png"
-                : "https://img.icons8.com/puffy/32/like.png"
+                ? "https://img.icons8.com/puffy-filled/48/like.png"
+                : "https://img.icons8.com/puffy/48/like.png"
               break
             case "AI Assistant":
               iconSource = focused
-                ? "https://img.icons8.com/material-rounded/24/bot.png"
-                : "https://img.icons8.com/material-outlined/24/bot.png"
+                ? "https://img.icons8.com/fluency-systems-filled/96/speech-bubble-with-dots.png"
+                : "https://img.icons8.com/fluency-systems-regular/96/speech-bubble-with-dots--v1.png"
               break
             case "Profile":
               iconSource = focused
