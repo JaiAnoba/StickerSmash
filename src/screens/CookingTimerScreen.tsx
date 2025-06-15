@@ -398,12 +398,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 15,
+    marginBottom: 10,
+    borderBottomStartRadius: 50,
+    borderBottomEndRadius: 50,
   },
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -479,7 +480,7 @@ const styles = StyleSheet.create({
   stepText: {
     fontSize: 16,
     lineHeight: 24,
-    color: "#4B5563",
+    color: "black",
   },
   stepCounter: {
     textAlign: "center",
@@ -513,7 +514,7 @@ const styles = StyleSheet.create({
   },
   ingredientText: {
     fontSize: 14,
-    color: "#4B5563",
+    color: "black",
     flex: 1,
     lineHeight: 20,
   },
@@ -551,7 +552,7 @@ const styles = StyleSheet.create({
   },
   tipText: {
     fontSize: 14,
-    color: "#4B5563",
+    color: "black",
     flex: 1,
     lineHeight: 20,
   },

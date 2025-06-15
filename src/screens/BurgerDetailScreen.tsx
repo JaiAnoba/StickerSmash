@@ -47,7 +47,6 @@ type Props = NavigationProps | DirectProps
 
 const { width, height } = Dimensions.get("window")
 
-// Type guard to check if props are navigation-based
 const isNavigationProps = (props: Props): props is NavigationProps => {
   return "route" in props && "route" in props
 }
@@ -163,7 +162,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
     setTimeout(() => {
       startCooking(burger)
       if (isDirectModal) {
-       
+        onClose() 
       }
       navigation.navigate("CookingTimer", { burger })
     }, 500)
@@ -273,7 +272,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
                     <View style={styles.ratingContainer}>
                       <Image
                         source={{ uri: "https://img.icons8.com/fluency-systems-filled/96/star.png" }}
-                        style={{ width: 14, height: 14, tintColor: "ffde59", marginRight: 4 }}
+                        style={{ width: 14, height: 14, tintColor: "#ffbd59", marginRight: 4 }}
                       />
                       <Text weight="semiBold" style={styles.ratingValue}>
                         {burger.rating}
