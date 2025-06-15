@@ -170,7 +170,7 @@ const ProfileScreen: React.FC = () => {
           </View>
           <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate("Settings")}>
             <Image
-              source={{ uri: "https://img.icons8.com/puffy/48/settings.png" }}
+              source={{ uri: "https://img.icons8.com/puffy/64/settings.png" }}
               style={styles.settingsIcon}
             />
           </TouchableOpacity>

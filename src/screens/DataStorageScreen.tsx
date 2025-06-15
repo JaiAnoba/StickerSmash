@@ -2,10 +2,12 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, ScrollView, Alert, TouchableOpacity } from "react-native"
+import { View, StyleSheet, SafeAreaView, StatusBar, ScrollView, Alert, TouchableOpacity, Image } from "react-native"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { useTheme } from "../context/ThemeContext"
 import Button from "../components/Button"
+import Text from "../components/CustomText"
+import { useNavigation } from "@react-navigation/native";
 
 interface StorageInfo {
   favorites: number
@@ -18,6 +20,8 @@ interface StorageInfo {
 
 const DataStorageScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme()
+  const navigation = useNavigation();
+  
   const [storageInfo, setStorageInfo] = useState<StorageInfo>({
     favorites: 0,
     cookingHistory: 0,
@@ -194,22 +198,20 @@ const DataStorageScreen: React.FC = () => {
   const DataCard: React.FC<{
     title: string
     count: number
-    icon: string
     onClear: () => void
     description: string
-  }> = ({ title, count, icon, onClear, description }) => (
+  }> = ({ title, count, onClear, description }) => (
     <View style={[styles.dataCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <View style={styles.dataCardHeader}>
         <View style={styles.dataCardLeft}>
-          <Text style={styles.dataIcon}>{icon}</Text>
           <View>
-            <Text style={[styles.dataTitle, { color: colors.text }]}>{title}</Text>
+            <Text weight='medium' style={[styles.dataTitle, { color: colors.text }]}>{title}</Text>
             <Text style={[styles.dataDescription, { color: colors.subtext }]}>{description}</Text>
           </View>
         </View>
-        <Text style={[styles.dataCount, { color: colors.primary }]}>{count}</Text>
+        <Text weight='semiBold' style={[styles.dataCount, { color: colors.primary }]}>{count}</Text>
       </View>
-      <Button title="Clear" onPress={onClear} variant="danger" size="small" icon="🗑️" style={styles.clearButton} />
+      <Button title="Clear" onPress={onClear} size="small" style={styles.clearButton} />
     </View>
   )
 
@@ -228,28 +230,33 @@ const DataStorageScreen: React.FC = () => {
       <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text style={styles.headerTitle}>Data & Storage</Text>
+      
+        <TouchableOpacity style={styles.side} onPress={() => navigation.goBack()}>
+          <Image source={{ uri: "https://img.icons8.com/sf-black/100/back.png" }} style={styles.backIcon} />
+        </TouchableOpacity>
+      
+        <Text weight='semiBold' style={styles.headerTitle}>Data & Storage</Text>
+      
+        <View style={styles.side} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Storage Overview */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Storage Overview</Text>
+          <Text weight='semiBold' style={[styles.sectionTitle, { color: colors.text }]}>Storage Overview</Text>
           <View style={[styles.overviewCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={styles.storageIcon}>📊</Text>
-            <Text style={[styles.totalSize, { color: colors.primary }]}>{storageInfo.totalSize}</Text>
+            <Text weight='semiBold' style={[styles.totalSize, { color: colors.primary }]}>{storageInfo.totalSize}</Text>
             <Text style={[styles.totalLabel, { color: colors.subtext }]}>Total App Data</Text>
           </View>
         </View>
 
         {/* Data Categories */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Data Categories</Text>
+          <Text weight='semiBold' style={[styles.sectionTitle, { color: colors.text }]}>Data Categories</Text>
 
           <DataCard
             title="Favorites"
             count={storageInfo.favorites}
-            icon="❤️"
             description="Saved burger recipes"
             onClear={() => clearSpecificData("favorites")}
           />
@@ -257,7 +264,6 @@ const DataStorageScreen: React.FC = () => {
           <DataCard
             title="Cooking History"
             count={storageInfo.cookingHistory}
-            icon="👨‍🍳"
             description="Cooking records and achievements"
             onClear={() => clearSpecificData("cookingHistory")}
           />
@@ -265,7 +271,6 @@ const DataStorageScreen: React.FC = () => {
           <DataCard
             title="Shopping Lists"
             count={storageInfo.shoppingList}
-            icon="🛒"
             description="Shopping list items"
             onClear={() => clearSpecificData("shoppingList")}
           />
@@ -273,7 +278,6 @@ const DataStorageScreen: React.FC = () => {
           <DataCard
             title="App Settings"
             count={storageInfo.settings}
-            icon="⚙️"
             description="Preferences and configuration"
             onClear={() => clearSpecificData("settings")}
           />
@@ -281,7 +285,6 @@ const DataStorageScreen: React.FC = () => {
           <DataCard
             title="Profile Data"
             count={storageInfo.profileData}
-            icon="👤"
             description="Profile info and picture"
             onClear={() =>
               Alert.alert("Info", 'Profile data cannot be cleared individually. Use "Clear All Data" if needed.')
@@ -291,48 +294,54 @@ const DataStorageScreen: React.FC = () => {
 
         {/* Data Management */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Data Management</Text>
+          <Text weight='semiBold' style={[styles.sectionTitle, { color: colors.text }]}>Data Management</Text>
 
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
             onPress={exportData}
           >
-            <Text style={styles.actionIcon}>📤</Text>
             <View style={styles.actionContent}>
-              <Text style={[styles.actionTitle, { color: colors.text }]}>Export Data</Text>
+              <Text weight='medium' style={[styles.actionTitle, { color: colors.text }]}>Export Data</Text>
               <Text style={[styles.actionSubtitle, { color: colors.subtext }]}>Backup your data to a file</Text>
             </View>
-            <Text style={[styles.actionArrow, { color: colors.primary }]}>→</Text>
+            <Image
+              source={{ uri: "https://img.icons8.com/material-rounded/48/chevron-right.png" }}
+              style={styles.arrowIcon}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
             onPress={importData}
           >
-            <Text style={styles.actionIcon}>📥</Text>
             <View style={styles.actionContent}>
-              <Text style={[styles.actionTitle, { color: colors.text }]}>Import Data</Text>
+              <Text weight='medium' style={[styles.actionTitle, { color: colors.text }]}>Import Data</Text>
               <Text style={[styles.actionSubtitle, { color: colors.subtext }]}>Restore data from a backup file</Text>
             </View>
-            <Text style={[styles.actionArrow, { color: colors.primary }]}>→</Text>
+            <Image
+              source={{ uri: "https://img.icons8.com/material-rounded/48/chevron-right.png" }}
+              style={styles.arrowIcon}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
             onPress={() => calculateStorageInfo()}
           >
-            <Text style={styles.actionIcon}>🔄</Text>
             <View style={styles.actionContent}>
-              <Text style={[styles.actionTitle, { color: colors.text }]}>Refresh Storage Info</Text>
+              <Text weight='medium' style={[styles.actionTitle, { color: colors.text }]}>Refresh Storage Info</Text>
               <Text style={[styles.actionSubtitle, { color: colors.subtext }]}>Recalculate storage usage</Text>
             </View>
-            <Text style={[styles.actionArrow, { color: colors.primary }]}>→</Text>
+            <Image
+              source={{ uri: "https://img.icons8.com/material-rounded/48/chevron-right.png" }}
+              style={styles.arrowIcon}
+            />
           </TouchableOpacity>
         </View>
 
         {/* Danger Zone */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Danger Zone</Text>
+          <Text weight='semiBold' style={[styles.sectionTitle, { color: colors.text }]}>Danger Zone</Text>
 
           <View
             style={[
@@ -343,16 +352,14 @@ const DataStorageScreen: React.FC = () => {
               },
             ]}
           >
-            <Text style={styles.dangerIcon}>⚠️</Text>
-            <Text style={[styles.dangerTitle, { color: colors.primary }]}>Clear All Data</Text>
+            <Text weight='semiBold' style={[styles.dangerTitle, { color: colors.primary }]}>Clear All Data</Text>
             <Text style={[styles.dangerDescription, { color: colors.subtext }]}>
               This will permanently delete all your app data. This action cannot be undone.
             </Text>
             <Button
-              title="Clear All Data"
+              title="Clear"
               onPress={clearAllData}
-              variant="danger"
-              icon="🗑️"
+              size= 'small'
               style={styles.dangerButton}
             />
           </View>
@@ -376,11 +383,33 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20,
     alignItems: "center",
+    justifyContent: "space-between", 
+    marginBottom: 5,
+    flexDirection: "row",
+    backgroundColor: "#8B0000",
+    borderBottomStartRadius: 50,
+    borderBottomEndRadius: 50,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
+    tintColor: "white",
+  },
+  side: {
+    width: 40, 
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "white",
+    fontSize: 18,
+    color: 'white',
+    textAlign: "center", 
   },
   content: {
     flex: 1,
@@ -398,8 +427,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 16,
     marginBottom: 15,
   },
   overviewCard: {
@@ -407,34 +435,19 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
     borderWidth: 1,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  storageIcon: {
-    fontSize: 32,
-    marginBottom: 10,
   },
   totalSize: {
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 25,
     marginBottom: 5,
   },
   totalLabel: {
-    fontSize: 16,
+    fontSize: 14,
   },
   dataCard: {
     borderRadius: 12,
-    padding: 16,
+    padding: 12,
     marginBottom: 12,
     borderWidth: 1,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   dataCardHeader: {
     flexDirection: "row",
@@ -452,16 +465,14 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   dataTitle: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 14,
     marginBottom: 2,
   },
   dataDescription: {
-    fontSize: 14,
+    fontSize: 12,
   },
   dataCount: {
     fontSize: 18,
-    fontWeight: "bold",
   },
   clearButton: {
     alignSelf: "flex-start",
@@ -473,11 +484,6 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   actionIcon: {
     fontSize: 24,
@@ -487,40 +493,34 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   actionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 14,
     marginBottom: 2,
   },
   actionSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
   },
-  actionArrow: {
-    fontSize: 16,
+  arrowIcon: {
+    width: 16,
+    height: 16,
+    resizeMode: "contain",
   },
   dangerCard: {
     borderRadius: 12,
     padding: 20,
     marginBottom: 20,
     borderWidth: 1,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    alignItems: "center",
   },
   dangerIcon: {
     fontSize: 32,
     marginBottom: 10,
   },
   dangerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 14,
     marginBottom: 8,
     textAlign: "center",
   },
   dangerDescription: {
-    fontSize: 14,
+    fontSize: 12,
     textAlign: "center",
     marginBottom: 16,
     lineHeight: 20,
@@ -533,9 +533,9 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
   },
   footerText: {
-    fontSize: 14,
+    fontSize: 12,
     textAlign: "center",
-    fontStyle: "italic",
+    fontFamily: "Poppins-Italic",
     lineHeight: 20,
   },
 })
