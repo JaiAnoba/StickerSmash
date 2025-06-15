@@ -105,7 +105,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
         easing: Easing.out(Easing.ease),
       }),
       Animated.timing(imageTranslateY, {
-        toValue: -80, // Move image up to overlap with modal
+        toValue: -80, 
         duration: 300,
         delay: 150,
         useNativeDriver: true,
@@ -144,7 +144,6 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
   }
 
   const handleStartCooking = async () => {
-    // Start button animation
     Animated.sequence([
       Animated.timing(buttonScale, {
         toValue: 1.1,
@@ -164,7 +163,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
     setTimeout(() => {
       startCooking(burger)
       if (isDirectModal) {
-        onClose() // Close the modal first
+       
       }
       navigation.navigate("CookingTimer", { burger })
     }, 500)
@@ -194,20 +193,6 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
       setModalVisible(false)
       onClose()
     })
-  }
-
-  const renderStars = (rating: number): string => {
-    const stars: string[] = []
-    const fullStars: number = Math.floor(rating)
-    const hasHalfStar: boolean = rating % 1 !== 0
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push("★")
-    }
-    if (hasHalfStar) {
-      stars.push("☆")
-    }
-    return stars.join("")
   }
 
   return (
@@ -286,7 +271,10 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
                   <View style={styles.metaItem}>
                     <Text style={styles.metaLabel}>Rating</Text>
                     <View style={styles.ratingContainer}>
-                      <Text style={styles.stars}>{renderStars(burger.rating)}</Text>
+                      <Image
+                        source={{ uri: "https://img.icons8.com/fluency-systems-filled/96/star.png" }}
+                        style={{ width: 14, height: 14, tintColor: "ffde59", marginRight: 4 }}
+                      />
                       <Text weight="semiBold" style={styles.ratingValue}>
                         {burger.rating}
                       </Text>
@@ -315,6 +303,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
                         title={ratingSaved ? "Update Rating" : "Save Rating"}
                         onPress={handleSaveRating}
                         variant="primary"
+                        size="small"
                         disabled={tempRating === null}
                         style={styles.saveRatingButton}
                       />
@@ -322,7 +311,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
                   </View>
                 )}
 
-                {/* Let's Start Button with Animation */}
+                {/* Let's Start Button */}
                 <Animated.View
                   style={[
                     styles.startButtonContainer,
@@ -498,6 +487,7 @@ const styles = StyleSheet.create({
   ratingValue: {
     fontSize: 12,
     color: "#333",
+    top: 3,
   },
   userRatingSection: {
     marginBottom: 20,

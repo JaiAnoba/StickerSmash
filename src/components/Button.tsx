@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { TouchableOpacity, StyleSheet, ActivityIndicator, View, type StyleProp, type ViewStyle } from "react-native"
+import { Image, TouchableOpacity, StyleSheet, ActivityIndicator, View, type StyleProp, type ViewStyle } from "react-native"
 import { useTheme } from "../context/ThemeContext"
 import Text from "./CustomText"
 
@@ -14,6 +14,9 @@ interface ButtonProps {
   disabled?: boolean
   loading?: boolean
   icon?: string
+  textColor?: string
+  backgroundColor?: string
+  borderColor?: string  
   style?: StyleProp<ViewStyle>
 }
 
@@ -26,12 +29,16 @@ const Button: React.FC<ButtonProps> = ({
   disabled = false,
   loading = false,
   icon,
+  textColor,
+  backgroundColor,
+  borderColor, 
   style,
 }) => {
   const { colors } = useTheme()
 
   const getBackgroundColor = () => {
     if (disabled) return colors.subtext
+    if (backgroundColor) return backgroundColor
     switch (variant) {
       case "secondary":
         return "transparent"
@@ -44,6 +51,7 @@ const Button: React.FC<ButtonProps> = ({
 
   const getTextColor = () => {
     if (disabled) return "#FFFFFF"
+    if (textColor) return textColor
     switch (variant) {
       case "secondary":
         return colors.primary
@@ -54,6 +62,7 @@ const Button: React.FC<ButtonProps> = ({
 
   const getBorderColor = () => {
     if (disabled) return colors.subtext
+    if (borderColor) return borderColor
     switch (variant) {
       case "secondary":
         return colors.primary
@@ -113,8 +122,14 @@ const Button: React.FC<ButtonProps> = ({
         <ActivityIndicator color={getTextColor()} size="small" />
       ) : (
         <View style={styles.buttonContent}>
-          {icon && <Text style={[styles.icon, { marginRight: 8 }]}>{icon}</Text>}
-          <Text weight="semiBold" style={[styles.text, { color: getTextColor(), fontSize: getTextSize() }]}>
+          {icon && (
+            typeof icon === "string" && icon.startsWith("http") ? (
+              <Image source={{ uri: icon }} style={styles.iconImage} />
+            ) : (
+              <Text style={[styles.iconText, { marginRight: 8 }]}>{icon}</Text>
+            )
+          )}
+          <Text weight="semiBold" style={[styles.text, { color: textColor || getTextColor(), fontSize: getTextSize() }]}>
             {title}
           </Text>
         </View>
@@ -128,12 +143,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   buttonContent: {
     flexDirection: "row",
@@ -146,6 +155,16 @@ const styles = StyleSheet.create({
   icon: {
     fontSize: 14,
   },
+  iconText: {
+    fontSize: 14,
+  },
+  iconImage: {
+    width: 18,
+    height: 18,
+    marginRight: 8,
+    resizeMode: "contain",
+  },
+
 })
 
 export default Button

@@ -279,7 +279,7 @@ const CookingTimerScreen: React.FC<Props> = ({ navigation, route }) => {
           <View style={styles.tabContent}>
             <View style={styles.tipsContainer}>
               <Text weight="semiBold" style={styles.tipsTitle}>
-                Chef AI Tips for {burger.difficulty} Burgers
+                Tips for {burger.difficulty} Burgers
               </Text>
               {getAITips().map((tip, index) => (
                 <View key={index} style={styles.tipItem}>
@@ -321,16 +321,37 @@ const CookingTimerScreen: React.FC<Props> = ({ navigation, route }) => {
           </Text>
           <View style={styles.timerControls}>
             {!isActive ? (
-              <Button title="Start Cooking" onPress={handleStart} variant="primary" icon="🍳" />
+              <Button title="Start Cooking" onPress={handleStart} variant="primary" size="large" />
             ) : isPaused ? (
-              <Button title="Resume" onPress={handleResume} variant="primary" icon="▶️" />
+              <Button
+                title="Resume"
+                onPress={handleResume}
+                variant="primary"
+                size="large"
+                icon="https://img.icons8.com/ios-filled/50/ffffff/play.png"
+              />
             ) : (
-              <Button title="Pause" onPress={handlePause} variant="secondary" icon="⏸️" />
+              <Button
+                title="Pause"
+                textColor="#000"
+                backgroundColor="#d9d9d9"
+                onPress={handlePause}
+                variant="secondary"
+                size="large"
+                icon="https://img.icons8.com/ios-glyphs/60/pause--v1.png"
+              />
             )}
 
             {isActive && (
-              <Button title="Complete" onPress={handleComplete} variant="success" icon="✅" style={{ marginTop: 10 }} />
+              <Button
+                title="Complete"
+                onPress={handleComplete}
+                variant="success"
+                size="large"
+                style={{ marginTop: 10 }}
+              />
             )}
+
           </View>
         </View>
 
@@ -340,7 +361,7 @@ const CookingTimerScreen: React.FC<Props> = ({ navigation, route }) => {
             style={[styles.tab, activeTab === "ingredients" && styles.activeTab]}
             onPress={() => setActiveTab("ingredients")}
             >
-            <Text style={[styles.tabText, activeTab === "ingredients" && styles.activeTabText]}>
+            <Text weight='medium' style={[styles.tabText, activeTab === "ingredients" && styles.activeTabText]}>
                 Ingredients
             </Text>
           </TouchableOpacity>
@@ -348,13 +369,13 @@ const CookingTimerScreen: React.FC<Props> = ({ navigation, route }) => {
             style={[styles.tab, activeTab === "instructions" && styles.activeTab]}
             onPress={() => setActiveTab("instructions")}
           >
-            <Text style={[styles.tabText, activeTab === "instructions" && styles.activeTabText]}>Instructions</Text>
+            <Text weight='medium' style={[styles.tabText, activeTab === "instructions" && styles.activeTabText]}>Instructions</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, activeTab === "tips" && styles.activeTab]}
             onPress={() => setActiveTab("tips")}
           >
-            <Text style={[styles.tabText, activeTab === "tips" && styles.activeTabText]}>AI Tips</Text>
+            <Text weight='medium' style={[styles.tabText, activeTab === "tips" && styles.activeTabText]}>Tips</Text>
           </TouchableOpacity>
         </View>
 
@@ -426,8 +447,6 @@ const styles = StyleSheet.create({
   },
   tabsContainer: {
     flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
     marginHorizontal: 15,
     marginBottom: 10,
    },
@@ -436,7 +455,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: "center",
     borderBottomWidth: 2,
-    borderBottomColor: "transparent",
+    borderBottomColor: "#F9FAFB", 
    },
    activeTab: {
     borderBottomColor: "#8B0000", 
@@ -444,11 +463,9 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 14,
     color: "#666",
-    fontWeight: "500",
     },
     activeTabText: {
     color: "#8B0000",
-    fontWeight: "700",
   },
   tabContent: {
     padding: 15,
