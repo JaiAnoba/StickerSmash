@@ -2,22 +2,14 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import {
-  View,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  FlatList,
-  TextInput,
-  TouchableOpacity,
-  Image,
-} from "react-native"
+import { View, StyleSheet, SafeAreaView, StatusBar, FlatList, TextInput, TouchableOpacity, Image } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
 import type { RootStackParamList } from "../../App"
 import { useTheme } from "../context/ThemeContext"
 import { useFavorites } from "../context/FavoritesContext"
-import BurgerCard from "../components/BurgerCard";
+import BurgerCard from "../components/BurgerCard"
+import BurgerDetailScreen from "./BurgerDetailScreen"
 import { burgersData } from "../data/burgersData"
 import type { Burger } from "../types/Burger"
 import type { Notification } from "../types/Notification"
@@ -26,7 +18,7 @@ import { useFilters } from "../hooks/useFilters"
 import FilterModal from "../components/FilterModal"
 import NotificationModal from "../components/NotificationModal"
 import NotificationButton from "../components/NotificationButton"
-import Text from "../components/CustomText";
+import Text from "../components/CustomText"
 
 type NavigationProp = StackNavigationProp<RootStackParamList>
 
@@ -40,6 +32,8 @@ const HomeScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("")
   const [filterModalVisible, setFilterModalVisible] = useState(false)
   const [notificationModalVisible, setNotificationModalVisible] = useState(false)
+  const [selectedBurger, setSelectedBurger] = useState<Burger | null>(null)
+  const [burgerDetailVisible, setBurgerDetailVisible] = useState(false)
 
   // Use the custom hook for filtering
   const {
@@ -59,7 +53,13 @@ const HomeScreen: React.FC = () => {
   })
 
   const handleBurgerPress = (burger: Burger) => {
-    navigation.navigate("BurgerDetail", { burger })
+    setSelectedBurger(burger)
+    setBurgerDetailVisible(true)
+  }
+
+  const handleCloseBurgerDetail = () => {
+    setBurgerDetailVisible(false)
+    setSelectedBurger(null)
   }
 
   const handleFavoritePress = (burger: Burger) => {
@@ -86,24 +86,10 @@ const HomeScreen: React.FC = () => {
       if (notification.actionUrl === "BurgerDetail") {
         const burger = burgersData.find((b) => b.id === notification.data.burgerId)
         if (burger) {
-          navigation.navigate("BurgerDetail", { burger })
+          handleBurgerPress(burger)
         }
       }
     }
-  }
-
-  const renderStars = (rating: number): string => {
-    const stars: string[] = []
-    const fullStars: number = Math.floor(rating)
-    const hasHalfStar: boolean = rating % 1 !== 0
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push("★")
-    }
-    if (hasHalfStar) {
-      stars.push("☆")
-    }
-    return stars.join("")
   }
 
   const renderCategoryTab = ({ item }: { item: string }) => (
@@ -159,10 +145,16 @@ const HomeScreen: React.FC = () => {
         <View style={styles.headerContent}>
           <View style={styles.profileAndText}>
             <View style={styles.headerTextContainer}>
-              <Text weight="semiBold" style={[styles.headerLineOne, { color: colors.text }]}>Choose</Text>
+              <Text weight="semiBold" style={[styles.headerLineOne, { color: colors.text }]}>
+                Choose
+              </Text>
               <Text style={styles.headerLineTwo}>
-                <Text weight="semiBold" style={[ { color: colors.text }]}>Your Favorite </Text>
-                <Text weight="semiBold" style={styles.redText}>Burger</Text>
+                <Text weight="semiBold" style={[{ color: colors.text }]}>
+                  Your Favorite{" "}
+                </Text>
+                <Text weight="semiBold" style={styles.redText}>
+                  Burger
+                </Text>
               </Text>
             </View>
           </View>
@@ -194,7 +186,7 @@ const HomeScreen: React.FC = () => {
               styles.searchInput,
               {
                 color: colors.text,
-                fontFamily: 'Poppins-Regular',
+                fontFamily: "Poppins-Regular",
               },
             ]}
             placeholder="Search"
@@ -230,20 +222,11 @@ const HomeScreen: React.FC = () => {
 
       {/* Burgers List */}
       <View style={styles.burgersSection}>
-        {/* <View style={styles.sectionHeader}>
-          <Text weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>
-            {selectedCategory === "All" ? "All" : `${selectedCategory}`}
-          </Text>
-          <View style={styles.resultsContainer}>
-            <Text italic style={[styles.resultsCount, { color: colors.subtext }]}>
-              {filteredBurgers.length} {filteredBurgers.length === 1 ? "result" : "results"}
-            </Text>
-          </View>
-        </View> */}
-
         {filteredBurgers.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text weight="semiBold" style={[styles.emptyTitle, { color: colors.text }]}>No burgers found</Text>
+            <Text weight="semiBold" style={[styles.emptyTitle, { color: colors.text }]}>
+              No burgers found
+            </Text>
             <Text style={[styles.emptySubtitle, { color: colors.subtext }]}>Try adjusting your search or filters</Text>
           </View>
         ) : (
@@ -276,6 +259,16 @@ const HomeScreen: React.FC = () => {
         onClose={() => setNotificationModalVisible(false)}
         onNotificationPress={handleNotificationPress}
       />
+
+      {/* Burger Detail Modal */}
+      {selectedBurger && (
+        <BurgerDetailScreen
+          burger={selectedBurger}
+          visible={burgerDetailVisible}
+          onClose={handleCloseBurgerDetail}
+          navigation={navigation}
+        />
+      )}
     </SafeAreaView>
   )
 }
@@ -382,121 +375,12 @@ const styles = StyleSheet.create({
     paddingTop: 5,
     marginBottom: 60,
   },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  sectionTitle: {
-    fontSize: 13,
-  },
-  resultsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  resultsCount: {
-    fontSize: 12,
-  },
   burgersList: {
     paddingBottom: 20,
   },
   burgerRow: {
     justifyContent: "space-between",
-    gap: 10, 
-  },
-  card: {
-    borderRadius: 15,
-    marginBottom: 16,
-    width: "48%",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    overflow: "hidden",
-    borderWidth: 1,
-  },
-  imageContainer: {
-    position: "relative",
-  },
-  image: {
-    width: "100%",
-    height: 140,
-    resizeMode: "cover",
-  },
-  favoriteButton: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  favoriteIcon: {
-    fontSize: 16,
-  },
-  content: {
-    padding: 12,
-  },
-  name: {
-    fontSize: 16,
-    marginBottom: 4,
-    lineHeight: 20,
-  },
-  category: {
-    fontSize: 12,
-    marginBottom: 8,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  rating: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  stars: {
-    fontSize: 14,
-    marginRight: 4,
-  },
-  ratingText: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  cookTime: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  difficulty: {
-    alignSelf: "flex-start",
-  },
-  difficultyText: {
-    fontSize: 11,
-    fontWeight: "bold",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  easy: {
-    backgroundColor: "#DCFCE7",
-    color: "#166534",
-  },
-  medium: {
-    backgroundColor: "#FEF3C7",
-    color: "#92400E",
-  },
-  hard: {
-    backgroundColor: "#FEE2E2",
-    color: "#B91C1C",
+    gap: 10,
   },
   emptyState: {
     flex: 1,

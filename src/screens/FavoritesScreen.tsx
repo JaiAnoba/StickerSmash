@@ -1,109 +1,100 @@
-import React, { useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  SafeAreaView,
-  StatusBar,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../App';
-import { useTheme } from '../context/ThemeContext';
-import { useFavorites } from '../context/FavoritesContext';
-import { Burger } from '../types/Burger';
-import BurgerCard from '../components/BurgerCard';
-import Button from '../components/Button';
-import Text from "../components/CustomText";
+"use client"
 
-type NavigationProp = StackNavigationProp<RootStackParamList>;
+import type React from "react"
+import { useState } from "react"
+import { View, StyleSheet, FlatList, SafeAreaView, StatusBar, TouchableOpacity, Alert } from "react-native"
+import { useNavigation } from "@react-navigation/native"
+import type { StackNavigationProp } from "@react-navigation/stack"
+import type { RootStackParamList } from "../../App"
+import { useTheme } from "../context/ThemeContext"
+import { useFavorites } from "../context/FavoritesContext"
+import type { Burger } from "../types/Burger"
+import BurgerCard from "../components/BurgerCard"
+import BurgerDetailScreen from "./BurgerDetailScreen"
+import Text from "../components/CustomText"
+
+type NavigationProp = StackNavigationProp<RootStackParamList>
 
 const FavoritesScreen: React.FC = () => {
-  const { colors, isDarkMode } = useTheme();
-  const { favorites, removeFavorite } = useFavorites();
-  const navigation = useNavigation<NavigationProp>();
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const { colors, isDarkMode } = useTheme()
+  const { favorites, removeFavorite } = useFavorites()
+  const navigation = useNavigation<NavigationProp>()
+  const [selectedCategory, setSelectedCategory] = useState<string>("All")
+  const [selectedBurger, setSelectedBurger] = useState<Burger | null>(null)
+  const [burgerDetailVisible, setBurgerDetailVisible] = useState(false)
 
-  const categories = ['All', ...Array.from(new Set(favorites.map(burger => burger.category)))];
+  const categories = ["All", ...Array.from(new Set(favorites.map((burger) => burger.category)))]
 
-  const filteredFavorites = selectedCategory === 'All' 
-    ? favorites 
-    : favorites.filter(burger => burger.category === selectedCategory);
+  const filteredFavorites =
+    selectedCategory === "All" ? favorites : favorites.filter((burger) => burger.category === selectedCategory)
 
   const handleBurgerPress = (burger: Burger) => {
-    navigation.navigate('BurgerDetail', { burger });
-  };
+    setSelectedBurger(burger)
+    setBurgerDetailVisible(true)
+  }
+
+  const handleCloseBurgerDetail = () => {
+    setBurgerDetailVisible(false)
+    setSelectedBurger(null)
+  }
 
   const handleRemoveFavorite = (burger: Burger) => {
-    Alert.alert(
-      'Remove Favorite',
-      `Remove "${burger.name}" from favorites?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => removeFavorite(burger.id),
-        },
-      ]
-    );
-  };
+    Alert.alert("Remove Favorite", `Remove "${burger.name}" from favorites?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: () => removeFavorite(burger.id),
+      },
+    ])
+  }
 
   const renderBurgerCard = ({ item }: { item: Burger }) => (
     <View style={styles.cardContainer}>
       <BurgerCard
         burger={item}
-        isFavorite={true} 
-        onPress={handleBurgerPress}
+        isFavorite={true}
+        onPress={() => handleBurgerPress(item)}
         onFavoritePress={() => handleRemoveFavorite(item)}
       />
     </View>
-  );
+  )
 
   const CategoryTab: React.FC<{ category: string; isActive: boolean }> = ({ category, isActive }) => (
     <TouchableOpacity
       style={[
         styles.categoryTab,
         { backgroundColor: colors.card, borderColor: colors.border },
-        isActive && { backgroundColor: colors.primary }
+        isActive && { backgroundColor: colors.primary },
       ]}
       onPress={() => setSelectedCategory(category)}
     >
-      <Text style={[
-        styles.categoryText,
-        { color: colors.text },
-        isActive && { color: 'white' }
-      ]}>
-        {category}
-      </Text>
+      <Text style={[styles.categoryText, { color: colors.text }, isActive && { color: "white" }]}>{category}</Text>
     </TouchableOpacity>
-  );
+  )
 
   const EmptyState = () => (
     <View style={styles.emptyState}>
-      <Text  weight='semiBold' style={[styles.emptyTitle, { color: colors.text }]}>No Favorites Yet</Text>
+      <Text weight="semiBold" style={[styles.emptyTitle, { color: colors.text }]}>
+        No Favorites Yet
+      </Text>
       <Text style={[styles.emptyText, { color: colors.subtext }]}>
         Start exploring burgers and tap the heart icon to add them to your favorites!
       </Text>
-      {/* <Button
-        title="Explore Burgers"
-        onPress={() => navigation.navigate('Main')}
-        style={styles.exploreButton}
-      /> */}
     </View>
-  );
+  )
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar backgroundColor="#8B0000" barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      
+      <StatusBar backgroundColor="#8B0000" barStyle={isDarkMode ? "light-content" : "dark-content"} />
+
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text weight='semiBold' style={styles.headerTitle}>My Favorites</Text>
+        <Text weight="semiBold" style={styles.headerTitle}>
+          My Favorites
+        </Text>
         <Text style={styles.headerSubtitle}>
-          {favorites.length} {favorites.length === 1 ? 'burger' : 'burgers'}
+          {favorites.length} {favorites.length === 1 ? "burger" : "burgers"}
         </Text>
       </View>
 
@@ -119,9 +110,7 @@ const FavoritesScreen: React.FC = () => {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={(item) => item}
-                renderItem={({ item }) => (
-                  <CategoryTab category={item} isActive={selectedCategory === item} />
-                )}
+                renderItem={({ item }) => <CategoryTab category={item} isActive={selectedCategory === item} />}
                 contentContainerStyle={styles.categoriesContent}
               />
             </View>
@@ -147,9 +136,19 @@ const FavoritesScreen: React.FC = () => {
           </View>
         </>
       )}
+
+      {/* Burger Detail Modal */}
+      {selectedBurger && (
+        <BurgerDetailScreen
+          burger={selectedBurger}
+          visible={burgerDetailVisible}
+          onClose={handleCloseBurgerDetail}
+          navigation={navigation}
+        />
+      )}
     </SafeAreaView>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -158,18 +157,18 @@ const styles = StyleSheet.create({
   header: {
     paddingVertical: 20,
     paddingHorizontal: 20,
-    alignItems: 'center',
+    alignItems: "center",
     borderBottomStartRadius: 60,
     borderBottomEndRadius: 60,
   },
   headerTitle: {
     fontSize: 20,
-    color: 'white',
+    color: "white",
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.8)',
+    color: "rgba(255,255,255,0.8)",
   },
   categoriesContainer: {
     paddingVertical: 15,
@@ -185,7 +184,7 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
+    color: "rgba(255,255,255,0.8)",
   },
   content: {
     marginBottom: 230,
@@ -196,15 +195,15 @@ const styles = StyleSheet.create({
     paddingLeft: 9,
   },
   cardContainer: {
-    position: 'relative',
+    position: "relative",
     marginBottom: 25,
     marginTop: 15,
     flex: 1,
   },
   emptyState: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 40,
   },
   emptyIcon: {
@@ -217,20 +216,20 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 13,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 24,
     marginBottom: 30,
   },
   emptyCategory: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 50,
   },
   emptyCategoryText: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
-});
+})
 
-export default FavoritesScreen;
+export default FavoritesScreen

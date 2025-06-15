@@ -16,7 +16,6 @@ import {
   Modal,
   Dimensions,
 } from "react-native"
-import { Audio } from "expo-av"
 import type { StackNavigationProp } from "@react-navigation/stack"
 import type { RouteProp } from "@react-navigation/native"
 import type { RootStackParamList } from "../../App"
@@ -27,36 +26,62 @@ import { useCooking } from "../context/CookingContext"
 import StarRating from "../components/StarRating"
 import Button from "../components/Button"
 import { useFocusEffect } from "@react-navigation/native"
+import type { Burger } from "../types/Burger"
 
 type BurgerDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, "BurgerDetail">
 type BurgerDetailScreenRouteProp = RouteProp<RootStackParamList, "BurgerDetail">
 
-interface Props {
+interface NavigationProps {
   navigation: BurgerDetailScreenNavigationProp
   route: BurgerDetailScreenRouteProp
 }
 
+interface DirectProps {
+  burger: Burger
+  visible: boolean
+  onClose: () => void
+  navigation: StackNavigationProp<RootStackParamList, keyof RootStackParamList>
+}
+
+type Props = NavigationProps | DirectProps
+
 const { width, height } = Dimensions.get("window")
 
-const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { burger } = route.params
+// Type guard to check if props are navigation-based
+const isNavigationProps = (props: Props): props is NavigationProps => {
+  return "route" in props && "route" in props
+}
+
+const BurgerDetailScreen: React.FC<Props> = (props) => {
+  // Extract burger and other props based on the prop type
+  const burger = isNavigationProps(props) ? props.route.params.burger : props.burger
+  const navigation = props.navigation
+  const isDirectModal = !isNavigationProps(props)
+  const visible = isNavigationProps(props) ? true : props.visible
+  const onClose = isNavigationProps(props) ? () => props.navigation.goBack() : props.onClose
+
   const { getUserRating, addRating } = useRatings()
   const { startCooking, cookingSessions } = useCooking()
   const [userRating, setUserRating] = useState<number | null>(null)
   const [tempRating, setTempRating] = useState<number | null>(null)
   const [ratingSaved, setRatingSaved] = useState(false)
   const [hasCookedBurger, setHasCookedBurger] = useState(false)
-  const [modalVisible, setModalVisible] = useState(true)
+  const [modalVisible, setModalVisible] = useState(visible)
 
   // Animation values
   const buttonScale = useRef(new Animated.Value(1)).current
   const buttonOpacity = useRef(new Animated.Value(1)).current
-  const [sound, setSound] = useState<Audio.Sound | null>(null)
   const fadeAnim = useRef(new Animated.Value(0)).current
   const slideAnim = useRef(new Animated.Value(height)).current
   const imageTranslateY = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
+    setModalVisible(visible)
+  }, [visible])
+
+  useEffect(() => {
+    if (!visible) return
+
     // Load user's rating when the component mounts
     const rating = getUserRating(burger.id)
     setUserRating(rating)
@@ -87,15 +112,16 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         easing: Easing.out(Easing.ease),
       }),
     ]).start()
-
-  }, [burger.id, getUserRating, cookingSessions])
+  }, [burger.id, getUserRating, cookingSessions, visible])
 
   useFocusEffect(
     React.useCallback(() => {
-      buttonOpacity.setValue(1)
-      buttonScale.setValue(1)
+      if (!isDirectModal) {
+        buttonOpacity.setValue(1)
+        buttonScale.setValue(1)
+      }
       return () => {}
-    }, [buttonOpacity, buttonScale]),
+    }, [buttonOpacity, buttonScale, isDirectModal]),
   )
 
   const checkIfBurgerCooked = () => {
@@ -137,6 +163,9 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
     // Start cooking and navigate after animations
     setTimeout(() => {
       startCooking(burger)
+      if (isDirectModal) {
+        onClose() // Close the modal first
+      }
       navigation.navigate("CookingTimer", { burger })
     }, 500)
   }
@@ -163,7 +192,7 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       }),
     ]).start(() => {
       setModalVisible(false)
-      navigation.goBack()
+      onClose()
     })
   }
 
@@ -214,9 +243,6 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         >
           {/* Header */}
           <View style={styles.modalHeader}>
-            {/* <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-              <Image source={{ uri: "https://img.icons8.com/sf-black/100/back.png" }} style={styles.closeIcon} />
-            </TouchableOpacity> */}
             <View style={styles.headerSpacer} />
           </View>
 
@@ -312,31 +338,6 @@ const BurgerDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                     </Text>
                   </TouchableOpacity>
                 </Animated.View>
-
-                {/* Nutrition Facts */}
-                {/* <View style={styles.nutritionSection}>
-                  <Text weight="semiBold" style={styles.sectionTitle}>
-                    Nutrition Facts
-                  </Text>
-                  <View style={styles.nutritionGrid}>
-                    <View style={styles.nutritionItem}>
-                      <Text style={styles.nutritionValue}>{burger.nutrition.calories}</Text>
-                      <Text style={styles.nutritionLabel}>Calories</Text>
-                    </View>
-                    <View style={styles.nutritionItem}>
-                      <Text style={styles.nutritionValue}>{burger.nutrition.protein}g</Text>
-                      <Text style={styles.nutritionLabel}>Protein</Text>
-                    </View>
-                    <View style={styles.nutritionItem}>
-                      <Text style={styles.nutritionValue}>{burger.nutrition.carbs}g</Text>
-                      <Text style={styles.nutritionLabel}>Carbs</Text>
-                    </View>
-                    <View style={styles.nutritionItem}>
-                      <Text style={styles.nutritionValue}>{burger.nutrition.fat}g</Text>
-                      <Text style={styles.nutritionLabel}>Fat</Text>
-                    </View>
-                  </View>
-                </View> */}
               </View>
             </View>
           </ScrollView>
@@ -381,7 +382,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: "63%", 
+    height: "63%",
     backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -522,9 +523,7 @@ const styles = StyleSheet.create({
   saveRatingButton: {
     minWidth: 150,
   },
-  startButtonContainer: {
-    
-  },
+  startButtonContainer: {},
   startButton: {
     backgroundColor: "#8B0000",
     borderRadius: 50,
