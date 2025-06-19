@@ -1,8 +1,6 @@
-"use client"
-
-import type React from "react"
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import type React from "react"
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 
 interface User {
   id: string

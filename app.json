@@ -2,7 +2,7 @@
   "expo": {
     "name": "Burgify",
     "slug": "burgify",
-    "jsEngine": "jsc",
+    "jsEngine": "hermes",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
