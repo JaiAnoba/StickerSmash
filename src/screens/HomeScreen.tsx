@@ -1,24 +1,22 @@
-"use client"
-
-import type React from "react"
-import { useState, useEffect } from "react"
-import { View, StyleSheet, SafeAreaView, StatusBar, FlatList, TextInput, TouchableOpacity, Image } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
+import type React from "react"
+import { useEffect, useState } from "react"
+import { FlatList, Image, SafeAreaView, StatusBar, StyleSheet, TextInput, TouchableOpacity, View } from "react-native"
 import type { RootStackParamList } from "../../App"
-import { useTheme } from "../context/ThemeContext"
-import { useFavorites } from "../context/FavoritesContext"
 import BurgerCard from "../components/BurgerCard"
-import BurgerDetailScreen from "./BurgerDetailScreen"
-import { burgersData } from "../data/burgersData"
-import type { Burger } from "../types/Burger"
-import type { Notification } from "../types/Notification"
-import { TOP_LEVEL_CATEGORIES } from "../types/Filter"
-import { useFilters } from "../hooks/useFilters"
-import FilterModal from "../components/FilterModal"
-import NotificationModal from "../components/NotificationModal"
-import NotificationButton from "../components/NotificationButton"
 import Text from "../components/CustomText"
+import FilterModal from "../components/FilterModal"
+import NotificationButton from "../components/NotificationButton"
+import NotificationModal from "../components/NotificationModal"
+import { useFavorites } from "../context/FavoritesContext"
+import { useTheme } from "../context/ThemeContext"
+import { burgersData } from "../data/burgersData"
+import { useFilters } from "../hooks/useFilters"
+import type { Burger } from "../types/Burger"
+import { TOP_LEVEL_CATEGORIES } from "../types/Filter"
+import type { Notification } from "../types/Notification"
+import BurgerDetailScreen from "./BurgerDetailScreen"
 
 type NavigationProp = StackNavigationProp<RootStackParamList>
 
@@ -81,7 +79,6 @@ const HomeScreen: React.FC = () => {
   }
 
   const handleNotificationPress = (notification: Notification) => {
-    // Handle notification actions
     if (notification.actionUrl && notification.data) {
       if (notification.actionUrl === "BurgerDetail") {
         const burger = burgersData.find((b) => b.id === notification.data.burgerId)
@@ -283,7 +280,7 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     flexDirection: "row",
-    gap: 60,
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 20,
     marginBottom: 10,

@@ -1,31 +1,29 @@
-"use client"
-
-import React from "react"
-import { useState, useEffect, useRef } from "react"
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  Animated,
-  Easing,
-  Alert,
-  Modal,
-  Dimensions,
-} from "react-native"
-import type { StackNavigationProp } from "@react-navigation/stack"
 import type { RouteProp } from "@react-navigation/native"
-import type { RootStackParamList } from "../../App"
-import { burgerImages } from "../data/burgerImages"
-import Text from "../components/CustomText"
-import { useRatings } from "../context/RatingContext"
-import { useCooking } from "../context/CookingContext"
-import StarRating from "../components/StarRating"
-import Button from "../components/Button"
 import { useFocusEffect } from "@react-navigation/native"
+import type { StackNavigationProp } from "@react-navigation/stack"
+import React, { useEffect, useRef, useState } from "react"
+import {
+  Alert,
+  Animated,
+  Dimensions,
+  Easing,
+  Image,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native"
+import type { RootStackParamList } from "../../App"
+import Button from "../components/Button"
+import Text from "../components/CustomText"
+import StarRating from "../components/StarRating"
+import { useCooking } from "../context/CookingContext"
+import { useFavorites } from "../context/FavoritesContext"
+import { useRatings } from "../context/RatingContext"
+import { burgerImages } from "../data/burgerImages"
 import type { Burger } from "../types/Burger"
 
 type BurgerDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, "BurgerDetail">
@@ -59,6 +57,9 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
   const visible = isNavigationProps(props) ? true : props.visible
   const onClose = isNavigationProps(props) ? () => props.navigation.goBack() : props.onClose
 
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites()
+  const isLiked = isFavorite(burger.id)
+
   const { getUserRating, addRating } = useRatings()
   const { startCooking, cookingSessions } = useCooking()
   const [userRating, setUserRating] = useState<number | null>(null)
@@ -67,12 +68,23 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
   const [hasCookedBurger, setHasCookedBurger] = useState(false)
   const [modalVisible, setModalVisible] = useState(visible)
 
+  const heartIcon = "https://img.icons8.com/puffy/32/like.png"
+  const filledHeartIcon = "https://img.icons8.com/puffy-filled/32/like.png"
+
   // Animation values
   const buttonScale = useRef(new Animated.Value(1)).current
   const buttonOpacity = useRef(new Animated.Value(1)).current
   const fadeAnim = useRef(new Animated.Value(0)).current
   const slideAnim = useRef(new Animated.Value(height)).current
   const imageTranslateY = useRef(new Animated.Value(0)).current
+
+  const handleFavoritePress = () => {
+    if (isLiked) {
+      removeFavorite(burger.id)
+    } else {
+      addFavorite(burger)
+    }
+  }
 
   useEffect(() => {
     setModalVisible(visible)
@@ -233,15 +245,20 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
           {/* Content */}
           <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
             <View style={styles.contentContainer}>
-              {/* Burger Name and Category - Name now above category */}
-              <View style={styles.titleSection}>
-                <Text weight="semiBold" style={styles.burgerName}>
-                  {burger.name}
-                </Text>
-                <Text weight="medium" style={styles.burgerCategory}>
-                  {burger.category}
-                </Text>
+              {/* Burger Name and Category */}
+              <View style={styles.titleRow}>
+                <Text weight="semiBold" style={styles.burgerName}>{burger.name}</Text>
+                <TouchableOpacity onPress={handleFavoritePress} style={styles.favoriteIcon}>
+                  <Image
+                    source={{ uri: isLiked ? filledHeartIcon : heartIcon }}
+                    style={[
+                      styles.heart,
+                      isLiked && styles.heartFilled,
+                    ]}
+                  />
+                </TouchableOpacity>
               </View>
+              <Text weight="medium" style={styles.burgerCategory}>{burger.category}</Text>
 
               {/* Details Content */}
               <View style={styles.tabContent}>
@@ -412,9 +429,23 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 20,
   },
-  titleSection: {
-    alignItems: "flex-start",
-    marginBottom: 20,
+  titleRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+  },
+  favoriteIcon: {
+    padding: 6,
+    backgroundColor: "#fff",
+  },
+  heart: {
+    width: 20,
+    height: 20,
+    tintColor: "black",
+  },
+  heartFilled: {
+    tintColor: "#8B0000",
   },
   burgerName: {
     fontSize: 20,
@@ -425,10 +456,11 @@ const styles = StyleSheet.create({
   burgerCategory: {
     fontSize: 12,
     color: "#8B0000",
-    textAlign: "center",
+    textAlign: "left",
     textTransform: "uppercase",
     letterSpacing: 1,
     fontWeight: "600",
+    marginBottom: 15,
   },
   tabContent: {
     paddingBottom: 30,
