@@ -13,6 +13,7 @@
     },
     "icon": "./assets/images/logo.png",
     "android": {
+      "softwareKeyboardLayoutMode": "pan",
       "package": "com.anonymous.burgify",
       "label": " ",
       "adaptiveIcon": {

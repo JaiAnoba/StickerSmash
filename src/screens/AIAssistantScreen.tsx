@@ -158,7 +158,8 @@ const AIAssistantScreen: React.FC = () => {
 
       <KeyboardAvoidingView 
         style={styles.content}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={5}
       >
         {/* Messages */}
         <ScrollView

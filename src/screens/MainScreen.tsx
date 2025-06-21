@@ -1,11 +1,11 @@
 "use client"
 
-import React from "react"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+import React from "react"
 import { Image } from "react-native"
-import HomeScreen from "./HomeScreen"
-import FavoritesScreen from "./FavoritesScreen"
 import AIAssistantScreen from "./AIAssistantScreen"
+import FavoritesScreen from "./FavoritesScreen"
+import HomeScreen from "./HomeScreen"
 import ProfileScreen from "./ProfileScreen"
 
 const Tab = createBottomTabNavigator()
@@ -14,6 +14,9 @@ const MainScreen: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
+        tabBarHideOnKeyboard: false,
+        keyboardHidesTabBar: false, 
+        
         tabBarIcon: ({ focused }) => {
           let iconSource = ""
 
