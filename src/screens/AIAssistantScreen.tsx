@@ -1,20 +1,21 @@
 import { AI_CHEF_API_KEY } from '@env';
-import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  KeyboardAvoidingView, 
-  Platform,
-  Image
+  View
 } from 'react-native';
-import axios from 'axios';
-import { AIMessage } from '../types/Burger';
 import Text from "../components/CustomText";
+import { useTheme } from "../context/ThemeContext";
+import { AIMessage } from '../types/Burger';
 
 const AIAssistantScreen: React.FC = () => {
   const [messages, setMessages] = useState<AIMessage[]>([
@@ -28,6 +29,7 @@ const AIAssistantScreen: React.FC = () => {
   const [inputText, setInputText] = useState<string>('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const scrollViewRef = useRef<ScrollView>(null);
+  const { colors, isDarkMode } = useTheme()
 
   const quickQuestions = [
     'How to make a perfect patty?',
@@ -139,7 +141,8 @@ const AIAssistantScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#8B0000" barStyle="light-content" />
+      <StatusBar backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
+      barStyle={isDarkMode ? "light-content" : "dark-content"} />
       
       {/* Header */}
       <View style={styles.header}>

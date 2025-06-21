@@ -23,6 +23,7 @@ import StarRating from "../components/StarRating"
 import { useCooking } from "../context/CookingContext"
 import { useFavorites } from "../context/FavoritesContext"
 import { useRatings } from "../context/RatingContext"
+import { useTheme } from "../context/ThemeContext"
 import { burgerImages } from "../data/burgerImages"
 import type { Burger } from "../types/Burger"
 
@@ -56,6 +57,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
   const isDirectModal = !isNavigationProps(props)
   const visible = isNavigationProps(props) ? true : props.visible
   const onClose = isNavigationProps(props) ? () => props.navigation.goBack() : props.onClose
+  const { colors, isDarkMode } = useTheme()
 
   const { isFavorite, addFavorite, removeFavorite } = useFavorites()
   const isLiked = isFavorite(burger.id)
@@ -209,7 +211,8 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
   return (
     <Modal visible={modalVisible} transparent={true} animationType="none" onRequestClose={handleClose}>
       <SafeAreaView style={styles.container}>
-        <StatusBar backgroundColor="rgba(0,0,0,0.5)" barStyle="light-content" />
+        <StatusBar backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
+      barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
         {/* Backdrop */}
         <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]}>
@@ -373,21 +376,24 @@ const styles = StyleSheet.create({
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
-    width: "65%",
+    width: "100%",
+    height: "25%",
+    paddingHorizontal: 20,
     zIndex: 5,
-    top: "34%",
+    top: "37%",
   },
   burgerImage: {
-    width: 220,
-    height: 220,
-    resizeMode: "cover",
+    width: "100%",
+    aspectRatio: 1,       
+    maxWidth: 260,        
+    resizeMode: "contain",
   },
   modalContent: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: "63%",
+    height: "60%",
     backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -397,7 +403,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 10,
-    paddingTop: 50,
+    paddingTop: 40,
+    paddingBottom: 10,
   },
   modalHeader: {
     flexDirection: "row",
