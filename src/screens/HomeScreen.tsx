@@ -133,7 +133,7 @@ const HomeScreen: React.FC = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
       <StatusBar
-        backgroundColor={isDarkMode ? colors.statusBar : "white"}
+        backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"}
         barStyle={isDarkMode ? "light-content" : "dark-content"}
       />
 

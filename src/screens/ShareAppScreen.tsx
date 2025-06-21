@@ -1,21 +1,19 @@
-"use client"
-
+import { useNavigation } from "@react-navigation/native"
 import type React from "react"
 import {
-  View,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  TouchableOpacity,
   Alert,
+  Image,
+  SafeAreaView,
+  ScrollView,
   Share,
-  Image
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View
 } from "react-native"
-import { useTheme } from "../context/ThemeContext"
 import Button from "../components/Button"
 import Text from '../components/CustomText'
-import { useNavigation } from "@react-navigation/native";
+import { useTheme } from "../context/ThemeContext"
 
 const ShareAppScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme()
@@ -103,7 +101,9 @@ const ShareAppScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? "light-content" : "dark-content"} />
+      <StatusBar 
+      backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
+      barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
       

@@ -1,24 +1,22 @@
-"use client"
-
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { useNavigation } from "@react-navigation/native"
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import {
-  View,
-  StyleSheet,
+  Alert,
+  FlatList,
+  Image,
+  Modal,
   SafeAreaView,
   StatusBar,
-  FlatList,
-  TouchableOpacity,
+  StyleSheet,
   TextInput,
-  Alert,
-  Modal,
-  Image
+  TouchableOpacity,
+  View
 } from "react-native"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import { useTheme } from "../context/ThemeContext"
 import Button from "../components/Button"
-import { useNavigation } from "@react-navigation/native"
 import Text from "../components/CustomText"
+import { useTheme } from "../context/ThemeContext"
 
 interface ShoppingItem {
   id: string
@@ -201,7 +199,9 @@ const ShoppingListScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? "light-content" : "dark-content"} />
+      <StatusBar 
+      backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
+      barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
         <TouchableOpacity style={styles.side} onPress={() => navigation.goBack()}>

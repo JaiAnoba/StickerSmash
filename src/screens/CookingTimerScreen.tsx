@@ -1,26 +1,25 @@
-"use client"
-
+import type { RouteProp } from "@react-navigation/native"
+import type { StackNavigationProp } from "@react-navigation/stack"
 import type React from "react"
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
   Alert,
   BackHandler,
+  Image,
+  SafeAreaView,
   ScrollView,
-  Image
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View
 } from "react-native"
-import type { StackNavigationProp } from "@react-navigation/stack"
-import type { RouteProp } from "@react-navigation/native"
 import type { RootStackParamList } from "../../App"
+import Button from "../components/Button"
+import Text from "../components/CustomText"
+import StarRating from "../components/StarRating"
 import { useCooking } from "../context/CookingContext"
 import { useRatings } from "../context/RatingContext"
-import Text from "../components/CustomText"
-import Button from "../components/Button"
-import StarRating from "../components/StarRating"
+import { useTheme } from "../context/ThemeContext"
 
 type CookingTimerScreenNavigationProp = StackNavigationProp<RootStackParamList, "CookingTimer">
 type CookingTimerScreenRouteProp = RouteProp<RootStackParamList, "CookingTimer">
@@ -36,6 +35,7 @@ const CookingTimerScreen: React.FC<Props> = ({ navigation, route }) => {
   const { burger } = route.params
   const { completeCooking, cancelCooking } = useCooking()
   const { getUserRating, addRating } = useRatings()
+  const { colors, isDarkMode } = useTheme()
 
   const [isActive, setIsActive] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
@@ -297,7 +297,8 @@ const CookingTimerScreen: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#8B0000" barStyle="light-content" />
+      <StatusBar backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
+      barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>

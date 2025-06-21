@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  Switch,
-  Alert,
-  Modal,
-  FlatList,
-  Image
-} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Settings, Language } from '../types/Burger';
-import { useTheme } from '../context/ThemeContext';
-import Text from '../components/CustomText'
 import { useNavigation } from "@react-navigation/native";
-import type { StackNavigationProp } from "@react-navigation/stack"
-import type { RootStackParamList } from "../../App"
+import type { StackNavigationProp } from "@react-navigation/stack";
+import React, { useEffect, useState } from 'react';
+import {
+  Alert,
+  FlatList,
+  Image,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Switch,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import type { RootStackParamList } from "../../App";
+import Text from '../components/CustomText';
+import { useTheme } from '../context/ThemeContext';
+import { Language, Settings } from '../types/Burger';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>
 
@@ -204,7 +204,9 @@ const SettingsScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      <StatusBar 
+      backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
+      barStyle={isDarkMode ? "light-content" : "dark-content"} />
       
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.primary }]}>

@@ -1,27 +1,25 @@
-"use client"
-
-import type React from "react"
-import { useState, useEffect } from "react"
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  Alert,
-  Image,
-} from "react-native"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { useNavigation } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
+import type React from "react"
+import { useEffect, useState } from "react"
+import {
+  Alert,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native"
 import type { RootStackParamList } from "../../App"
-import { useTheme } from "../context/ThemeContext"
-import { useAuth } from "../context/AuthContext"
-import { useFavorites } from "../context/FavoritesContext"
-import type { UserStats } from "../types/Burger"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import { useCooking } from "../context/CookingContext"
 import Text from "../components/CustomText"
+import { useAuth } from "../context/AuthContext"
+import { useCooking } from "../context/CookingContext"
+import { useFavorites } from "../context/FavoritesContext"
+import { useTheme } from "../context/ThemeContext"
+import type { UserStats } from "../types/Burger"
 
 type NavigationProp = StackNavigationProp<RootStackParamList>
 
@@ -160,7 +158,9 @@ const ProfileScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar backgroundColor={colors.primary} barStyle="light-content" />
+      <StatusBar 
+      backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
+      barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}

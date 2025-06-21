@@ -1,13 +1,13 @@
 "use client"
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { View, StyleSheet, SafeAreaView, StatusBar, ScrollView, Alert, TouchableOpacity, Image } from "react-native"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { useTheme } from "../context/ThemeContext"
+import { useNavigation } from "@react-navigation/native"
+import type React from "react"
+import { useEffect, useState } from "react"
+import { Alert, Image, SafeAreaView, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native"
 import Button from "../components/Button"
 import Text from "../components/CustomText"
-import { useNavigation } from "@react-navigation/native";
+import { useTheme } from "../context/ThemeContext"
 
 interface StorageInfo {
   favorites: number
@@ -227,7 +227,9 @@ const DataStorageScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? "light-content" : "dark-content"} />
+      <StatusBar 
+      backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
+      barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
       

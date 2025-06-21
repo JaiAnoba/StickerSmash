@@ -1,12 +1,11 @@
-"use client"
-
-import type React from "react"
-import { useState, useEffect } from "react" 
-import { View, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar, FlatList, Image } from "react-native"
 import type { StackNavigationProp } from "@react-navigation/stack"
+import type React from "react"
+import { useEffect, useState } from "react"
+import { FlatList, Image, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native"
 import type { RootStackParamList } from "../../App"
-import { useCooking } from "../context/CookingContext"
 import Text from "../components/CustomText"
+import { useCooking } from "../context/CookingContext"
+import { useTheme } from "../context/ThemeContext"
 
 type CookingHistoryScreenNavigationProp = StackNavigationProp<RootStackParamList, "CookingHistory">
 
@@ -17,6 +16,7 @@ interface Props {
 const CookingHistoryScreen: React.FC<Props> = ({ navigation }) => {
   const { cookingSessions } = useCooking()
   const [groupedSessions, setGroupedSessions] = useState<any>({})
+  const { colors, isDarkMode } = useTheme()
 
   useEffect(() => {
     // Group sessions by date
@@ -92,7 +92,8 @@ const CookingHistoryScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#8B0000" barStyle="light-content" />
+      <StatusBar backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
+      barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>

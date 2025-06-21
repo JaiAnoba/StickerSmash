@@ -1,24 +1,22 @@
-"use client";
-
+import { useNavigation } from "@react-navigation/native";
+import type { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  ActivityIndicator,
-  ScrollView,
-  Image,
+  View,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import type { StackNavigationProp } from "@react-navigation/stack";
 import type { RootStackParamList } from "../../App";
-import { useTheme } from "../context/ThemeContext";
-import { useAuth } from "../context/AuthContext";
 import Button from "../components/Button";
 import Text from "../components/CustomText";
+import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { validatePassword } from "../utils/validatePassword"; // import the shared validator
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -109,7 +107,9 @@ const RegisterScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar backgroundColor={colors.statusBar} barStyle={isDarkMode ? "light-content" : "dark-content"} />
+      <StatusBar 
+      backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
+      barStyle={isDarkMode ? "light-content" : "dark-content"} />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           <View style={styles.header}>
