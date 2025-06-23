@@ -3,6 +3,7 @@ import type { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   SafeAreaView,
   StatusBar,
@@ -14,6 +15,7 @@ import {
 import type { RootStackParamList } from "../../App";
 import Button from "../components/Button";
 import Text from "../components/CustomText";
+import ForgotPasswordModal from "../components/ForgotPassModal";
 import SocialButtons from "../components/SocialButtons";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -42,6 +44,12 @@ const LoginScreen: React.FC = () => {
 
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  // Forgot password states
+  const [forgotPasswordModalVisible, setForgotPasswordModalVisible] = useState(false)
+  const [resetEmail, setResetEmail] = useState("")
+  const [resetLoading, setResetLoading] = useState(false)
+  const [resetSent, setResetSent] = useState(false)
 
   const handleLogin = async () => {
     let hasError = false;
@@ -91,6 +99,36 @@ const LoginScreen: React.FC = () => {
       fontFamily: "Poppins-Regular",
     },
   ];
+
+  const handleForgotPassword = () => {
+    setForgotPasswordModalVisible(true)
+    // Pre-fill with the email from login form if available
+    if (email) {
+      setResetEmail(email)
+    }
+  }
+
+  const handleResetPassword = async () => {
+    if (!resetEmail.trim() || !resetEmail.includes("@")) {
+      Alert.alert("Error", "Please enter a valid email address")
+      return
+    }
+    setResetLoading(true)
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      setResetSent(true)
+    } catch (error) {
+      Alert.alert("Error", "Failed to send reset email. Please try again.")
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
+  const closeResetModal = () => {
+    setForgotPasswordModalVisible(false)
+    setResetEmail("")
+    setResetSent(false)
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -145,6 +183,13 @@ const LoginScreen: React.FC = () => {
             {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
           </View>
 
+          {/* Forgot Password Link */}
+          <TouchableOpacity style={styles.forgotPasswordContainer} onPress={handleForgotPassword} activeOpacity={0.7}>
+            <Text weight="medium" style={[styles.forgotPasswordText, { color: colors.primary }]}>
+              Forgot password?
+            </Text>
+          </TouchableOpacity>
+
           <Button
             title={isLoading ? "Logging in..." : "Login"}
             onPress={handleLogin}
@@ -164,6 +209,19 @@ const LoginScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        visible={forgotPasswordModalVisible}
+        resetEmail={resetEmail}
+        setResetEmail={setResetEmail}
+        resetLoading={resetLoading}
+        resetSent={resetSent}
+        closeResetModal={closeResetModal}
+        handleResetPassword={handleResetPassword}
+        colors={colors}
+      />
+
     </SafeAreaView>
   );
 };
@@ -182,6 +240,8 @@ const styles = StyleSheet.create({
   passwordContainer: { position: "relative" },
   eyeButton: { position: "absolute", right: 16, top: 11, padding: 4 },
   eyeIcon: { width: 20, height: 20 },
+  forgotPasswordContainer: { alignSelf: "flex-end", marginBottom: 20, marginTop: -10, },
+  forgotPasswordText: { fontSize: 14, },
   loginButton: { marginTop: 10, borderRadius: 999 },
   loadingIndicator: { marginTop: 10 },
   footer: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginBottom: 20, marginTop: 10  },

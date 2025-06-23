@@ -1,7 +1,14 @@
-"use client"
-
 import type React from "react"
-import { Image, TouchableOpacity, StyleSheet, ActivityIndicator, View, type StyleProp, type ViewStyle } from "react-native"
+import {
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native"
 import { useTheme } from "../context/ThemeContext"
 import Text from "./CustomText"
 
@@ -17,7 +24,8 @@ interface ButtonProps {
   iconColor?: string
   textColor?: string
   backgroundColor?: string
-  borderColor?: string  
+  borderColor?: string
+  textStyle?: StyleProp<TextStyle> 
   style?: StyleProp<ViewStyle>
 }
 
@@ -33,7 +41,8 @@ const Button: React.FC<ButtonProps> = ({
   iconColor,
   textColor,
   backgroundColor,
-  borderColor, 
+  borderColor,
+  textStyle,
   style,
 }) => {
   const { colors } = useTheme()
@@ -138,7 +147,14 @@ const Button: React.FC<ButtonProps> = ({
               </Text>
             )
           )}
-          <Text weight="semiBold" style={[styles.text, { color: textColor || getTextColor(), fontSize: getTextSize() }]}>
+          <Text
+            weight="semiBold"
+            style={[
+              styles.text,
+              { color: textColor || getTextColor(), fontSize: getTextSize() },
+              textStyle, // 👈 ALLOWS OVERRIDING FONT SIZE
+            ]}
+          >
             {title}
           </Text>
         </View>
@@ -161,9 +177,6 @@ const styles = StyleSheet.create({
   text: {
     textAlign: "center",
   },
-  icon: {
-    fontSize: 14,
-  },
   iconText: {
     fontSize: 14,
   },
@@ -173,7 +186,6 @@ const styles = StyleSheet.create({
     marginRight: 8,
     resizeMode: "contain",
   },
-
 })
 
 export default Button
