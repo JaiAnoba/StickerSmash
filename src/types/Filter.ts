@@ -15,16 +15,7 @@ export interface SortOption {
 export const CATEGORIES = {
   // 1. Protein Type
   protein: [
-    "Beef",
-    "Chicken",
-    "Turkey",
-    "Lamb",
-    "Fish",
-    "Pork",
-    "Bacon",
-    "Plant-Based",
-    "Vegetarian",
-    "Vegan",
+    "Beef", "Chicken", "Pork", "Fish", "Lamb", "Turkey", "Vegetarian", "Vegan", "Cheese", "Egg", "Mushroom", "Tofu", "Plant-Based", "Spicy", "Bacon", "BBQ", "Mini / Slider", "Breakfast", "Double Patty", "Specialty",
   ],
 
   // 2. Style / Flavor Profile
