@@ -16,10 +16,8 @@ interface BurgerDataProviderProps {
 }
 
 export const BurgerDataProvider: React.FC<BurgerDataProviderProps> = ({ children }) => {
-  // Initialize with existing burgers data and user-added burgers
   const [userAddedBurgers, setUserAddedBurgers] = useState<Burger[]>([])
 
-  // Combine existing burgers with user-added ones
   const allBurgers = [...burgersData, ...userAddedBurgers]
 
   const addBurger = (burger: Burger) => {

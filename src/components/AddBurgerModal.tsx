@@ -1,5 +1,3 @@
-"use client"
-
 import * as ImagePicker from "expo-image-picker"
 import type React from "react"
 import { useState } from "react"
@@ -40,11 +38,11 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
     difficulty: "",
     cookTime: "",
     totalTime: "",
-    prepTime: "", // Add this
-    servings: "", // Add this
+    prepTime: "", 
+    servings: "", 
     rating: "",
-    calories: "", // Add this (separate from nutrition)
-    isRecommended: false, // Add this
+    calories: "", 
+    isRecommended: false, 
   })
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null)

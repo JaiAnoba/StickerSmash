@@ -51,7 +51,6 @@ const isNavigationProps = (props: Props): props is NavigationProps => {
 }
 
 const BurgerDetailScreen: React.FC<Props> = (props) => {
-  // Extract burger and other props based on the prop type
   const burger = isNavigationProps(props) ? props.route.params.burger : props.burger
   const navigation = props.navigation
   const isDirectModal = !isNavigationProps(props)

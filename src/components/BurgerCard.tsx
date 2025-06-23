@@ -29,7 +29,7 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
     }
   }
 
-  // Use the utility function to get the image source
+  // Use utility function to get the image source
   const imageSource = getBurgerImageSource(burger)
 
   return (

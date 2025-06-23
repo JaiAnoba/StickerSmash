@@ -23,7 +23,7 @@ type NavigationProp = StackNavigationProp<RootStackParamList>
 const HomeScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme()
   const { isFavorite, addFavorite, removeFavorite } = useFavorites()
-  const { allBurgers } = useBurgerData() // Use the context instead of static data
+  const { allBurgers } = useBurgerData() 
   const navigation = useNavigation<NavigationProp>()
 
   // State
@@ -34,7 +34,6 @@ const HomeScreen: React.FC = () => {
   const [selectedBurger, setSelectedBurger] = useState<Burger | null>(null)
   const [burgerDetailVisible, setBurgerDetailVisible] = useState(false)
 
-  // Use the custom hook for filtering with dynamic burger data
   const {
     filterOptions,
     setFilterOptions,
@@ -45,7 +44,7 @@ const HomeScreen: React.FC = () => {
     updateCategoryFilter,
     hasActiveFilters,
   } = useFilters({
-    burgers: allBurgers, // Use all burgers including user-added ones
+    burgers: allBurgers,
     searchQuery,
     selectedCategory,
     isFavorite,

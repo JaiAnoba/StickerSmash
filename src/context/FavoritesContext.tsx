@@ -1,6 +1,6 @@
 import type React from "react";
 import { createContext, useContext, useState, type ReactNode } from "react";
-import { burgerImages } from "../data/burgerImages"; // Ensure to import burgerImages
+import { burgerImages } from "../data/burgerImages";
 import type { Burger } from "../types/Burger";
 
 interface FavoritesContextType {
@@ -41,20 +41,17 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
 
       // Validate image based on burger type
       if (burger.isUserAdded) {
-        // For user-added burgers, check if image is a valid URI string
         if (!burger.image || typeof burger.image !== "string" || burger.image.length === 0) {
           console.warn(`User-added burger ${burger.name} has invalid image URI.`)
           return
         }
       } else {
-        // For default burgers, check if image key exists in burgerImages
         if (!burger.image || !burgerImages[burger.image as keyof typeof burgerImages]) {
           console.warn(`Default burger ${burger.name} has invalid or missing image key.`)
           return
         }
       }
 
-      // Add burger to favorites
       const newFavorites = [...favorites, burger]
       setFavorites(newFavorites)
       console.log(`Successfully added ${burger.name} to favorites`)
