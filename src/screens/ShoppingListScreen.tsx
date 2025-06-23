@@ -215,10 +215,6 @@ const ShoppingListScreen: React.FC = () => {
 
       {shoppingList.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Image
-            source={{ uri: "https://img.icons8.com/material-outlined/96/shopping-cart--v1.png" }}
-            style={styles.emptyIcon}
-          />
           <Text weight='semiBold' style={[styles.emptyTitle, { color: colors.text }]}>Empty Shopping List</Text>
           <Text style={[styles.emptySubtitle, { color: colors.subtext }]}>
             Add ingredients you need for your burger recipes!
