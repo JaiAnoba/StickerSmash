@@ -15,9 +15,10 @@ import {
 import type { RootStackParamList } from "../../App";
 import Button from "../components/Button";
 import Text from "../components/CustomText";
+import SocialButtons from "../components/SocialButtons";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import { validatePassword } from "../utils/validatePassword"; // import the shared validator
+import { validatePassword } from "../utils/validatePassword";
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -211,6 +212,8 @@ const RegisterScreen: React.FC = () => {
             {isLoading && <ActivityIndicator size="small" color={colors.primary} style={styles.loadingIndicator} />}
           </View>
 
+          <SocialButtons />
+
           <View style={styles.footer}>
             <Text style={styles.footerText}>Already have an account?</Text>
             <TouchableOpacity onPress={() => navigation.navigate("Login")}>
@@ -231,7 +234,7 @@ const styles = StyleSheet.create({
   logo: { width: 50, height: 50, resizeMode: "contain", marginBottom: 10 },
   title: { fontSize: 22, textAlign: "center", marginBottom: 10 },
   subtitle: { fontSize: 14, textAlign: "center", lineHeight: 24 },
-  form: { marginBottom: 30 },
+  form: { marginBottom: 10 },
   inputContainer: { marginBottom: 20 },
   label: { fontSize: 14, marginBottom: 8 },
   input: { borderRadius: 999, padding: 16, fontSize: 13, borderWidth: 1 },
@@ -240,7 +243,7 @@ const styles = StyleSheet.create({
   eyeIcon: { width: 20, height: 20 },
   registerButton: { borderRadius: 999, marginTop: 10 },
   loadingIndicator: { marginTop: 10 },
-  footer: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
+  footer: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: 10 },
   footerText: { fontSize: 14, marginRight: 5 },
   linkText: { fontSize: 14 },
   errorText: { color: "red", fontSize: 12, marginTop: 4 },

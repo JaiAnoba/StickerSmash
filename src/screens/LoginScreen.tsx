@@ -14,6 +14,7 @@ import {
 import type { RootStackParamList } from "../../App";
 import Button from "../components/Button";
 import Text from "../components/CustomText";
+import SocialButtons from "../components/SocialButtons";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
@@ -154,6 +155,8 @@ const LoginScreen: React.FC = () => {
           {isLoading && <ActivityIndicator size="small" color={colors.primary} style={styles.loadingIndicator} />}
         </View>
 
+        <SocialButtons />
+
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account?</Text>
           <TouchableOpacity onPress={() => navigation.navigate("Register")}>
@@ -172,7 +175,7 @@ const styles = StyleSheet.create({
   logo: { width: 50, height: 50, resizeMode: "contain", marginBottom: 10 },
   title: { fontSize: 23, textAlign: "center", marginBottom: 10 },
   subtitle: { fontSize: 15, textAlign: "center", lineHeight: 24 },
-  form: { marginBottom: 30 },
+  form: { marginBottom: 10 },
   inputContainer: { marginBottom: 20 },
   label: { fontSize: 14, marginBottom: 8 },
   input: { borderRadius: 999, padding: 16, fontSize: 14, borderWidth: 1 },
@@ -181,7 +184,7 @@ const styles = StyleSheet.create({
   eyeIcon: { width: 20, height: 20 },
   loginButton: { marginTop: 10, borderRadius: 999 },
   loadingIndicator: { marginTop: 10 },
-  footer: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginBottom: 20 },
+  footer: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginBottom: 20, marginTop: 10  },
   footerText: { fontSize: 14, marginRight: 5 },
   linkText: { fontSize: 14 },
   errorText: { color: "red", fontSize: 12, marginTop: 4 },
