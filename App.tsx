@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react"
 import { ActivityIndicator, View } from "react-native"
 
 import { AuthProvider, useAuth } from "./src/context/AuthContext"
+import { BurgerDataProvider } from "./src/context/BurgerDataContext"
 import { CookingProvider } from "./src/context/CookingContext"
 import { FavoritesProvider } from "./src/context/FavoritesContext"
 import { NotificationProvider } from "./src/context/NotificationContext"
@@ -118,6 +119,7 @@ const App = () => {
 
   return (
     <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+      <BurgerDataProvider>
       <ThemeProvider>
         <AuthProvider>
           <FavoritesProvider>
@@ -131,6 +133,7 @@ const App = () => {
           </FavoritesProvider>
         </AuthProvider>
       </ThemeProvider>
+      </BurgerDataProvider>
     </View>
   )
 }

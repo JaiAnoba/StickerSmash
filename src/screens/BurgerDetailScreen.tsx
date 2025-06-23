@@ -1,7 +1,7 @@
 import type { RouteProp } from "@react-navigation/native"
 import { useFocusEffect } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import {
   Alert,
   Animated,
@@ -24,8 +24,8 @@ import { useCooking } from "../context/CookingContext"
 import { useFavorites } from "../context/FavoritesContext"
 import { useRatings } from "../context/RatingContext"
 import { useTheme } from "../context/ThemeContext"
-import { burgerImages } from "../data/burgerImages"
 import type { Burger } from "../types/Burger"
+import { getBurgerImageSource } from "../utils/imageUtils"
 
 type BurgerDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, "BurgerDetail">
 type BurgerDetailScreenRouteProp = RouteProp<RootStackParamList, "BurgerDetail">
@@ -68,7 +68,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
   const [tempRating, setTempRating] = useState<number | null>(null)
   const [ratingSaved, setRatingSaved] = useState(false)
   const [hasCookedBurger, setHasCookedBurger] = useState(false)
-  const [modalVisible, setModalVisible] = useState(visible)
+  const [modalVisible, setModalVisible] = useState(false)
 
   const heartIcon = "https://img.icons8.com/puffy/32/like.png"
   const filledHeartIcon = "https://img.icons8.com/puffy-filled/32/like.png"
@@ -80,13 +80,18 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
   const slideAnim = useRef(new Animated.Value(height)).current
   const imageTranslateY = useRef(new Animated.Value(0)).current
 
-  const handleFavoritePress = () => {
-    if (isLiked) {
-      removeFavorite(burger.id)
-    } else {
-      addFavorite(burger)
+  const handleFavoritePress = useCallback(() => {
+    try {
+      if (isLiked) {
+        removeFavorite(burger.id)
+      } else {
+        addFavorite(burger)
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error)
+      Alert.alert("Error", "Failed to update favorites")
     }
-  }
+  }, [isLiked, burger.id, addFavorite, removeFavorite])
 
   useEffect(() => {
     setModalVisible(visible)
@@ -228,7 +233,13 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
             },
           ]}
         >
-          <Image source={burgerImages[burger.image]} style={styles.burgerImage} />
+          <Image
+            source={getBurgerImageSource(burger)}
+            style={styles.burgerImage}
+            onError={() => {
+              console.log(`Image load error for ${burger.name}`)
+            }}
+          />
         </Animated.View>
 
         {/* Content Modal */}

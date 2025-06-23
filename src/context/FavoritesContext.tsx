@@ -1,16 +1,13 @@
-"use client"
-
-import type React from "react"
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import type { Burger } from "../types/Burger"
-import { burgerImages } from '../data/burgerImages';
+import type React from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
+import { burgerImages } from "../data/burgerImages"; // Ensure to import burgerImages
+import type { Burger } from "../types/Burger";
 
 interface FavoritesContextType {
   favorites: Burger[]
+  isFavorite: (burgerId: string) => boolean
   addFavorite: (burger: Burger) => void
   removeFavorite: (burgerId: string) => void
-  isFavorite: (burgerId: string) => boolean
   clearFavorites: () => void
 }
 
@@ -23,64 +20,72 @@ interface FavoritesProviderProps {
 export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }) => {
   const [favorites, setFavorites] = useState<Burger[]>([])
 
-  useEffect(() => {
-    loadFavorites()
-  }, [])
-
-  const loadFavorites = async () => {
-    try {
-      const savedFavorites = await AsyncStorage.getItem("favorites")
-      if (savedFavorites) {
-        setFavorites(JSON.parse(savedFavorites))
-      }
-    } catch (error) {
-      console.error("Error loading favorites:", error)
-    }
-  }
-
-  const saveFavorites = async (newFavorites: Burger[]) => {
-    try {
-      await AsyncStorage.setItem("favorites", JSON.stringify(newFavorites))
-      setFavorites(newFavorites)
-    } catch (error) {
-      console.error("Error saving favorites:", error)
-    }
-  }
-
-  const addFavorite = (burger: Burger) => {
-    if (!burger.image || !burgerImages[burger.image]) {
-      console.warn(`Burger ${burger.name} has invalid or missing image key.`);
-      return;
-    }
-
-    const exists = favorites.some(item => item.id === burger.id);
-    if (!exists) {
-      const newFavorites = [...favorites, burger];
-      saveFavorites(newFavorites);
-    }
-  };
-
-
-  const removeFavorite = (burgerId: string) => {
-    const newFavorites = favorites.filter((burger) => burger.id !== burgerId)
-    saveFavorites(newFavorites)
-  }
-
   const isFavorite = (burgerId: string): boolean => {
     return favorites.some((burger) => burger.id === burgerId)
   }
 
+  const addFavorite = (burger: Burger) => {
+    try {
+      // Validate the burger object
+      if (!burger || !burger.id) {
+        console.warn("Invalid burger object passed to addFavorite:", burger)
+        return
+      }
+
+      // Check if burger already exists in favorites
+      const exists = favorites.some((item) => item.id === burger.id)
+      if (exists) {
+        console.log(`Burger ${burger.name} is already in favorites`)
+        return
+      }
+
+      // Validate image based on burger type
+      if (burger.isUserAdded) {
+        // For user-added burgers, check if image is a valid URI string
+        if (!burger.image || typeof burger.image !== "string" || burger.image.length === 0) {
+          console.warn(`User-added burger ${burger.name} has invalid image URI.`)
+          return
+        }
+      } else {
+        // For default burgers, check if image key exists in burgerImages
+        if (!burger.image || !burgerImages[burger.image as keyof typeof burgerImages]) {
+          console.warn(`Default burger ${burger.name} has invalid or missing image key.`)
+          return
+        }
+      }
+
+      // Add burger to favorites
+      const newFavorites = [...favorites, burger]
+      setFavorites(newFavorites)
+      console.log(`Successfully added ${burger.name} to favorites`)
+    } catch (error) {
+      console.error("Error adding burger to favorites:", error)
+    }
+  }
+
+  const removeFavorite = (burgerId: string) => {
+    try {
+      setFavorites((prev) => {
+        const filtered = prev.filter((burger) => burger.id !== burgerId)
+        console.log(`Removed burger ${burgerId} from favorites`)
+        return filtered
+      })
+    } catch (error) {
+      console.error("Error removing burger from favorites:", error)
+    }
+  }
+
   const clearFavorites = () => {
-    saveFavorites([])
+    setFavorites([])
   }
 
   return (
     <FavoritesContext.Provider
       value={{
         favorites,
+        isFavorite,
         addFavorite,
         removeFavorite,
-        isFavorite,
         clearFavorites,
       }}
     >
@@ -91,8 +96,9 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
 
 export const useFavorites = (): FavoritesContextType => {
   const context = useContext(FavoritesContext)
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useFavorites must be used within a FavoritesProvider")
   }
   return context
 }
+

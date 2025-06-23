@@ -9,9 +9,9 @@ import Text from "../components/CustomText"
 import FilterModal from "../components/FilterModal"
 import NotificationButton from "../components/NotificationButton"
 import NotificationModal from "../components/NotificationModal"
+import { useBurgerData } from "../context/BurgerDataContext"
 import { useFavorites } from "../context/FavoritesContext"
 import { useTheme } from "../context/ThemeContext"
-import { burgersData } from "../data/burgersData"
 import { useFilters } from "../hooks/useFilters"
 import type { Burger } from "../types/Burger"
 import { TOP_LEVEL_CATEGORIES } from "../types/Filter"
@@ -23,6 +23,7 @@ type NavigationProp = StackNavigationProp<RootStackParamList>
 const HomeScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme()
   const { isFavorite, addFavorite, removeFavorite } = useFavorites()
+  const { allBurgers } = useBurgerData() // Use the context instead of static data
   const navigation = useNavigation<NavigationProp>()
 
   // State
@@ -33,7 +34,7 @@ const HomeScreen: React.FC = () => {
   const [selectedBurger, setSelectedBurger] = useState<Burger | null>(null)
   const [burgerDetailVisible, setBurgerDetailVisible] = useState(false)
 
-  // Use the custom hook for filtering
+  // Use the custom hook for filtering with dynamic burger data
   const {
     filterOptions,
     setFilterOptions,
@@ -44,7 +45,7 @@ const HomeScreen: React.FC = () => {
     updateCategoryFilter,
     hasActiveFilters,
   } = useFilters({
-    burgers: burgersData,
+    burgers: allBurgers, // Use all burgers including user-added ones
     searchQuery,
     selectedCategory,
     isFavorite,
@@ -81,7 +82,7 @@ const HomeScreen: React.FC = () => {
   const handleNotificationPress = (notification: Notification) => {
     if (notification.actionUrl && notification.data) {
       if (notification.actionUrl === "BurgerDetail") {
-        const burger = burgersData.find((b) => b.id === notification.data.burgerId)
+        const burger = allBurgers.find((b) => b.id === notification.data.burgerId)
         if (burger) {
           handleBurgerPress(burger)
         }

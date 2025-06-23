@@ -17,9 +17,10 @@ export interface Burger {
   nutrition?: {
     calories: number
     protein: number
-    carbs: number
+    carbs: number 
     fat: number
   }
+  isUserAdded?: boolean
 }
 
 export interface UserStats {

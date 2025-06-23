@@ -1,3 +1,5 @@
+"use client"
+
 import * as ImagePicker from "expo-image-picker"
 import type React from "react"
 import { useState } from "react"
@@ -14,7 +16,9 @@ import {
     TouchableOpacity,
     View,
 } from "react-native"
+import { useBurgerData } from "../context/BurgerDataContext"
 import { useTheme } from "../context/ThemeContext"
+import type { Burger } from "../types/Burger"
 import Button from "./Button"
 import Text from "./CustomText"
 
@@ -27,6 +31,7 @@ const { width } = Dimensions.get("window")
 
 const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => {
   const { colors, isDarkMode } = useTheme()
+  const { addBurger } = useBurgerData()
 
   const [formData, setFormData] = useState({
     name: "",
@@ -35,7 +40,11 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
     difficulty: "",
     cookTime: "",
     totalTime: "",
+    prepTime: "", // Add this
+    servings: "", // Add this
     rating: "",
+    calories: "", // Add this (separate from nutrition)
+    isRecommended: false, // Add this
   })
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
@@ -58,10 +67,31 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
   const [showDifficultyPicker, setShowDifficultyPicker] = useState(false)
   const [showImagePicker, setShowImagePicker] = useState(false)
 
-  const categories = ["Beef", "Chicken", "Pork", "Fish", "Lamb", "Turkey", "Vegetarian", "Vegan", "Cheese", "Egg", "Mushroom", "Tofu", "Plant-Based", "Spicy", "Bacon", "BBQ", "Mini / Slider", "Breakfast", "Double Patty", "Specialty"]
+  const categories = [
+    "Beef",
+    "Chicken",
+    "Pork",
+    "Fish",
+    "Lamb",
+    "Turkey",
+    "Vegetarian",
+    "Vegan",
+    "Cheese",
+    "Egg",
+    "Mushroom",
+    "Tofu",
+    "Plant-Based",
+    "Spicy",
+    "Bacon",
+    "BBQ",
+    "Mini / Slider",
+    "Breakfast",
+    "Double Patty",
+    "Specialty",
+  ]
   const difficulties = ["Easy", "Medium", "Hard"]
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -173,6 +203,33 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
     ])
   }
 
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      category: "",
+      description: "",
+      difficulty: "",
+      cookTime: "",
+      totalTime: "",
+      prepTime: "",
+      servings: "",
+      rating: "",
+      calories: "",
+      isRecommended: false,
+    })
+    setSelectedImage(null)
+    setIngredients([])
+    setInstructions([])
+    setCurrentIngredient("")
+    setCurrentInstruction("")
+    setNutrition({
+      calories: "",
+      protein: "",
+      carbs: "",
+      fat: "",
+    })
+  }
+
   const handleSubmit = () => {
     // Validation
     if (!formData.name.trim()) {
@@ -199,6 +256,14 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
       Alert.alert("Error", "Please enter total time")
       return
     }
+    if (!formData.prepTime.trim()) {
+      Alert.alert("Error", "Please enter prep time")
+      return
+    }
+    if (!formData.servings.trim()) {
+      Alert.alert("Error", "Please enter number of servings")
+      return
+    }
     if (!selectedImage) {
       Alert.alert("Error", "Please add a burger image")
       return
@@ -212,39 +277,46 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
       return
     }
 
-    const burgerData = {
-      ...formData,
+    // Create the new burger object
+    const newBurger: Burger = {
+      id: `user_${Date.now()}`, // Prefix with 'user_' to distinguish from default burgers
+      name: formData.name.trim(),
+      category: formData.category,
+      description: formData.description.trim(),
+      difficulty: formData.difficulty as "Easy" | "Medium" | "Hard",
+      cookTime: formData.cookTime.trim(),
+      totalTime: formData.totalTime.trim(),
+      prepTime: formData.prepTime.trim(), // Add this missing field
+      servings: Number.parseInt(formData.servings) || 1, // Add this missing field
+      calories: Number.parseInt(formData.calories) || 0, // Add this missing field
+      rating: Number.parseFloat(formData.rating) || 4.0, // Default rating if not provided
+      isRecommended: formData.isRecommended, // Add this missing field
+      image: selectedImage, // This will be the URI for user-added images
       ingredients,
       instructions,
-      nutrition,
-      image: selectedImage, 
-      id: Date.now().toString(),
-      rating: Number.parseFloat(formData.rating) || 0,
+      nutrition: {
+        calories: Number.parseInt(nutrition.calories) || 0,
+        protein: Number.parseInt(nutrition.protein) || 0,
+        carbs: Number.parseInt(nutrition.carbs) || 0,
+        fat: Number.parseInt(nutrition.fat) || 0,
+      },
+      isUserAdded: true, // Flag to identify user-added burgers
     }
 
-    console.log("New Burger Data:", burgerData)
+    // Add the burger to the context
+    addBurger(newBurger)
 
     // Reset form
-    setFormData({
-      name: "",
-      category: "",
-      description: "",
-      difficulty: "",
-      cookTime: "",
-      totalTime: "",
-      rating: "",
-    })
-    setSelectedImage(null)
-    setIngredients([])
-    setInstructions([])
-    setNutrition({
-      calories: "",
-      protein: "",
-      carbs: "",
-      fat: "",
-    })
+    resetForm()
 
-    Alert.alert("Success", "Burger recipe added successfully!", [{ text: "OK", onPress: onClose }])
+    Alert.alert("Success", "Burger recipe added successfully!", [
+      {
+        text: "OK",
+        onPress: () => {
+          onClose()
+        },
+      },
+    ])
   }
 
   const renderImagePicker = () => (
@@ -253,14 +325,14 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
         <View style={[styles.imagePickerContainer, { backgroundColor: colors.background }]}>
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
             <Text weight="bold" style={[styles.headerTitle, { color: colors.text }]}>
-                Add New Burger Recipe
+              Select Image
             </Text>
 
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Image
+            <TouchableOpacity onPress={() => setShowImagePicker(false)} style={styles.closeButton}>
+              <Image
                 source={{ uri: "https://img.icons8.com/ios-glyphs/90/multiply.png" }}
                 style={[styles.closeIcon, { tintColor: colors.text }]}
-                />
+              />
             </TouchableOpacity>
           </View>
 
@@ -323,16 +395,16 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
           </View>
           <ScrollView style={{ maxHeight: 300 }}>
             {categories.map((category) => (
-                <TouchableOpacity
+              <TouchableOpacity
                 key={category}
                 style={styles.pickerItem}
                 onPress={() => {
-                    handleInputChange("category", category);
-                    setShowCategoryPicker(false);
+                  handleInputChange("category", category)
+                  setShowCategoryPicker(false)
                 }}
-                >
+              >
                 <Text style={[styles.pickerItemText, { color: colors.text }]}>{category}</Text>
-                </TouchableOpacity>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
@@ -560,6 +632,81 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
                 onChangeText={(value) => handleInputChange("totalTime", value)}
               />
             </View>
+
+            <View style={styles.inputContainer}>
+              <Text weight="medium" style={[styles.label, { color: colors.text }]}>
+                Prep Time
+              </Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: colors.inputBackground, color: colors.text, borderColor: colors.border },
+                ]}
+                placeholder="e.g., 10 mins"
+                placeholderTextColor={colors.subtext}
+                value={formData.prepTime}
+                onChangeText={(value) => handleInputChange("prepTime", value)}
+              />
+            </View>
+
+            <View style={styles.row}>
+              <View style={[styles.inputContainer, styles.flex1, styles.marginRight]}>
+                <Text weight="medium" style={[styles.label, { color: colors.text }]}>
+                  Servings
+                </Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    { backgroundColor: colors.inputBackground, color: colors.text, borderColor: colors.border },
+                  ]}
+                  placeholder="e.g., 4"
+                  placeholderTextColor={colors.subtext}
+                  value={formData.servings}
+                  onChangeText={(value) => handleInputChange("servings", value)}
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <View style={[styles.inputContainer, styles.flex1]}>
+                <Text weight="medium" style={[styles.label, { color: colors.text }]}>
+                  Total Calories
+                </Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    { backgroundColor: colors.inputBackground, color: colors.text, borderColor: colors.border },
+                  ]}
+                  placeholder="e.g., 650"
+                  placeholderTextColor={colors.subtext}
+                  value={formData.calories}
+                  onChangeText={(value) => handleInputChange("calories", value)}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <View style={styles.checkboxContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.checkbox,
+                    formData.isRecommended && styles.checkboxChecked,
+                    { borderColor: colors.border },
+                  ]}
+                  onPress={() => handleInputChange("isRecommended", !formData.isRecommended)}
+                >
+                  {formData.isRecommended && (
+                    <Image
+                      source={{ uri: "https://img.icons8.com/ios-glyphs/30/checkmark.png" }}
+                      style={[styles.checkIcon, { tintColor: "#FFFFFF" }]}
+                    />
+                  )}
+                </TouchableOpacity>
+                <Text weight="medium" style={[styles.checkboxLabel, { color: colors.text }]}>
+                  Mark as Recommended
+                </Text>
+              </View>
+            </View>
           </View>
 
           {/* Ingredients */}
@@ -747,8 +894,22 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { alignItems: "center", justifyContent: "center", paddingVertical: 15, borderBottomWidth: 1, position: "relative" },
-  closeButton: { position: "absolute", right: 20, top: 8, width: 40, height: 40, justifyContent: "center", alignItems: "center" },
+  header: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    position: "relative",
+  },
+  closeButton: {
+    position: "absolute",
+    right: 20,
+    top: 8,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   closeIcon: { width: 20, height: 20 },
   headerTitle: { fontSize: 18, textAlign: "center" },
   headerSpacer: { width: 40 },
@@ -768,10 +929,25 @@ const styles = StyleSheet.create({
   imageContainer: { position: "relative", alignItems: "center", marginBottom: 15 },
   selectedImage: { width: width * 0.6, height: width * 0.6, borderRadius: 12, resizeMode: "cover" },
   imageOverlay: { position: "absolute", top: 10, right: 10, flexDirection: "row", gap: 8 },
-  imageActionButton: { width: 36, height: 36, backgroundColor: "rgba(0,0,0,0.7)", borderRadius: 18, justifyContent: "center", alignItems: "center" },
+  imageActionButton: {
+    width: 36,
+    height: 36,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   removeButton: { backgroundColor: "rgba(220,38,38,0.9)" },
   imageActionIcon: { width: 18, height: 18, tintColor: "white" },
-  imageUploadButton: { height: 120, borderRadius: 12, borderWidth: 2, borderStyle: "dashed", justifyContent: "center", alignItems: "center", marginBottom: 15 },
+  imageUploadButton: {
+    height: 120,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderStyle: "dashed",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 15,
+  },
   uploadIcon: { width: 40, height: 40, marginBottom: 8 },
   uploadText: { fontSize: 16, marginBottom: 4 },
   uploadSubtext: { fontSize: 12, textAlign: "center" },
@@ -784,15 +960,36 @@ const styles = StyleSheet.create({
   uploadingContainer: { padding: 20, alignItems: "center" },
   uploadingText: { fontSize: 14 },
   addItemContainer: { flexDirection: "row", alignItems: "flex-start", marginBottom: 15 },
-  addButton: { width: 40, height: 40, backgroundColor: "#8B0000", borderRadius: 50, justifyContent: "center", alignItems: "center" },
+  addButton: {
+    width: 40,
+    height: 40,
+    backgroundColor: "#8B0000",
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   addIcon: { width: 15, height: 15, tintColor: "white" },
   itemsList: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  itemTag: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, marginBottom: 8 },
+  itemTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginBottom: 8,
+  },
   itemTagText: { fontSize: 12, marginRight: 6 },
   removeIcon: { width: 14, height: 14 },
   instructionsList: { gap: 10 },
   instructionItem: { flexDirection: "row", alignItems: "flex-start", padding: 12, borderRadius: 8, gap: 10 },
-  instructionNumber: { width: 24, height: 24, backgroundColor: "#8B0000", borderRadius: 12, justifyContent: "center", alignItems: "center" },
+  instructionNumber: {
+    width: 24,
+    height: 24,
+    backgroundColor: "#8B0000",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   instructionNumberText: { color: "white", fontSize: 12, fontWeight: "bold" },
   instructionText: { flex: 1, fontSize: 14, lineHeight: 20 },
   nutritionGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
@@ -803,10 +1000,43 @@ const styles = StyleSheet.create({
   submitButton: { marginLeft: 5 },
   pickerOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" },
   pickerContainer: { borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 20 },
-  pickerHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 20, borderBottomWidth: 1, borderBottomColor: "#E5E7EB" },
+  pickerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
   pickerTitle: { fontSize: 16 },
   pickerItem: { paddingHorizontal: 20, paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: "#F3F4F6" },
   pickerItemText: { fontSize: 16 },
-});
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    borderWidth: 2,
+    marginRight: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkboxChecked: {
+    backgroundColor: "#8B0000",
+    borderColor: "#8B0000",
+  },
+  checkIcon: {
+    width: 16,
+    height: 16,
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    flex: 1,
+  },
+})
 
 export default AddBurgerModal

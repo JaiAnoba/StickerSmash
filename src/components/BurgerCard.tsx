@@ -1,59 +1,51 @@
-import React from 'react';
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
-import { Burger } from '../types/Burger';
-import { useTheme } from '../context/ThemeContext';
-import { useFavorites } from '../context/FavoritesContext';
-import Text from "../components/CustomText";
-import { burgerImages } from '../data/burgerImages';
+import type React from "react"
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native"
+import Text from "../components/CustomText"
+import { useFavorites } from "../context/FavoritesContext"
+import { useTheme } from "../context/ThemeContext"
+import type { Burger } from "../types/Burger"
+import { getBurgerImageSource } from "../utils/imageUtils"
 
-const heartIcon = 'https://img.icons8.com/puffy/32/like.png';
-const filledHeartIcon = 'https://img.icons8.com/puffy-filled/32/like.png';
+const heartIcon = "https://img.icons8.com/puffy/32/like.png"
+const filledHeartIcon = "https://img.icons8.com/puffy-filled/32/like.png"
 
 interface BurgerCardProps {
-  burger: Burger;
-  isFavorite: boolean;
-  onPress: (burger: Burger) => void;
-  onFavoritePress: () => void;
+  burger: Burger
+  isFavorite: boolean
+  onPress: (burger: Burger) => void
+  onFavoritePress: () => void
 }
 
 const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
-  const { colors } = useTheme();
-  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
-  const isLiked = isFavorite(burger.id);
+  const { colors } = useTheme()
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites()
+  const isLiked = isFavorite(burger.id)
 
   const handleFavoritePress = () => {
     if (isLiked) {
-      removeFavorite(burger.id);
+      removeFavorite(burger.id)
     } else {
-      addFavorite(burger);
+      addFavorite(burger)
     }
-  };
+  }
+
+  // Use the utility function to get the image source
+  const imageSource = getBurgerImageSource(burger)
 
   return (
-    <TouchableOpacity
-      style={[styles.card]}
-      onPress={() => onPress(burger)}
-      activeOpacity={0.9}
-    >
+    <TouchableOpacity style={[styles.card]} onPress={() => onPress(burger)} activeOpacity={0.9}>
       <View style={styles.imageWrapper}>
         <Image
-          source={burgerImages[burger.image]} 
+          source={imageSource}
           style={styles.image}
+          onError={(error) => {
+            console.warn(`Failed to load image for burger ${burger.name}:`, error.nativeEvent.error)
+          }}
         />
       </View>
 
       <View style={styles.infoSection}>
-        <Text
-          weight='semiBold'
-          style={styles.name}
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
+        <Text weight="semiBold" style={styles.name} numberOfLines={1} ellipsizeMode="tail">
           {burger.name}
         </Text>
         <Text style={styles.category}>{burger.category}</Text>
@@ -65,67 +57,63 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
           <View
             style={[
               styles.difficulty,
-              burger.difficulty.toLowerCase() === 'medium' && { backgroundColor: '#FEF3C7' }, 
-              burger.difficulty.toLowerCase() === 'hard' && { backgroundColor: '#FECACA' }, 
+              burger.difficulty.toLowerCase() === "medium" && { backgroundColor: "#FEF3C7" },
+              burger.difficulty.toLowerCase() === "hard" && { backgroundColor: "#FECACA" },
             ]}
           >
             <Text
               weight="semiBold"
               style={[
                 styles.difficultyText,
-                burger.difficulty.toLowerCase() === 'medium' && { color: '#B45309' }, 
-                burger.difficulty.toLowerCase() === 'hard' && { color: '#B91C1C' },  
+                burger.difficulty.toLowerCase() === "medium" && { color: "#B45309" },
+                burger.difficulty.toLowerCase() === "hard" && { color: "#B91C1C" },
               ]}
             >
               {burger.difficulty.toUpperCase()}
             </Text>
           </View>
-
         </View>
 
         <TouchableOpacity onPress={handleFavoritePress} style={styles.favoriteIcon}>
           <Image
             source={{ uri: isLiked ? filledHeartIcon : heartIcon }}
-            style={[
-              styles.heart,
-              isLiked && styles.heartFilled
-            ]}
+            style={[styles.heart, isLiked && styles.heartFilled]}
           />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 12,
     marginLeft: 2,
     width: 150,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 6,
     elevation: 4,
   },
   imageWrapper: {
-    position: 'relative',
-    alignItems: 'center',
+    position: "relative",
+    alignItems: "center",
     marginTop: -45,
     zIndex: 10,
   },
   image: {
     width: 120,
     height: 100,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   favoriteIcon: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     right: 2,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 5,
     elevation: 2,
@@ -133,55 +121,55 @@ const styles = StyleSheet.create({
   heart: {
     width: 18,
     height: 18,
-    tintColor: 'black', 
+    tintColor: "black",
   },
   heartFilled: {
-    tintColor: '#8B0000', 
+    tintColor: "#8B0000",
   },
   infoSection: {
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     marginTop: 6,
     paddingLeft: 4,
   },
   name: {
     fontSize: 14,
-    textAlign: 'left',
+    textAlign: "left",
     marginBottom: 2,
-    maxWidth: '100%',
-    overflow: 'hidden',
+    maxWidth: "100%",
+    overflow: "hidden",
   },
   category: {
     fontSize: 11,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 2,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   row: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    width: '100%',
+    flexDirection: "column",
+    justifyContent: "space-between",
+    width: "100%",
     gap: 4,
   },
   timeContainer: {
     paddingVertical: 4,
     borderRadius: 999,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   timeText: {
     fontSize: 11,
-    color: 'black',
+    color: "black",
   },
   difficulty: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: "#DCFCE7",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 999,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   difficultyText: {
     fontSize: 11,
-    color: '#166534',
+    color: "#166534",
   },
-});
+})
 
-export default BurgerCard;
+export default BurgerCard
