@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     height: 125,
     resizeMode: "contain",
     position: "absolute",
-    bottom: 3,
+    bottom: 2,
   },
   favoriteIcon: {
     position: "absolute",
