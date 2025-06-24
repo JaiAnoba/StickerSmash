@@ -37,7 +37,7 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
       <View style={styles.imageWrapper}>
         <Image
           source={imageSource}
-          style={styles.image}
+          style={burger.isUserAdded ? styles.userImage : styles.image}
           onError={(error) => {
             console.warn(`Failed to load image for burger ${burger.name}:`, error.nativeEvent.error)
           }}
@@ -101,6 +101,7 @@ const styles = StyleSheet.create({
   imageWrapper: {
     position: "relative",
     alignItems: "center",
+    height: 100,
     marginTop: -45,
     zIndex: 10,
   },
@@ -108,6 +109,14 @@ const styles = StyleSheet.create({
     width: 120,
     height: 100,
     resizeMode: "contain",
+    position: "absolute",
+  },
+  userImage: {
+    width: 150, 
+    height: 125,
+    resizeMode: "contain",
+    position: "absolute",
+    bottom: 3,
   },
   favoriteIcon: {
     position: "absolute",

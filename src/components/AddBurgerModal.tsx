@@ -1,3 +1,6 @@
+import axios from "axios"
+import { Buffer } from "buffer"
+import * as FileSystem from "expo-file-system"
 import * as ImagePicker from "expo-image-picker"
 import type React from "react"
 import { useState } from "react"
@@ -26,6 +29,42 @@ interface AddBurgerModalProps {
 }
 
 const { width } = Dimensions.get("window")
+
+const removeImageBackground = async (imageUri: string): Promise<string | null> => {
+  try {
+    const base64Img = await FileSystem.readAsStringAsync(imageUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    })
+
+    const response = await axios.post(
+      "https://api.remove.bg/v1.0/removebg",
+      {
+        image_file_b64: base64Img,
+        size: "auto",
+      },
+      {
+        headers: {
+          "X-Api-Key": "7oRaKioJ5dj3w2Er4UMszm92",
+        },
+        responseType: "arraybuffer",
+      }
+    )
+
+    const base64FromBuffer = `data:image/png;base64,${Buffer.from(response.data, "binary").toString("base64")}`
+
+    const outputPath = `${FileSystem.cacheDirectory}bg-removed-${Date.now()}.png`
+
+    await FileSystem.writeAsStringAsync(outputPath, base64FromBuffer.replace(/^data:image\/png;base64,/, ""), {
+      encoding: FileSystem.EncodingType.Base64,
+    })
+
+    return outputPath
+  } catch (error) {
+    console.error("Background removal failed", error)
+    Alert.alert("Error", "Failed to remove background from image.")
+    return null
+  }
+}
 
 const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => {
   const { colors, isDarkMode } = useTheme()
@@ -147,13 +186,17 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
       })
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        const imageUri = result.assets[0].uri
-        setSelectedImage(imageUri)
-        setShowImagePicker(false)
+        const originalUri = result.assets[0].uri
+        const uriWithoutBg = await removeImageBackground(originalUri)
+
+        if (uriWithoutBg) {
+          setSelectedImage(uriWithoutBg)
+          setShowImagePicker(false)
+        }
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to pick image. Please try again.")
-      console.error("Image picker error:", error)
+      Alert.alert("Error", "Failed to pick image.")
+      console.error(error)
     } finally {
       setImageUploading(false)
     }
