@@ -6,6 +6,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "scheme": "stickersmash",
     "splash": {
       "image": "./assets/images/logo.png",
       "resizeMode": "contain",
