@@ -2,17 +2,17 @@ import * as ImagePicker from "expo-image-picker"
 import type React from "react"
 import { useState } from "react"
 import {
-    Alert,
-    Dimensions,
-    Image,
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Dimensions,
+  Image,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native"
 import { useBurgerData } from "../context/BurgerDataContext"
 import { useTheme } from "../context/ThemeContext"
@@ -277,19 +277,19 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
 
     // Create the new burger object
     const newBurger: Burger = {
-      id: `user_${Date.now()}`, // Prefix with 'user_' to distinguish from default burgers
+      id: `user_${Date.now()}`,
       name: formData.name.trim(),
       category: formData.category,
       description: formData.description.trim(),
       difficulty: formData.difficulty as "Easy" | "Medium" | "Hard",
-      cookTime: formData.cookTime.trim(),
-      totalTime: formData.totalTime.trim(),
-      prepTime: formData.prepTime.trim(), // Add this missing field
-      servings: Number.parseInt(formData.servings) || 1, // Add this missing field
-      calories: Number.parseInt(formData.calories) || 0, // Add this missing field
-      rating: Number.parseFloat(formData.rating) || 4.0, // Default rating if not provided
-      isRecommended: formData.isRecommended, // Add this missing field
-      image: selectedImage, // This will be the URI for user-added images
+      cookTime: `${formData.cookTime.trim()} mins`,
+      totalTime: `${formData.totalTime.trim()} mins`,
+      prepTime: `${formData.prepTime.trim()} mins`,
+      servings: Number.parseInt(formData.servings) || 1,
+      calories: Number.parseInt(formData.calories) || 0, 
+      rating: Number.parseFloat(formData.rating) || 4.0, 
+      isRecommended: formData.isRecommended, 
+      image: selectedImage,
       ingredients,
       instructions,
       nutrition: {
@@ -298,13 +298,11 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
         carbs: Number.parseInt(nutrition.carbs) || 0,
         fat: Number.parseInt(nutrition.fat) || 0,
       },
-      isUserAdded: true, // Flag to identify user-added burgers
+      isUserAdded: true,
     }
 
-    // Add the burger to the context
     addBurger(newBurger)
 
-    // Reset form
     resetForm()
 
     Alert.alert("Success", "Burger recipe added successfully!", [
@@ -896,7 +894,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 15,
-    borderBottomWidth: 1,
     position: "relative",
   },
   closeButton: {
