@@ -5,7 +5,6 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -14,6 +13,7 @@ import {
   View
 } from 'react-native';
 import Text from "../components/CustomText";
+import ScreenWrapper from "../components/ScreenWrapper";
 import { useTheme } from "../context/ThemeContext";
 import { AIMessage } from '../types/Burger';
 
@@ -140,17 +140,13 @@ const AIAssistantScreen: React.FC = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ScreenWrapper scroll>
       <StatusBar backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
       barStyle={isDarkMode ? "light-content" : "dark-content"} />
       
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerWrapper}>
-          <Image
-            source={{ uri : "https://img.icons8.com/fluency-systems-regular/48/chatbot.png"}}
-            style={{ width: 18, height: 18, tintColor: 'white', marginRight: 8, top: 4 }}
-          /> 
           <Text weight='semiBold' style={styles.headerTitle}>AI Burger Chef</Text>
         </View>
         <Text style={styles.headerSubtitle}>Your personal cooking assistant</Text>
@@ -224,7 +220,7 @@ const AIAssistantScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 };
 

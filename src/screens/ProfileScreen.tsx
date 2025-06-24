@@ -6,15 +6,15 @@ import { useEffect, useState } from "react"
 import {
   Alert,
   Image,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
-  View,
+  View
 } from "react-native"
 import type { RootStackParamList } from "../../App"
 import Text from "../components/CustomText"
+import ScreenWrapper from "../components/ScreenWrapper"
 import { useAuth } from "../context/AuthContext"
 import { useCooking } from "../context/CookingContext"
 import { useFavorites } from "../context/FavoritesContext"
@@ -62,10 +62,8 @@ const ProfileScreen: React.FC = () => {
 
   const loadUserStats = async () => {
     try {
-      // Get recipes cooked from cooking context
       const recipesCooked = getRecipesCooked()
 
-      // Get total cooking time from cooking context
       const totalCookTime = getTotalCookingTime()
 
       setStats({
@@ -157,7 +155,7 @@ const ProfileScreen: React.FC = () => {
 
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScreenWrapper scroll>
       <StatusBar 
       backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
       barStyle={isDarkMode ? "light-content" : "dark-content"} />
@@ -235,16 +233,9 @@ const ProfileScreen: React.FC = () => {
             onPress={() => navigation.navigate("ShoppingList")}
           />
 
-          {/* <MenuButton
-            title="Data & Storage"
-            subtitle="Manage your app data"
-            icon="https://img.icons8.com/forma-light/48/data-backup.png"
-            onPress={() => navigation.navigate("DataStorage")}
-          /> */}
-
           <MenuButton
             title="Share App"
-            subtitle="Tell friends about Burgerpedia"
+            subtitle="Tell friends about Burgify"
             icon="https://img.icons8.com/forma-light/48/share.png"
             onPress={() => navigation.navigate("ShareApp")}
           />
@@ -260,7 +251,7 @@ const ProfileScreen: React.FC = () => {
 
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </ScreenWrapper>
   )
 }
 

@@ -16,6 +16,7 @@ import {
 } from "react-native"
 import Button from "../components/Button"
 import Text from "../components/CustomText"
+import ScreenWrapper from "../components/ScreenWrapper"
 import { useTheme } from "../context/ThemeContext"
 
 interface ShoppingItem {
@@ -198,7 +199,7 @@ const ShoppingListScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScreenWrapper scroll>
       <StatusBar 
       backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
       barStyle={isDarkMode ? "light-content" : "dark-content"} />
@@ -326,7 +327,7 @@ const ShoppingListScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </ScreenWrapper>
   )
 }
 

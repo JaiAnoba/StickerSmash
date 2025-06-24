@@ -1,9 +1,10 @@
 import type { StackNavigationProp } from "@react-navigation/stack"
 import type React from "react"
 import { useEffect, useState } from "react"
-import { FlatList, Image, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native"
+import { FlatList, Image, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native"
 import type { RootStackParamList } from "../../App"
 import Text from "../components/CustomText"
+import ScreenWrapper from "../components/ScreenWrapper"
 import { useCooking } from "../context/CookingContext"
 import { useTheme } from "../context/ThemeContext"
 
@@ -91,7 +92,7 @@ const CookingHistoryScreen: React.FC<Props> = ({ navigation }) => {
   )
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ScreenWrapper scroll>
       <StatusBar backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
       barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
@@ -123,7 +124,7 @@ const CookingHistoryScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         )}
       </View>
-    </SafeAreaView>
+    </ScreenWrapper>
   )
 }
 

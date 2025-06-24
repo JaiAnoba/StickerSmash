@@ -1,11 +1,9 @@
-"use client"
-
 import type React from "react"
-import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle, StyleProp  } from "react-native"
-import { useTheme } from "../context/ThemeContext"
+import { Image, StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native"
 import { useFavorites } from "../context/FavoritesContext"
-import IconButton from "./IconButton"
+import { useTheme } from "../context/ThemeContext"
 import type { Burger } from "../types/Burger"
+import IconButton from "./IconButton"
 
 interface BurgerItemProps {
     burger: Burger

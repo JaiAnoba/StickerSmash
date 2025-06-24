@@ -7,17 +7,17 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { RootStackParamList } from '../../App';
 import Button from '../components/Button';
 import Text from "../components/CustomText";
+import ScreenWrapper from "../components/ScreenWrapper";
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -179,7 +179,7 @@ const EditProfileScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScreenWrapper scroll>
       <StatusBar 
       backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
       barStyle={isDarkMode ? "light-content" : "dark-content"} />
@@ -330,7 +330,7 @@ const EditProfileScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 };
 

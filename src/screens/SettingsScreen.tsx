@@ -7,7 +7,6 @@ import {
   FlatList,
   Image,
   Modal,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -17,6 +16,7 @@ import {
 } from 'react-native';
 import type { RootStackParamList } from "../../App";
 import Text from '../components/CustomText';
+import ScreenWrapper from "../components/ScreenWrapper";
 import { useTheme } from '../context/ThemeContext';
 import { Language, Settings } from '../types/Burger';
 
@@ -203,7 +203,7 @@ const SettingsScreen: React.FC = () => {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScreenWrapper scroll>
       <StatusBar 
       backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
       barStyle={isDarkMode ? "light-content" : "dark-content"} />
@@ -476,7 +476,7 @@ const SettingsScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 };
 

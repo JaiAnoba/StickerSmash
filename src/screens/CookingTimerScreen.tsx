@@ -6,7 +6,6 @@ import {
   Alert,
   BackHandler,
   Image,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -16,6 +15,7 @@ import {
 import type { RootStackParamList } from "../../App"
 import Button from "../components/Button"
 import Text from "../components/CustomText"
+import ScreenWrapper from "../components/ScreenWrapper"
 import StarRating from "../components/StarRating"
 import { useCooking } from "../context/CookingContext"
 import { useRatings } from "../context/RatingContext"
@@ -296,7 +296,7 @@ const CookingTimerScreen: React.FC<Props> = ({ navigation, route }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ScreenWrapper scroll>
       <StatusBar backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
       barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
@@ -383,7 +383,7 @@ const CookingTimerScreen: React.FC<Props> = ({ navigation, route }) => {
         {/* Tab Content */}
         {renderTabContent()}
       </ScrollView>
-    </SafeAreaView>
+    </ScreenWrapper>
   )
 }
 

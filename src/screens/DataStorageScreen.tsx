@@ -1,5 +1,3 @@
-"use client"
-
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { useNavigation } from "@react-navigation/native"
 import type React from "react"
@@ -7,6 +5,7 @@ import { useEffect, useState } from "react"
 import { Alert, Image, SafeAreaView, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native"
 import Button from "../components/Button"
 import Text from "../components/CustomText"
+import ScreenWrapper from "../components/ScreenWrapper"
 import { useTheme } from "../context/ThemeContext"
 
 interface StorageInfo {
@@ -226,7 +225,7 @@ const DataStorageScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScreenWrapper scroll>
       <StatusBar 
       backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
       barStyle={isDarkMode ? "light-content" : "dark-content"} />
@@ -373,7 +372,7 @@ const DataStorageScreen: React.FC = () => {
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </ScreenWrapper>
   )
 }
 

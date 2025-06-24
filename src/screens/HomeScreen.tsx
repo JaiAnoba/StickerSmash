@@ -2,13 +2,14 @@ import { useNavigation } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
 import type React from "react"
 import { useEffect, useState } from "react"
-import { FlatList, Image, SafeAreaView, StatusBar, StyleSheet, TextInput, TouchableOpacity, View } from "react-native"
+import { FlatList, Image, StatusBar, StyleSheet, TextInput, TouchableOpacity, View } from "react-native"
 import type { RootStackParamList } from "../../App"
 import BurgerCard from "../components/BurgerCard"
 import Text from "../components/CustomText"
 import FilterModal from "../components/FilterModal"
 import NotificationButton from "../components/NotificationButton"
 import NotificationModal from "../components/NotificationModal"
+import ScreenWrapper from "../components/ScreenWrapper"
 import { useBurgerData } from "../context/BurgerDataContext"
 import { useFavorites } from "../context/FavoritesContext"
 import { useTheme } from "../context/ThemeContext"
@@ -131,7 +132,7 @@ const HomeScreen: React.FC = () => {
   }, [])
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor }]}>
+    <ScreenWrapper>
       <StatusBar
         backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"}
         barStyle={isDarkMode ? "light-content" : "dark-content"}
@@ -266,7 +267,7 @@ const HomeScreen: React.FC = () => {
           navigation={navigation}
         />
       )}
-    </SafeAreaView>
+     </ScreenWrapper>
   )
 }
 

@@ -2,10 +2,11 @@ import { useNavigation } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
 import type React from "react"
 import { useState } from "react"
-import { Alert, FlatList, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native"
+import { Alert, FlatList, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native"
 import type { RootStackParamList } from "../../App"
 import BurgerCard from "../components/BurgerCard"
 import Text from "../components/CustomText"
+import ScreenWrapper from "../components/ScreenWrapper"
 import { useFavorites } from "../context/FavoritesContext"
 import { useTheme } from "../context/ThemeContext"
 import type { Burger } from "../types/Burger"
@@ -83,7 +84,7 @@ const FavoritesScreen: React.FC = () => {
   )
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScreenWrapper scroll>
       <StatusBar backgroundColor="#8B0000" barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
       {/* Header */}
@@ -144,7 +145,7 @@ const FavoritesScreen: React.FC = () => {
           navigation={navigation}
         />
       )}
-    </SafeAreaView>
+    </ScreenWrapper>
   )
 }
 

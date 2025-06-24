@@ -1,9 +1,7 @@
-"use client"
-
 import type React from "react"
-import { TouchableOpacity, View, Text, StyleSheet, Image } from "react-native"
-import { useTheme } from "../context/ThemeContext"
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { useNotifications } from "../context/NotificationContext"
+import { useTheme } from "../context/ThemeContext"
 
 interface NotificationButtonProps {
   onPress: () => void

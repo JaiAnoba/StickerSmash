@@ -1,10 +1,8 @@
-"use client"
-
 import type React from "react"
-import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity, Switch } from "react-native"
+import { Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native"
 import { useTheme } from "../context/ThemeContext"
 import type { FilterOptions, SortOption } from "../types/Filter"
-import { CATEGORIES, INGREDIENTS, DIFFICULTIES, COOK_TIMES } from "../types/Filter"
+import { CATEGORIES, COOK_TIMES, DIFFICULTIES, INGREDIENTS } from "../types/Filter"
 
 interface FilterModalProps {
   visible: boolean

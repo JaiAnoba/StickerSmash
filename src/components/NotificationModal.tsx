@@ -1,9 +1,7 @@
-"use client"
-
 import type React from "react"
-import { View, Text, StyleSheet, Modal, FlatList, TouchableOpacity, SafeAreaView, StatusBar, Alert } from "react-native"
-import { useTheme } from "../context/ThemeContext"
+import { Alert, FlatList, Modal, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { useNotifications } from "../context/NotificationContext"
+import { useTheme } from "../context/ThemeContext"
 import type { Notification } from "../types/Notification"
 
 interface NotificationModalProps {

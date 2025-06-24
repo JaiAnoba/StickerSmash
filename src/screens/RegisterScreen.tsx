@@ -4,17 +4,17 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import type { RootStackParamList } from "../../App";
 import Button from "../components/Button";
 import Text from "../components/CustomText";
+import ScreenWrapper from "../components/ScreenWrapper";
 import SocialButtons from "../components/SocialButtons";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -107,7 +107,7 @@ const RegisterScreen: React.FC = () => {
   ];
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScreenWrapper scroll>
       <StatusBar 
       backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
       barStyle={isDarkMode ? "light-content" : "dark-content"} />
@@ -222,7 +222,7 @@ const RegisterScreen: React.FC = () => {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 };
 
