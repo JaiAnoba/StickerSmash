@@ -92,7 +92,7 @@ const CookingHistoryScreen: React.FC<Props> = ({ navigation }) => {
   )
 
   return (
-    <ScreenWrapper scroll>
+    <ScreenWrapper>
       <StatusBar backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
       barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
