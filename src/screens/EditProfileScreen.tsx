@@ -341,12 +341,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    paddingTop: 10,
+    paddingTop: 30,
   },
   backButton: {
     position: 'absolute',
     left: 15,
-    padding: 5,
+    paddingBottom: 5,
+    paddingTop: 30,
+    paddingInline: 5,
     zIndex: 1,
   },
   backIcon: {
