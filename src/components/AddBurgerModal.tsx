@@ -1,3 +1,4 @@
+import { REMOVE_BG_API_KEY } from "@env"
 import axios from "axios"
 import { Buffer } from "buffer"
 import * as FileSystem from "expo-file-system"
@@ -44,7 +45,7 @@ const removeImageBackground = async (imageUri: string): Promise<string | null> =
       },
       {
         headers: {
-          "X-Api-Key": "7oRaKioJ5dj3w2Er4UMszm92",
+          "X-Api-Key": REMOVE_BG_API_KEY,
         },
         responseType: "arraybuffer",
       }
