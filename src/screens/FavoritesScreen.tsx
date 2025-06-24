@@ -84,7 +84,7 @@ const FavoritesScreen: React.FC = () => {
   )
 
   return (
-    <ScreenWrapper scroll>
+    <ScreenWrapper>
       <StatusBar backgroundColor="#8B0000" barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
       {/* Header */}

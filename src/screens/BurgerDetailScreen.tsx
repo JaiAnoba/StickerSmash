@@ -246,6 +246,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
           style={[
             styles.modalContent,
             {
+              backgroundColor: colors.background,
               transform: [{ translateY: slideAnim }],
             },
           ]}
@@ -260,32 +261,33 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
             <View style={styles.contentContainer}>
               {/* Burger Name and Category */}
               <View style={styles.titleRow}>
-                <Text weight="semiBold" style={styles.burgerName}>{burger.name}</Text>
-                <TouchableOpacity onPress={handleFavoritePress} style={styles.favoriteIcon}>
+                <Text weight="semiBold" style={[styles.burgerName, {color: colors.text,}]}>{burger.name}</Text>
+                <TouchableOpacity onPress={handleFavoritePress} style={[styles.favoriteIcon, {backgroundColor: isDarkMode ? "#121212" : "#fff",}]}>
                   <Image
                     source={{ uri: isLiked ? filledHeartIcon : heartIcon }}
                     style={[
                       styles.heart,
-                      isLiked && styles.heartFilled,
+                      isLiked && styles.heartFilled, {tintColor: isDarkMode ? "#8B0000" : "#8B0000",}
                     ]}
                   />
                 </TouchableOpacity>
               </View>
-              <Text weight="medium" style={styles.burgerCategory}>{burger.category}</Text>
+              <Text weight="medium" style={[styles.burgerCategory, {color: colors.primary,}]}>{burger.category}</Text>
 
               {/* Details Content */}
               <View style={styles.tabContent}>
-                <Text style={styles.description}>{burger.description}</Text>
-                <View style={styles.metaInfo}>
+                <Text style={[styles.description, {color: colors.subtext,}]}>{burger.description}</Text>
+                <View style={[styles.metaInfo, {backgroundColor: isDarkMode ? colors.inputBackground : "#F9FAFB",}]}>
                   <View style={styles.metaItem}>
-                    <Text style={styles.metaLabel}>Difficulty</Text>
+                    <Text style={[styles.metaLabel, {color: colors.subtext,}]}>Difficulty</Text>
                     <Text
                       weight="semiBold"
                       style={[
                         styles.metaValue,
                         burger.difficulty === "Easy" && styles.easyText,
                         burger.difficulty === "Medium" && styles.mediumText,
-                        burger.difficulty === "Hard" && styles.hardText,
+                        burger.difficulty === "Hard" && styles.hardText, 
+                        {color: colors.text,}
                       ]}
                     >
                       {burger.difficulty}
@@ -304,7 +306,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
                         source={{ uri: "https://img.icons8.com/fluency-systems-filled/96/star.png" }}
                         style={{ width: 14, height: 14, tintColor: "#8B0000", marginRight: 4 }}
                       />
-                      <Text weight="semiBold" style={styles.ratingValue}>
+                      <Text weight="semiBold" style={[styles.ratingValue, {color: colors.text,}]}>
                         {burger.rating}
                       </Text>
                     </View>
@@ -313,8 +315,8 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
 
                 {/* User Rating Section - Only show if user has cooked this burger */}
                 {hasCookedBurger && (
-                  <View style={styles.userRatingSection}>
-                    <Text weight="semiBold" style={styles.userRatingTitle}>
+                  <View style={[styles.userRatingSection, {backgroundColor: isDarkMode ? colors.inputBackground : "#F9FAFB",}]}>
+                    <Text weight="semiBold" style={[styles.userRatingTitle, {color: colors.text,}]}>
                       Rate this burger
                     </Text>
                     <View style={styles.userRatingContainer}>
@@ -325,7 +327,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
                         size={32}
                         color="#8B0000"
                       />
-                      <Text style={styles.userRatingText}>
+                      <Text style={[styles.userRatingText, {color: colors.subtext,}]}>
                         {tempRating ? `Your rating: ${tempRating}` : "Tap to rate"}
                       </Text>
                       <Button
@@ -351,7 +353,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
                   ]}
                 >
                   <TouchableOpacity style={styles.startButton} onPress={handleStartCooking} activeOpacity={0.8}>
-                    <Text weight="semiBold" style={styles.startButtonText}>
+                    <Text weight="semiBold" style={[styles.startButtonText, {color: isDarkMode ? "#fff" : "#fff"}]}>
                       Let's Start Cooking!
                     </Text>
                   </TouchableOpacity>
@@ -404,7 +406,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: "60%",
-    backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     overflow: "hidden",
@@ -454,25 +455,21 @@ const styles = StyleSheet.create({
   },
   favoriteIcon: {
     padding: 6,
-    backgroundColor: "#fff",
   },
   heart: {
     width: 20,
     height: 20,
-    tintColor: "black",
   },
   heartFilled: {
     tintColor: "#8B0000",
   },
   burgerName: {
     fontSize: 20,
-    color: "#333",
     textAlign: "left",
     marginBottom: 5,
   },
   burgerCategory: {
     fontSize: 12,
-    color: "#8B0000",
     textAlign: "left",
     textTransform: "uppercase",
     letterSpacing: 1,
@@ -484,7 +481,6 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 12,
-    color: "#666",
     lineHeight: 24,
     marginBottom: 25,
     textAlign: "left",
@@ -492,7 +488,6 @@ const styles = StyleSheet.create({
   metaInfo: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "#F9FAFB",
     borderRadius: 15,
     padding: 20,
     marginBottom: 25,
@@ -502,14 +497,12 @@ const styles = StyleSheet.create({
   },
   metaLabel: {
     fontSize: 11,
-    color: "#666",
     marginBottom: 8,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   metaValue: {
     fontSize: 12,
-    color: "#333",
   },
   easyText: {
     color: "#059669",
@@ -534,18 +527,15 @@ const styles = StyleSheet.create({
   },
   ratingValue: {
     fontSize: 12,
-    color: "#333",
     top: 3,
   },
   userRatingSection: {
     marginBottom: 20,
-    backgroundColor: "#F9FAFB",
     borderRadius: 15,
     padding: 20,
   },
   userRatingTitle: {
     fontSize: 15,
-    color: "#333",
     marginBottom: 5,
     textAlign: "center",
   },
@@ -555,7 +545,6 @@ const styles = StyleSheet.create({
   userRatingText: {
     marginTop: 5,
     marginBottom: 15,
-    color: "#666",
     fontSize: 13,
   },
   saveRatingButton: {
@@ -572,36 +561,7 @@ const styles = StyleSheet.create({
     marginBottom: -50,
   },
   startButtonText: {
-    color: "white",
     fontSize: 15,
-  },
-  nutritionSection: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 15,
-    padding: 20,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    color: "#333",
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  nutritionGrid: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  nutritionItem: {
-    alignItems: "center",
-  },
-  nutritionValue: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#8B0000",
-    marginBottom: 5,
-  },
-  nutritionLabel: {
-    fontSize: 12,
-    color: "#666",
   },
 })
 

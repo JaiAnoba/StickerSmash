@@ -1,7 +1,6 @@
 import type React from "react"
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native"
 import Text from "../components/CustomText"
-import { useFavorites } from "../context/FavoritesContext"
 import { useTheme } from "../context/ThemeContext"
 import type { Burger } from "../types/Burger"
 import { getBurgerImageSource } from "../utils/imageUtils"
@@ -16,24 +15,18 @@ interface BurgerCardProps {
   onFavoritePress: () => void
 }
 
-const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
-  const { colors } = useTheme()
-  const { isFavorite, addFavorite, removeFavorite } = useFavorites()
-  const isLiked = isFavorite(burger.id)
-
-  const handleFavoritePress = () => {
-    if (isLiked) {
-      removeFavorite(burger.id)
-    } else {
-      addFavorite(burger)
-    }
-  }
+const BurgerCard: React.FC<BurgerCardProps> = ({ burger, isFavorite, onPress, onFavoritePress }) => {
+  const { colors, isDarkMode } = useTheme()
 
   // Use utility function to get the image source
   const imageSource = getBurgerImageSource(burger)
 
   return (
-    <TouchableOpacity style={[styles.card]} onPress={() => onPress(burger)} activeOpacity={0.9}>
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.text }]}
+      onPress={() => onPress(burger)}
+      activeOpacity={0.9}
+    >
       <View style={styles.imageWrapper}>
         <Image
           source={imageSource}
@@ -45,15 +38,17 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
       </View>
 
       <View style={styles.infoSection}>
-        <Text weight="semiBold" style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+        <Text weight="semiBold" style={[styles.name, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
           {burger.name}
         </Text>
-        <Text style={styles.category}>{burger.category}</Text>
+
+        <Text style={[styles.category, { color: colors.subtext }]}>{burger.category}</Text>
 
         <View style={styles.row}>
           <View style={styles.timeContainer}>
-            <Text style={styles.timeText}>{burger.totalTime}</Text>
+            <Text style={[styles.timeText, { color: colors.text }]}>{burger.totalTime}</Text>
           </View>
+
           <View
             style={[
               styles.difficulty,
@@ -74,10 +69,15 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
           </View>
         </View>
 
-        <TouchableOpacity onPress={handleFavoritePress} style={styles.favoriteIcon}>
-          <Image
-            source={{ uri: isLiked ? filledHeartIcon : heartIcon }}
-            style={[styles.heart, isLiked && styles.heartFilled]}
+        <TouchableOpacity onPress={onFavoritePress} style={[styles.favoriteIcon, { backgroundColor: colors.card }]}>
+          < Image
+            source={{ uri: isFavorite ? filledHeartIcon : heartIcon }}
+            style={[
+              styles.heart,
+              {
+                tintColor: isFavorite ? "#8B0000" : isDarkMode ? "#FFFFFF" : "black",
+              },
+            ]}
           />
         </TouchableOpacity>
       </View>
@@ -87,12 +87,10 @@ const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 12,
     marginLeft: 2,
     width: 150,
-    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 6,
@@ -112,7 +110,7 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   userImage: {
-    width: 150, 
+    width: 150,
     height: 125,
     resizeMode: "contain",
     position: "absolute",
@@ -122,7 +120,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 2,
-    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 5,
     elevation: 2,
@@ -149,7 +146,6 @@ const styles = StyleSheet.create({
   },
   category: {
     fontSize: 11,
-    color: "#6B7280",
     marginBottom: 2,
     alignSelf: "flex-start",
   },
@@ -166,7 +162,6 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 11,
-    color: "black",
   },
   difficulty: {
     backgroundColor: "#DCFCE7",

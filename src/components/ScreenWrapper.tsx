@@ -1,11 +1,9 @@
 import React from "react"
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    View,
-    ViewStyle,
+  ScrollView,
+  StyleSheet,
+  View,
+  ViewStyle
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useTheme } from "../context/ThemeContext"
@@ -29,11 +27,6 @@ const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardAvoiding}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
-      >
         <Wrapper
           style={[styles.wrapper, style]}
           contentContainerStyle={scroll ? [{ flexGrow: 1 }, contentContainerStyle] : undefined}
@@ -41,7 +34,6 @@ const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
         >
           {children}
         </Wrapper>
-      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
