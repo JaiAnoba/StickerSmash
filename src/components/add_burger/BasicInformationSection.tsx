@@ -116,7 +116,7 @@ export const BasicInformationSection: React.FC<BasicInformationSectionProps> = (
           </TouchableOpacity>
         </View>
 
-        <View style={[styles.inputContainer, styles.flex1]}>
+        {/* <View style={[styles.inputContainer, styles.flex1]}>
           <Text weight="medium" style={[styles.label, { color: colors.text }]}>
             Cook Time
           </Text>
@@ -130,7 +130,7 @@ export const BasicInformationSection: React.FC<BasicInformationSectionProps> = (
             value={formData.cookTime}
             onChangeText={(value) => onInputChange("cookTime", value)}
           />
-        </View>
+        </View> */}
       </View>
 
       <View style={styles.inputContainer}>
@@ -149,7 +149,7 @@ export const BasicInformationSection: React.FC<BasicInformationSectionProps> = (
         />
       </View>
 
-      <View style={styles.inputContainer}>
+      {/* <View style={styles.inputContainer}>
         <Text weight="medium" style={[styles.label, { color: colors.text }]}>
           Prep Time
         </Text>
@@ -163,10 +163,10 @@ export const BasicInformationSection: React.FC<BasicInformationSectionProps> = (
           value={formData.prepTime}
           onChangeText={(value) => onInputChange("prepTime", value)}
         />
-      </View>
+      </View> */}
 
       <View style={styles.row}>
-        <View style={[styles.inputContainer, styles.flex1, styles.marginRight]}>
+        {/* <View style={[styles.inputContainer, styles.flex1, styles.marginRight]}>
           <Text weight="medium" style={[styles.label, { color: colors.text }]}>
             Servings
           </Text>
@@ -181,7 +181,7 @@ export const BasicInformationSection: React.FC<BasicInformationSectionProps> = (
             onChangeText={(value) => onInputChange("servings", value)}
             keyboardType="numeric"
           />
-        </View>
+        </View> */}
 
         <View style={[styles.inputContainer, styles.flex1]}>
           <Text weight="medium" style={[styles.label, { color: colors.text }]}>
@@ -201,7 +201,7 @@ export const BasicInformationSection: React.FC<BasicInformationSectionProps> = (
         </View>
       </View>
 
-      <View style={styles.inputContainer}>
+      {/* <View style={styles.inputContainer}>
         <View style={styles.checkboxContainer}>
           <TouchableOpacity
             style={[
@@ -222,7 +222,7 @@ export const BasicInformationSection: React.FC<BasicInformationSectionProps> = (
             Mark as Recommended
           </Text>
         </View>
-      </View>
+      </View> */}
     </View>
   )
 }

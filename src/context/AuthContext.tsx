@@ -1,6 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import axios from "axios";
-import { API_URL } from "../utils/env";
 import type React from "react"
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 
@@ -26,7 +24,6 @@ interface AuthContextType {
   logout: () => Promise<void>
   updateUser: (userData: Partial<User>) => Promise<void>
   resetPassword: (email: string) => Promise<boolean>
-  loginWithGoogleToken: (token: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -60,35 +57,74 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const res = await axios.post(`${API_URL}/signin`, { email, password }, { withCredentials: true });
-      if (res.data && res.data.token) {
-        await AsyncStorage.setItem("userToken", res.data.token);
-        await AsyncStorage.setItem("userData", JSON.stringify({ email }));
-        setUser({ email, id: "", name: "", password: "", joinDate: "" });
-        return true;
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      // Accept demo credentials or any email/password for demo purposes
+      if (
+        (email === "demo@burgerpedia.com" && password === "demo123") ||
+        (email.includes("@") && password.length >= 3)
+      ) {
+        const userData: User = {
+          id: Date.now().toString(),
+          name: email === "demo@burgerpedia.com" ? "Demo User" : "User",
+          email: email,
+          password,
+          joinDate: new Date().toISOString(),
+          stats: {
+            burgersViewed: 25,
+            recipesCooked: 8,
+            favoriteCategory: "Classic",
+            totalCookTime: "3h 45m",
+          },
+        }
+
+        await AsyncStorage.setItem("userToken", "mock-token-" + Date.now())
+        await AsyncStorage.setItem("userData", JSON.stringify(userData))
+        setUser(userData)
+        return true
       }
-      return false;
+
+      return false
     } catch (error) {
-      console.error("Login error:", error);
-      return false;
+      console.error("Login error:", error)
+      return false
     }
-  };
+  }
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-      const res = await axios.post(`${API_URL}/signup`, { fullName: name, email, password }, { withCredentials: true });
-      if (res.data && res.data.token) {
-        await AsyncStorage.setItem("userToken", res.data.token);
-        await AsyncStorage.setItem("userData", JSON.stringify({ email, name }));
-        setUser({ email, name, id: "", password: "", joinDate: "" });
-        return true;
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      // For demo purposes, accept any valid input
+      if (name.trim() && email.includes("@") && password.length >= 6) {
+        const userData: User = {
+          id: Date.now().toString(),
+          name: name,
+          email: email,
+          password: password,
+          joinDate: new Date().toISOString(),
+          stats: {
+            burgersViewed: 0,
+            recipesCooked: 0,
+            favoriteCategory: "None yet",
+            totalCookTime: "0m",
+          },
+        }
+
+        await AsyncStorage.setItem("userToken", "mock-token-" + Date.now())
+        await AsyncStorage.setItem("userData", JSON.stringify(userData))
+        setUser(userData)
+        return true
       }
-      return false;
+
+      return false
     } catch (error) {
-      console.error("Registration error:", error);
-      return false;
+      console.error("Registration error:", error)
+      return false
     }
-  };
+  }
 
   const logout = async (): Promise<void> => {
     try {
@@ -114,27 +150,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const resetPassword = async (email: string): Promise<boolean> => {
     try {
-      const res = await axios.post(`${API_URL}/forgot-password`, { email }, { withCredentials: true });
-      if (res.data && res.data.message) {
-        return true;
-      }
-      return false;
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      // For demo purposes, always return success
+      // In a real app, you would call an API endpoint
+
+      // Store the reset request in AsyncStorage for demo purposes
+      await AsyncStorage.setItem("passwordResetRequested", email)
+
+      return true
     } catch (error) {
-      console.error("Password reset error:", error);
-      return false;
+      console.error("Password reset error:", error)
+      return false
     }
   }
-
-  const loginWithGoogleToken = async (token: string): Promise<void> => {
-    try {
-      await AsyncStorage.setItem('userToken', token);
-      // Optionally fetch user info from backend using token
-      // For now, just set a minimal user object
-      setUser({ email: '', id: '', name: '', password: '', joinDate: '' });
-    } catch (error) {
-      console.error('Google login error:', error);
-    }
-  };
 
   return (
     <AuthContext.Provider
@@ -146,7 +176,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logout,
         updateUser,
         resetPassword,
-        loginWithGoogleToken,
       }}
     >
       {children}
