@@ -183,7 +183,7 @@ export const BasicInformationSection: React.FC<BasicInformationSectionProps> = (
           />
         </View> */}
 
-        <View style={[styles.inputContainer, styles.flex1]}>
+        {/* <View style={[styles.inputContainer, styles.flex1]}>
           <Text weight="medium" style={[styles.label, { color: colors.text }]}>
             Total Calories
           </Text>
@@ -198,7 +198,7 @@ export const BasicInformationSection: React.FC<BasicInformationSectionProps> = (
             onChangeText={(value) => onInputChange("calories", value)}
             keyboardType="numeric"
           />
-        </View>
+        </View> */}
       </View>
 
       {/* <View style={styles.inputContainer}>

@@ -23,7 +23,7 @@ const ShareAppScreen: React.FC = () => {
     try {
       const result = await Share.share({
         message:
-          "Check out Burgerpedia! The ultimate app for burger lovers with amazing recipes, cooking tips, and an AI chef assistant. Download it now!",
+          "Check out Burgify! The ultimate app for burger lovers with amazing recipes, cooking tips, and an AI chef assistant. Download it now!",
         url: "https://burgify.app", // Mock
         title: "Burgify - The Ultimate Burger App",
       })
@@ -173,7 +173,7 @@ const ShareAppScreen: React.FC = () => {
 
         {/* Why Share */}
         <View style={styles.section}>
-          <Text weight='semiBold' style={[styles.sectionTitle, { color: colors.text }]}>Why Share Burgerpedia?</Text>
+          <Text weight='semiBold' style={[styles.sectionTitle, { color: colors.text }]}>Why Share Burgify?</Text>
 
           <View style={[styles.benefitCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.benefitItem}>

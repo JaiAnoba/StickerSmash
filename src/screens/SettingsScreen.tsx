@@ -416,7 +416,7 @@ const SettingsScreen: React.FC = () => {
         
         <SettingRow
           title="Build Number"
-          subtitle="2024.01.15"
+          subtitle="2025.06.15"
           iconComponent={
             <Image
                   source={{ uri: 'https://img.icons8.com/fluency-systems-regular/48/open-end-wrench.png' }}

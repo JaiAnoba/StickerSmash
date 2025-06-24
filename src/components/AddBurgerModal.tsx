@@ -21,7 +21,6 @@ import { ImageUploadSection } from "../components/add_burger/ImageUploadSection"
 import { IngredientsSection } from "../components/add_burger/IngredientsSection"
 import { InstructionsSection } from "../components/add_burger/InstructionsSection"
 import { ModalHeader } from "../components/add_burger/ModalHeader"
-import { NutritionSection } from "../components/add_burger/NutritionSection"
 import { useBurgerData } from "../context/BurgerDataContext"
 import { useTheme } from "../context/ThemeContext"
 import type { Burger } from "../types/Burger"
@@ -159,22 +158,22 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
       Alert.alert("Error", "Please select difficulty level")
       return
     }
-    if (!formData.cookTime.trim()) {
-      Alert.alert("Error", "Please enter cook time")
-      return
-    }
+    // if (!formData.cookTime.trim()) {
+    //   Alert.alert("Error", "Please enter cook time")
+    //   return
+    // }
     if (!formData.totalTime.trim()) {
       Alert.alert("Error", "Please enter total time")
       return
     }
-    if (!formData.prepTime.trim()) {
-      Alert.alert("Error", "Please enter prep time")
-      return
-    }
-    if (!formData.servings.trim()) {
-      Alert.alert("Error", "Please enter number of servings")
-      return
-    }
+    // if (!formData.prepTime.trim()) {
+    //   Alert.alert("Error", "Please enter prep time")
+    //   return
+    // }
+    // if (!formData.servings.trim()) {
+    //   Alert.alert("Error", "Please enter number of servings")
+    //   return
+    // }
     if (!selectedImage) {
       Alert.alert("Error", "Please add a burger image")
       return
@@ -264,11 +263,6 @@ const AddBurgerModal: React.FC<AddBurgerModalProps> = ({ visible, onClose }) => 
             currentInstruction={currentInstruction}
             onInstructionsChange={setInstructions}
             onCurrentInstructionChange={setCurrentInstruction}
-          />
-
-          <NutritionSection
-            nutrition={nutrition}
-            onNutritionChange={handleNutritionChange}
           />
 
           <View style={styles.buttonContainer}>
