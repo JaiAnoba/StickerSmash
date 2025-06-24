@@ -1,17 +1,15 @@
-"use client"
-
-import type React from "react"
-import { useState } from "react"
-import { View, StyleSheet, FlatList, SafeAreaView, StatusBar, TouchableOpacity, Alert } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import type { StackNavigationProp } from "@react-navigation/stack"
+import type React from "react"
+import { useState } from "react"
+import { Alert, FlatList, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native"
 import type { RootStackParamList } from "../../App"
-import { useTheme } from "../context/ThemeContext"
-import { useFavorites } from "../context/FavoritesContext"
-import type { Burger } from "../types/Burger"
 import BurgerCard from "../components/BurgerCard"
-import BurgerDetailScreen from "./BurgerDetailScreen"
 import Text from "../components/CustomText"
+import { useFavorites } from "../context/FavoritesContext"
+import { useTheme } from "../context/ThemeContext"
+import type { Burger } from "../types/Burger"
+import BurgerDetailScreen from "./BurgerDetailScreen"
 
 type NavigationProp = StackNavigationProp<RootStackParamList>
 
@@ -188,6 +186,7 @@ const styles = StyleSheet.create({
   },
   content: {
     marginBottom: 230,
+    top: 5,
     paddingInline: 10,
   },
   favoritesList: {
