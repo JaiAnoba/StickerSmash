@@ -1,15 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import { validatePassword } from "../utils/validatePassword";
 import Button from "./Button";
 import Text from "./CustomText";
 
@@ -34,89 +35,328 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
   handleResetPassword,
   colors,
 }) => {
+  const [step, setStep] = React.useState<"email" | "otp" | "password" | "success">("email");
+  const [otp, setOtp] = React.useState(["", "", "", "", "", ""]);
+  const [error, setError] = React.useState<string | null>(null);
+  const [confirmLoading, setConfirmLoading] = React.useState(false);
+  const inputsRef = React.useRef<Array<TextInput | null>>([]);
+  const [resendCooldown, setResendCooldown] = React.useState(0);
+
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [newPasswordError, setNewPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [emailError, setEmailError] = useState("");
+
+  React.useEffect(() => {
+    if (resetSent) setStep("otp");
+  }, [resetSent]);
+
+  React.useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
+
+  React.useEffect(() => {
+    if (step === "success") {
+      const timer = setTimeout(() => {
+        closeResetModal();    
+        setStep("email");      
+      }, 2000); 
+
+      return () => clearTimeout(timer); 
+    }
+  }, [step]);
+
+  const handleOtpSubmit = () => {
+    const otpValue = otp.join("");
+    if (otpValue.length !== 6 || !/^\d{6}$/.test(otpValue)) {
+      setError("Enter a valid 6-digit OTP.");
+      return;
+    }
+    setError(null);
+    setStep("password");
+  };
+
+  const handleConfirmReset = () => {
+    setError(null);
+    if (!newPassword || !confirmPassword) {
+      setError("Both password fields are required.");
+      return;
+    }
+
+    const validation = validatePassword(newPassword);
+    if (validation) {
+      setError("New password: " + validation);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setConfirmLoading(true);
+    setTimeout(() => {
+      setConfirmLoading(false);
+      setStep("success");
+    }, 1000);
+  };
+
+  const inputStyle = (error: string) => [
+    styles.input,
+    {
+      backgroundColor: colors.inputBackground,
+      color: colors.text,
+      borderColor: error ? "red" : colors.border,
+      fontFamily: "Poppins-Regular",
+    },
+  ];
+
+  const handleValidateAndSendReset = () => {
+    setEmailError("");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!resetEmail.trim()) {
+      setEmailError("Email is required");
+      return;
+    } else if (!emailRegex.test(resetEmail)) {
+      setEmailError("Invalid email format");
+      return;
+    }
+
+    handleResetPassword();
+  };
+
+  const resendOtp = () => {
+    setResendCooldown(30);
+    handleResetPassword(); 
+  };
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={closeResetModal}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.modalOverlay}
       >
-        <View
-          style={[
-            styles.modalContent,
-            { backgroundColor: colors.card, borderColor: colors.border },
-          ]}
-        >
-          {/* X Close Button */}
-          <TouchableOpacity onPress={closeResetModal} style={styles.closeButton}>
-            <Image
-              source={{
-                uri: "https://img.icons8.com/ios-glyphs/90/multiply.png",
-              }}
-              style={[styles.closeIcon, { tintColor: colors.text }]}
-            />
-          </TouchableOpacity>
+        <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          {step !== "success" && (
+            <TouchableOpacity onPress={closeResetModal} style={styles.closeButton}>
+              <Image
+                source={{ uri: "https://img.icons8.com/ios-glyphs/90/multiply.png" }}
+                style={[styles.closeIcon, { tintColor: colors.text }]}
+              />
+            </TouchableOpacity>
+          )}
 
-          {!resetSent ? (
+          {step === "email" && (
             <>
               <Text weight="semiBold" style={[styles.modalTitle, { color: colors.text }]}>
                 Reset Password
               </Text>
               <Text style={[styles.modalSubtitle, { color: colors.subtext }]}>
-                Enter your email address and we'll send you instructions to reset your password.
+                Enter your email and we'll send a reset link.
               </Text>
 
               <View style={styles.modalInputContainer}>
                 <Text style={[styles.label, { color: colors.text }]}>Email</Text>
                 <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      backgroundColor: colors.inputBackground,
-                      color: colors.text,
-                      borderColor: colors.border,
-                    },
-                  ]}
+                  style={inputStyle(emailError)}
                   placeholder="Enter your email"
                   placeholderTextColor={colors.subtext}
                   value={resetEmail}
-                  onChangeText={setResetEmail}
+                  onChangeText={(text) => {
+                    setResetEmail(text);
+                    setEmailError(""); 
+                  }}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
+                {emailError ? (
+                  <Text style={[styles.errorText, { color: "red", textAlign: "left", marginTop: 6 }]}>
+                    {emailError}
+                  </Text>
+                ) : null}
               </View>
 
               <Button
                 title={resetLoading ? "Sending..." : "Send Reset Link"}
-                onPress={handleResetPassword}
+                onPress={handleValidateAndSendReset}
                 disabled={resetLoading}
                 fullWidth
                 style={styles.resetButton}
                 textStyle={{ fontSize: 14 }}
               />
-
               {resetLoading && (
                 <ActivityIndicator size="small" color={colors.primary} style={styles.loadingIndicator} />
               )}
             </>
-          ) : (
-            <View style={styles.successContainer}>
-              <Text weight="semiBold" style={[styles.modalTitle, { color: colors.text }]}>Email Sent!</Text>
-              <Text
-                style={[styles.modalSubtitle, { color: colors.subtext, textAlign: "center" }]}
-              >
-                We've sent password reset instructions to:
+          )}
+
+          {step === "otp" && (
+            <>
+              <Text weight="semiBold" style={[styles.modalTitle, { color: colors.text }]}>Enter OTP</Text>
+              <Text style={[styles.modalSubtitle, { color: colors.subtext }]}>
+                We’ve sent a 6-digit OTP to {resetEmail}.
               </Text>
-              <Text weight="semiBold" style={[styles.emailSent, { color: colors.primary }]}>
-                {resetEmail}
+
+              <View style={styles.otpContainer}>
+                {otp.map((digit, index) => (
+                  <TextInput
+                    key={index}
+                    ref={(ref) => { inputsRef.current[index] = ref; }}
+                    style={[
+                      styles.otpInput,
+                      {
+                        backgroundColor: colors.inputBackground,
+                        color: colors.text,
+                        borderColor: error ? "red" : colors.border,
+                      },
+                    ]}
+                    keyboardType="number-pad"
+                    maxLength={1}
+                    value={digit}
+                    onChangeText={(text) => {
+                      const newOtp = [...otp];
+                      newOtp[index] = text;
+                      setOtp(newOtp);
+                      if (text && index < 5) inputsRef.current[index + 1]?.focus();
+                    }}
+                    onKeyPress={({ nativeEvent }) => {
+                      if (nativeEvent.key === "Backspace" && !otp[index] && index > 0) {
+                        inputsRef.current[index - 1]?.focus();
+                      }
+                    }}
+                    textAlign="center"
+                  />
+                ))}
+              </View>
+
+              {error && <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>}
+
+              <Button title="Confirm OTP" onPress={handleOtpSubmit} fullWidth style={styles.resetButton} />
+              <TouchableOpacity onPress={resendOtp} disabled={resendCooldown > 0}>
+                <Text
+                  style={{
+                    color: resendCooldown > 0 ? colors.subtext : colors.primary,
+                    fontSize: 12,
+                    textAlign: "center",
+                    marginTop: 12,
+                  }}
+                >
+                  {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : "Resend OTP"}
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {step === "password" && (
+            <>
+              <Text weight="semiBold" style={[styles.modalTitle, { color: colors.text }]}>
+                Set New Password
               </Text>
-              <Text
-                style={[
-                  styles.modalSubtitle,
-                  { color: colors.subtext, textAlign: "center", marginTop: 10 },
-                ]}
-              >
-                Please check your inbox and follow the instructions to reset your password.
+
+              {/* New Password */}
+              <View style={styles.modalInputContainer}>
+                <Text style={[styles.label, { color: colors.text }]}>New Password</Text>
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={inputStyle(newPasswordError)}
+                    placeholder="Enter new password"
+                    placeholderTextColor={colors.subtext}
+                    value={newPassword}
+                    onChangeText={(text) => {
+                      setNewPassword(text);
+                      setNewPasswordError(validatePassword(text) ?? "");
+                    }}
+                    secureTextEntry={!showNewPassword}
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity style={styles.eyeButton} onPress={() => setShowNewPassword(!showNewPassword)}>
+                    <Image
+                      source={{
+                        uri: showNewPassword
+                          ? "https://img.icons8.com/fluency-systems-regular/48/visible--v1.png"
+                          : "https://img.icons8.com/fluency-systems-regular/48/closed-eye.png",
+                      }}
+                      style={[styles.eyeIcon, { tintColor: colors.subtext }]}
+                    />
+                  </TouchableOpacity>
+                </View>
+                {newPasswordError ? (
+                  <Text style={[styles.errorText, { color: "red", textAlign: "left", marginTop: 6 }]}>
+                    {newPasswordError}
+                  </Text>
+                ) : null}
+              </View>
+
+              {/* Confirm Password */}
+              <View style={styles.modalInputContainer}>
+                <Text style={[styles.label, { color: colors.text }]}>Confirm Password</Text>
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={inputStyle(confirmPasswordError)}
+                    placeholder="Confirm your password"
+                    placeholderTextColor={colors.subtext}
+                    value={confirmPassword}
+                    onChangeText={(text) => {
+                      setConfirmPassword(text);
+                      setConfirmPasswordError(
+                        text !== newPassword ? "Passwords do not match" : ""
+                      );
+                    }}
+                    secureTextEntry={!showConfirmPassword}
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity style={styles.eyeButton} onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    <Image
+                      source={{
+                        uri: showConfirmPassword
+                          ? "https://img.icons8.com/fluency-systems-regular/48/visible--v1.png"
+                          : "https://img.icons8.com/fluency-systems-regular/48/closed-eye.png",
+                      }}
+                      style={[styles.eyeIcon, { tintColor: colors.subtext }]}
+                    />
+                  </TouchableOpacity>
+                </View>
+                {confirmPasswordError ? (
+                  <Text style={[styles.errorText, { color: "red", textAlign: "left", marginTop: 6 }]}>
+                    {confirmPasswordError}
+                  </Text>
+                ) : null}
+              </View>
+
+              <Button
+                title={confirmLoading ? "Resetting..." : "Confirm Reset"}
+                onPress={handleConfirmReset}
+                disabled={
+                  !!newPasswordError ||
+                  !!confirmPasswordError ||
+                  !newPassword ||
+                  !confirmPassword ||
+                  confirmLoading
+                }
+                fullWidth
+                style={styles.resetButton}
+              />
+              {confirmLoading && (
+                <ActivityIndicator size="small" color={colors.primary} style={styles.loadingIndicator} />
+              )}
+            </>
+          )}
+          {step === "success" && (
+            <View style={{ alignItems: "center", gap: 12 }}>
+              <Text weight="semiBold" style={[styles.modalTitle, { color: colors.text }]}>
+                Password Reset Successful!
+              </Text>
+              <Text style={[styles.modalSubtitle, { color: colors.subtext, textAlign: "center" }]}>
+                Your password has been changed. You can now log in with your new credentials.
               </Text>
             </View>
           )}
@@ -137,7 +377,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 12,
     borderWidth: 1,
-    position: "relative", 
+    position: "relative",
   },
   closeButton: {
     position: "absolute",
@@ -170,29 +410,44 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: 1,
     fontSize: 12,
-    fontFamily: "Poppins-Regular"
-  },
-  modalButtons: {
-    gap: 10,
+    fontFamily: "Poppins-Regular",
   },
   resetButton: {
     marginBottom: 0,
   },
-  cancelButton: {
-    marginBottom: 0,
-  },
-  backButton: {
-    marginTop: 24,
-  },
-  successContainer: {
-    alignItems: "center",
-    gap: 8,
-  },
-  emailSent: {
-    fontSize: 16,
-  },
   loadingIndicator: {
     marginTop: 10,
+  },
+  errorText: {
+    fontSize: 12,
+    textAlign: "center",
+  },
+  otpContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+    gap: 8,
+  },
+  otpInput: {
+    width: 40,
+    height: 48,
+    borderWidth: 1,
+    borderRadius: 8,
+    fontSize: 18,
+    fontFamily: "Poppins-Regular",
+  },
+  passwordContainer: {
+    position: "relative",
+  },
+  eyeButton: {
+    position: "absolute",
+    right: 16,
+    top: 8,
+    padding: 4,
+  },
+  eyeIcon: {
+    width: 20,
+    height: 20,
   },
 });
 
