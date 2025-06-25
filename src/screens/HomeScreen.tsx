@@ -19,13 +19,16 @@ import { TOP_LEVEL_CATEGORIES } from "../types/Filter"
 import type { Notification } from "../types/Notification"
 import BurgerDetailScreen from "./BurgerDetailScreen"
 
+
 type NavigationProp = StackNavigationProp<RootStackParamList>
+
 
 const HomeScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme()
   const { isFavorite, addFavorite, removeFavorite } = useFavorites()
-  const { allBurgers } = useBurgerData() 
+  const { allBurgers } = useBurgerData()
   const navigation = useNavigation<NavigationProp>()
+
 
   // State
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
@@ -34,6 +37,7 @@ const HomeScreen: React.FC = () => {
   const [notificationModalVisible, setNotificationModalVisible] = useState(false)
   const [selectedBurger, setSelectedBurger] = useState<Burger | null>(null)
   const [burgerDetailVisible, setBurgerDetailVisible] = useState(false)
+
 
   const {
     filterOptions,
@@ -51,15 +55,18 @@ const HomeScreen: React.FC = () => {
     isFavorite,
   })
 
+
   const handleBurgerPress = (burger: Burger) => {
     setSelectedBurger(burger)
     setBurgerDetailVisible(true)
   }
 
+
   const handleCloseBurgerDetail = () => {
     setBurgerDetailVisible(false)
     setSelectedBurger(null)
   }
+
 
   const handleFavoritePress = (burger: Burger) => {
     if (isFavorite(burger.id)) {
@@ -69,15 +76,18 @@ const HomeScreen: React.FC = () => {
     }
   }
 
+
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category)
     updateCategoryFilter(category)
   }
 
+
   const handleResetFilters = () => {
     resetFilters()
     setSelectedCategory("All")
   }
+
 
   const handleNotificationPress = (notification: Notification) => {
     if (notification.actionUrl && notification.data) {
@@ -89,6 +99,7 @@ const HomeScreen: React.FC = () => {
       }
     }
   }
+
 
   const renderCategoryTab = ({ item }: { item: string }) => (
     <TouchableOpacity
@@ -113,6 +124,7 @@ const HomeScreen: React.FC = () => {
     </TouchableOpacity>
   )
 
+
   const renderBurgerCard = ({ item }: { item: Burger }) => (
     <View style={{ width: "48%", marginBlock: 16, paddingTop: 8 }}>
       <BurgerCard
@@ -124,12 +136,15 @@ const HomeScreen: React.FC = () => {
     </View>
   )
 
+
   // Background color based on theme
   const backgroundColor = isDarkMode ? colors.background : "white"
+
 
   useEffect(() => {
     updateCategoryFilter("All")
   }, [])
+
 
   return (
     <ScreenWrapper>
@@ -137,6 +152,7 @@ const HomeScreen: React.FC = () => {
         backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"}
         barStyle={isDarkMode ? "light-content" : "dark-content"}
       />
+
 
       {/* Header */}
       <View style={[styles.header, { backgroundColor }]}>
@@ -157,9 +173,11 @@ const HomeScreen: React.FC = () => {
             </View>
           </View>
 
+
           <NotificationButton onPress={() => setNotificationModalVisible(true)} />
         </View>
       </View>
+
 
       {/* Search Bar */}
       <View style={styles.searchWrapper}>
@@ -206,6 +224,7 @@ const HomeScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
+
       {/* Categories */}
       <View style={styles.categoriesSection}>
         <FlatList
@@ -217,6 +236,7 @@ const HomeScreen: React.FC = () => {
           contentContainerStyle={styles.categoriesList}
         />
       </View>
+
 
       {/* Burgers List */}
       <View style={styles.burgersSection}>
@@ -240,6 +260,7 @@ const HomeScreen: React.FC = () => {
         )}
       </View>
 
+
       {/* Filter Modal */}
       <FilterModal
         visible={filterModalVisible}
@@ -251,12 +272,14 @@ const HomeScreen: React.FC = () => {
         onReset={handleResetFilters}
       />
 
+
       {/* Notification Modal */}
       <NotificationModal
         visible={notificationModalVisible}
         onClose={() => setNotificationModalVisible(false)}
         onNotificationPress={handleNotificationPress}
       />
+
 
       {/* Burger Detail Modal */}
       {selectedBurger && (
@@ -270,6 +293,7 @@ const HomeScreen: React.FC = () => {
      </ScreenWrapper>
   )
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -398,5 +422,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
 })
+
 
 export default HomeScreen

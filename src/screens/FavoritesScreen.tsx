@@ -12,7 +12,9 @@ import { useTheme } from "../context/ThemeContext"
 import type { Burger } from "../types/Burger"
 import BurgerDetailScreen from "./BurgerDetailScreen"
 
+
 type NavigationProp = StackNavigationProp<RootStackParamList>
+
 
 const FavoritesScreen: React.FC = () => {
   const { colors, isDarkMode } = useTheme()
@@ -22,20 +24,25 @@ const FavoritesScreen: React.FC = () => {
   const [selectedBurger, setSelectedBurger] = useState<Burger | null>(null)
   const [burgerDetailVisible, setBurgerDetailVisible] = useState(false)
 
+
   const categories = ["All", ...Array.from(new Set(favorites.map((burger) => burger.category)))]
+
 
   const filteredFavorites =
     selectedCategory === "All" ? favorites : favorites.filter((burger) => burger.category === selectedCategory)
+
 
   const handleBurgerPress = (burger: Burger) => {
     setSelectedBurger(burger)
     setBurgerDetailVisible(true)
   }
 
+
   const handleCloseBurgerDetail = () => {
     setBurgerDetailVisible(false)
     setSelectedBurger(null)
   }
+
 
   const handleRemoveFavorite = (burger: Burger) => {
     Alert.alert("Remove Favorite", `Remove "${burger.name}" from favorites?`, [
@@ -48,6 +55,7 @@ const FavoritesScreen: React.FC = () => {
     ])
   }
 
+
   const renderBurgerCard = ({ item }: { item: Burger }) => (
     <View style={styles.cardContainer}>
       <BurgerCard
@@ -58,6 +66,7 @@ const FavoritesScreen: React.FC = () => {
       />
     </View>
   )
+
 
   const CategoryTab: React.FC<{ category: string; isActive: boolean }> = ({ category, isActive }) => (
     <TouchableOpacity
@@ -72,6 +81,7 @@ const FavoritesScreen: React.FC = () => {
     </TouchableOpacity>
   )
 
+
   const EmptyState = () => (
     <View style={styles.emptyState}>
       <Text weight="semiBold" style={[styles.emptyTitle, { color: colors.text }]}>
@@ -83,9 +93,11 @@ const FavoritesScreen: React.FC = () => {
     </View>
   )
 
+
   return (
     <ScreenWrapper>
       <StatusBar backgroundColor="#8B0000" barStyle={isDarkMode ? "light-content" : "dark-content"} />
+
 
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.primary }]}>
@@ -96,6 +108,7 @@ const FavoritesScreen: React.FC = () => {
           {favorites.length} {favorites.length === 1 ? "burger" : "burgers"}
         </Text>
       </View>
+
 
       {favorites.length === 0 ? (
         <EmptyState />
@@ -114,6 +127,7 @@ const FavoritesScreen: React.FC = () => {
               />
             </View>
           )}
+
 
           {/* Favorites List */}
           <View style={styles.content}>
@@ -136,6 +150,7 @@ const FavoritesScreen: React.FC = () => {
         </>
       )}
 
+
       {/* Burger Detail Modal */}
       {selectedBurger && (
         <BurgerDetailScreen
@@ -148,6 +163,7 @@ const FavoritesScreen: React.FC = () => {
     </ScreenWrapper>
   )
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -231,5 +247,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 })
+
 
 export default FavoritesScreen
