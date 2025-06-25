@@ -1,3 +1,15 @@
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
-export const API_URL = Constants.manifest?.extra?.API_URL || process.env.API_URL || "http://localhost:8000/auth";
+let API_URL = '';
+
+if (Platform.OS === 'web') {
+  API_URL = Constants.manifest?.extra?.API_URL || process.env.API_URL || 'http://localhost:8000';
+} else if (Platform.OS === 'android') {
+  API_URL = Constants.manifest?.extra?.API_URL || process.env.API_URL || 'http://192.168.254.111:8000';
+} else {
+  API_URL = Constants.manifest?.extra?.API_URL || process.env.API_URL || 'http://192.168.254.111:8000';
+}
+
+export { API_URL };
+

@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -10,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { API_URL } from "../utils/env";
 import { validatePassword } from "../utils/validatePassword";
 import Button from "./Button";
 import Text from "./CustomText";
@@ -51,6 +53,9 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
   const [emailError, setEmailError] = useState("");
 
+  const [verifying, setVerifying] = useState(false);
+  const [verifiedToken, setVerifiedToken] = useState<string | null>(null);
+
   React.useEffect(() => {
     if (resetSent) setStep("otp");
   }, [resetSent]);
@@ -73,39 +78,64 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
     }
   }, [step]);
 
-  const handleOtpSubmit = () => {
+  const handleOtpSubmit = async () => {
     const otpValue = otp.join("");
     if (otpValue.length !== 6 || !/^\d{6}$/.test(otpValue)) {
       setError("Enter a valid 6-digit OTP.");
       return;
     }
     setError(null);
-    setStep("password");
+    setVerifying(true);
+    try {
+      // Debug: log OTP value
+      console.log("Submitting OTP:", otpValue);
+      // Call backend to verify token
+      const res = await axios.get(
+        `${API_URL}/auth/verify-reset-token/${otpValue}`
+      );
+      setVerifiedToken(otpValue);
+      setStep("password");
+    } catch (err: any) {
+      // Debug: log error and response
+      console.log("OTP verify error:", err?.response?.data, err);
+      setError(
+        err?.response?.data?.message || "Invalid or expired reset token."
+      );
+    } finally {
+      setVerifying(false);
+    }
   };
 
-  const handleConfirmReset = () => {
+  const handleConfirmReset = async () => {
     setError(null);
     if (!newPassword || !confirmPassword) {
       setError("Both password fields are required.");
       return;
     }
-
     const validation = validatePassword(newPassword);
     if (validation) {
       setError("New password: " + validation);
       return;
     }
-
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-
     setConfirmLoading(true);
-    setTimeout(() => {
-      setConfirmLoading(false);
+    try {
+      // Call backend to reset password
+      await axios.post(
+        `${API_URL}/auth/reset-password/${verifiedToken}`,
+        { password: newPassword }
+      );
       setStep("success");
-    }, 1000);
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.message || "Failed to reset password."
+      );
+    } finally {
+      setConfirmLoading(false);
+    }
   };
 
   const inputStyle = (error: string) => [
@@ -240,7 +270,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
               {error && <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>}
 
-              <Button title="Confirm OTP" onPress={handleOtpSubmit} fullWidth style={styles.resetButton} />
+              <Button title={verifying ? "Verifying..." : "Confirm OTP"} onPress={handleOtpSubmit} fullWidth style={styles.resetButton} disabled={verifying} />
               <TouchableOpacity onPress={resendOtp} disabled={resendCooldown > 0}>
                 <Text
                   style={{

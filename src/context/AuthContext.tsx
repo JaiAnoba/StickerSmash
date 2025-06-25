@@ -1,6 +1,7 @@
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import type React from "react"
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import type React from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { API_URL } from '../utils/env';
 
 interface User {
   id: string
@@ -57,35 +58,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Accept demo credentials or any email/password for demo purposes
-      if (
-        (email === "demo@burgerpedia.com" && password === "demo123") ||
-        (email.includes("@") && password.length >= 3)
-      ) {
+      const response = await fetch(`${API_URL}/auth/signin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await response.json()
+      if (response.ok && data.token) {
+        // You may want to decode the token or fetch user profile here
         const userData: User = {
-          id: Date.now().toString(),
-          name: email === "demo@burgerpedia.com" ? "Demo User" : "User",
+          id: data.userId || Date.now().toString(),
+          name: data.name || email.split("@")[0],
           email: email,
-          password,
+          password: password,
           joinDate: new Date().toISOString(),
           stats: {
-            burgersViewed: 25,
-            recipesCooked: 8,
-            favoriteCategory: "Classic",
-            totalCookTime: "3h 45m",
+            burgersViewed: 0,
+            recipesCooked: 0,
+            favoriteCategory: "None yet",
+            totalCookTime: "0m",
           },
         }
-
-        await AsyncStorage.setItem("userToken", "mock-token-" + Date.now())
+        await AsyncStorage.setItem("userToken", data.token)
         await AsyncStorage.setItem("userData", JSON.stringify(userData))
         setUser(userData)
         return true
+      } else {
+        return false
       }
-
-      return false
     } catch (error) {
       console.error("Login error:", error)
       return false
@@ -94,13 +94,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // For demo purposes, accept any valid input
-      if (name.trim() && email.includes("@") && password.length >= 6) {
+      const response = await fetch(`${API_URL}/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName: name, email, password }),
+      })
+      const data = await response.json()
+      if (response.ok && data.token) {
         const userData: User = {
-          id: Date.now().toString(),
+          id: data.userId || Date.now().toString(),
           name: name,
           email: email,
           password: password,
@@ -112,14 +114,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             totalCookTime: "0m",
           },
         }
-
-        await AsyncStorage.setItem("userToken", "mock-token-" + Date.now())
+        await AsyncStorage.setItem("userToken", data.token)
         await AsyncStorage.setItem("userData", JSON.stringify(userData))
         setUser(userData)
         return true
+      } else {
+        return false
       }
-
-      return false
     } catch (error) {
       console.error("Registration error:", error)
       return false

@@ -19,6 +19,7 @@ import ScreenWrapper from "../components/ScreenWrapper";
 import SocialButtons from "../components/SocialButtons";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { API_URL } from '../utils/env';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -28,7 +29,7 @@ const validatePassword = (password: string): string | null => {
   if (!/[a-z]/.test(password)) return "Include a lowercase letter";
   if (!/[A-Z]/.test(password)) return "Include an uppercase letter";
   if (!/[0-9]/.test(password)) return "Include a number";
-  if (!/[!@#$%^&*(),.?\":{}|<>]/.test(password)) return "Include a special character";
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) return "Include a special character";
   return null;
 };
 
@@ -109,18 +110,32 @@ const LoginScreen: React.FC = () => {
   }
 
   const handleResetPassword = async () => {
+    console.log('Forgot password button clicked');
+    console.log('API_URL:', API_URL);
     if (!resetEmail.trim() || !resetEmail.includes("@")) {
-      Alert.alert("Error", "Please enter a valid email address")
-      return
+      Alert.alert("Error", "Please enter a valid email address");
+      return;
     }
-    setResetLoading(true)
+    setResetLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      setResetSent(true)
+      const response = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail })
+      });
+      console.log('Response status:', response.status);
+      const data = await response.json();
+      console.log('Response data:', data);
+      if (response.ok) {
+        setResetSent(true);
+      } else {
+        Alert.alert('Error', data.message || 'Failed to send reset code.');
+      }
     } catch (error) {
-      Alert.alert("Error", "Failed to send reset email. Please try again.")
+      console.log('Forgot password error:', error);
+      Alert.alert('Error', 'Failed to send reset code. Please try again.');
     } finally {
-      setResetLoading(false)
+      setResetLoading(false);
     }
   }
 

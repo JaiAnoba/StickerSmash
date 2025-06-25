@@ -20,6 +20,7 @@ import Text from "../components/CustomText";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { API_URL } from '../utils/env';
 
 type EditProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'EditProfile'>;
 
@@ -126,26 +127,43 @@ const EditProfileScreen: React.FC<Props> = ({ navigation }) => {
     if (!email.trim()) return Alert.alert('Error', 'Email cannot be empty');
     if (!/\S+@\S+\.\S+/.test(email)) return Alert.alert('Error', 'Enter a valid email');
 
-    if (showPasswordFields) {
-      if (!newPassword || !confirmPassword) {
-        return Alert.alert('Error', 'Please fill out both new password fields.');
-      }
-      if (newPassword !== confirmPassword) {
-        return Alert.alert('Error', 'New passwords do not match.');
-      }
-    }
-
     setIsLoading(true);
     try {
-      await updateUser({
-        name: name.trim(),
+      // 1. Update profile info
+      const profilePayload = {
+        userId: user?.id,
+        fullName: name.trim(),
         email: email.trim(),
-        ...(showPasswordFields ? { password: newPassword } : {})
+      };
+      const profileRes = await fetch(`${API_URL}/auth/update-profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profilePayload),
       });
+      const profileData = await profileRes.json();
+      if (!profileRes.ok) throw new Error(profileData.message || 'Failed to update profile.');
+
+      // 2. Update password if needed
+      if (showPasswordFields && newPassword) {
+        const passPayload = {
+          userId: user?.id,
+          oldPassword: password,
+          newPassword,
+        };
+        const passRes = await fetch(`${API_URL}/auth/update-password`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(passPayload),
+        });
+        const passData = await passRes.json();
+        if (!passRes.ok) throw new Error(passData.message || 'Failed to update password.');
+      }
+
+      await updateUser({ name: name.trim(), email: email.trim(), ...(showPasswordFields ? { password: newPassword } : {}) });
       setInitialProfileImage(profileImage);
       Alert.alert('Success', 'Profile updated successfully!', [{ text: 'OK', onPress: () => navigation.goBack() }]);
-    } catch (err) {
-      Alert.alert('Error', 'Failed to update profile. Please try again.');
+    } catch (err: any) {
+      Alert.alert('Error', err?.message || 'Failed to update profile. Please try again.');
     } finally {
       setIsLoading(false);
     }
