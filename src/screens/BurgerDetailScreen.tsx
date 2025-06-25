@@ -77,7 +77,6 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
   const buttonOpacity = useRef(new Animated.Value(1)).current
   const fadeAnim = useRef(new Animated.Value(0)).current
   const slideAnim = useRef(new Animated.Value(height)).current
-  const imageTranslateY = useRef(new Animated.Value(0)).current
 
   const handleFavoritePress = useCallback(() => {
     try {
@@ -118,13 +117,6 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
       Animated.timing(slideAnim, {
         toValue: 0,
         duration: 300,
-        useNativeDriver: true,
-        easing: Easing.out(Easing.ease),
-      }),
-      Animated.timing(imageTranslateY, {
-        toValue: -80, 
-        duration: 300,
-        delay: 150,
         useNativeDriver: true,
         easing: Easing.out(Easing.ease),
       }),
@@ -200,12 +192,6 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
         useNativeDriver: true,
         easing: Easing.in(Easing.ease),
       }),
-      Animated.timing(imageTranslateY, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: true,
-        easing: Easing.in(Easing.ease),
-      }),
     ]).start(() => {
       setModalVisible(false)
       onClose()
@@ -216,29 +202,11 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
     <Modal visible={modalVisible} transparent={true} animationType="none" onRequestClose={handleClose}>
       <SafeAreaView style={styles.container}>
         <StatusBar backgroundColor={isDarkMode ? colors.statusBar : "#8B0000"} 
-      barStyle={isDarkMode ? "light-content" : "dark-content"} />
+          barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
         {/* Backdrop */}
         <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]}>
           <TouchableOpacity style={styles.backdropTouchable} onPress={handleClose} />
-        </Animated.View>
-
-        {/* Burger Image */}
-        <Animated.View
-          style={[
-            styles.floatingImageContainer,
-            {
-              transform: [{ translateY: Animated.add(slideAnim, imageTranslateY) }],
-            },
-          ]}
-        >
-          <Image
-            source={getBurgerImageSource(burger)}
-            style={styles.burgerImage}
-            onError={() => {
-              console.log(`Image load error for ${burger.name}`)
-            }}
-          />
         </Animated.View>
 
         {/* Content Modal */}
@@ -251,9 +219,15 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
             },
           ]}
         >
-          {/* Header */}
-          <View style={styles.modalHeader}>
-            <View style={styles.headerSpacer} />
+          {/* Burger Image at the top inside modal */}
+          <View style={styles.imageWrapper}>
+            <Image
+              source={getBurgerImageSource(burger)}
+              style={styles.burgerImage}
+              onError={() => {
+                console.log(`Image load error for ${burger.name}`)
+              }}
+            />
           </View>
 
           {/* Content */}
@@ -384,37 +358,40 @@ const styles = StyleSheet.create({
   backdropTouchable: {
     flex: 1,
   },
-  floatingImageContainer: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
+  imageWrapper: {
     width: "100%",
-    height: "25%",
-    paddingHorizontal: 20,
-    zIndex: 5,
-    top: "37%",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    marginTop: 0,
+    marginBottom: 0,
   },
   burgerImage: {
-    width: "100%",
-    aspectRatio: 1,       
-    maxWidth: 260,        
+    aspectRatio: 1,
+    height: '70%',
+    maxWidth: 300,
+    alignSelf: "center",
     resizeMode: "contain",
+    marginTop: 0,
+    marginBottom: 0,
+    borderWidth: 1,
+    borderColor: 'yellow'
   },
   modalContent: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: "60%",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    maxHeight: "80%",
+    minHeight: 400,
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -5 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 10,
-    paddingTop: 40,
+    paddingTop: 0,
     paddingBottom: 10,
   },
   modalHeader: {
@@ -437,15 +414,13 @@ const styles = StyleSheet.create({
     tintColor: "#333",
     zIndex: 999,
   },
-  headerSpacer: {
-    width: 40,
-  },
   scrollContent: {
-    flex: 1,
-    marginTop: 30,
+
   },
   contentContainer: {
     padding: 20,
+    borderColor: 'red',
+    borderWidth: 1
   },
   titleRow: {
     flexDirection: "row",
