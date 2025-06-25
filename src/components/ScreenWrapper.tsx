@@ -8,7 +8,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useTheme } from "../context/ThemeContext"
 
-interface ScreenWrapperProps {
+interface ScreenWrapperProps { 
   children: React.ReactNode
   scroll?: boolean
   style?: ViewStyle
