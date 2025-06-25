@@ -220,7 +220,7 @@ const BurgerDetailScreen: React.FC<Props> = (props) => {
           ]}
         >
           {/* Burger Image at the top inside modal */}
-          <View style={styles.imageWrapper}>
+          <View style={styles.redBackground}>
             <Image
               source={getBurgerImageSource(burger)}
               style={styles.burgerImage}
@@ -358,30 +358,30 @@ const styles = StyleSheet.create({
   backdropTouchable: {
     flex: 1,
   },
-  imageWrapper: {
-    width: "100%",
+  redBackground: {
+    height: '50%',
+    backgroundColor: "#8B0000",
+    borderBottomLeftRadius: 140,
+    borderBottomRightRadius: 140,
+    paddingTop: 30,
+    paddingBottom: 30,
     alignItems: "center",
-    justifyContent: "flex-start",
-    marginTop: 0,
-    marginBottom: 0,
+    justifyContent: "center",
   },
   burgerImage: {
     aspectRatio: 1,
     height: '70%',
     maxWidth: 300,
-    alignSelf: "center",
     resizeMode: "contain",
     marginTop: 0,
     marginBottom: 0,
-    borderWidth: 1,
-    borderColor: 'yellow'
   },
   modalContent: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    maxHeight: "80%",
+    maxHeight: "83%",
     minHeight: 400,
     borderTopLeftRadius: 50,
     borderTopRightRadius: 50,
@@ -401,26 +401,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
   },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  closeIcon: {
-    width: 20,
-    height: 20,
-    tintColor: "#333",
-    zIndex: 999,
-  },
+  // closeButton: {
+  //   width: 40,
+  //   height: 40,
+  //   borderRadius: 20,
+  //   justifyContent: "center",
+  //   alignItems: "center",
+  // },
+  // closeIcon: {
+  //   width: 20,
+  //   height: 20,
+  //   tintColor: "#333",
+  //   zIndex: 999,
+  // },
   scrollContent: {
 
   },
   contentContainer: {
     padding: 20,
-    borderColor: 'red',
-    borderWidth: 1
+    marginTop: 10,
   },
   titleRow: {
     flexDirection: "row",
